@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import RelationshipFinder from './RelationshipFinder'
 import { peopleById } from './data'
 import type { Person } from './types'
 
@@ -65,6 +67,7 @@ export default function FocusedFamilyView({
   onSelect: (id: string) => void
   onOpenDetails: () => void
 }) {
+  const [relationshipOpen, setRelationshipOpen] = useState(false)
   const parent = person.parentId ? peopleById[person.parentId] : undefined
   const siblings = parent
     ? parent.childIds
@@ -113,10 +116,16 @@ export default function FocusedFamilyView({
             label="Ausgewählte Person"
             onSelect={() => onOpenDetails()}
           />
-          <button type="button" className="focus-details-button" onClick={onOpenDetails}>
-            Alle Personendetails
-            <span aria-hidden="true">→</span>
-          </button>
+          <div className="focus-actions">
+            <button type="button" className="focus-details-button" onClick={onOpenDetails}>
+              Personendetails
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" className="focus-relationship-button" onClick={() => setRelationshipOpen(true)}>
+              Verwandtschaft finden
+              <span aria-hidden="true">↔</span>
+            </button>
+          </div>
         </section>
 
         {siblings.length > 0 && (
@@ -149,6 +158,13 @@ export default function FocusedFamilyView({
           )}
         </section>
       </div>
+
+      <RelationshipFinder
+        person={person}
+        open={relationshipOpen}
+        onClose={() => setRelationshipOpen(false)}
+        onNavigate={onSelect}
+      />
     </div>
   )
 }
