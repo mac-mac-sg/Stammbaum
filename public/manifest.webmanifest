@@ -3,15 +3,15 @@
   "short_name": "Stammbaum",
   "description": "Privates Familienarchiv mit interaktivem Stammbaum der Nachkommen von Sebastian Villiger.",
   "lang": "de-CH",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f4f2ec",
   "theme_color": "#344b38",
   "icons": [
     {
-      "src": "/app-icon.svg",
+      "src": "app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
