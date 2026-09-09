@@ -107,7 +107,12 @@ export default function FocusedFamilyView({
             <span>Im Fokus</span>
             <small>Generation {person.generation}</small>
           </div>
-          <CompactPerson person={person} selected label="Ausgewählte Person" onSelect={onOpenDetails as unknown as (id: string) => void} />
+          <CompactPerson
+            person={person}
+            selected
+            label="Ausgewählte Person"
+            onSelect={() => onOpenDetails()}
+          />
           <button type="button" className="focus-details-button" onClick={onOpenDetails}>
             Alle Personendetails
             <span aria-hidden="true">→</span>
