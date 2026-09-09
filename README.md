@@ -11,7 +11,7 @@ Private, interaktive Stammbaum-App auf Basis der Familienunterlagen «Nachkommen
 - zoombarer und verschiebbarer Stammbaum
 - Detailansicht mit Lebensdaten, Familie, Abstammungslinie und Quellenhinweis
 - Smartphone-optimierte Bedienung mit Pinch-Zoom, grossen Touch-Flächen und Bottom Navigation
-- Personendetails auf kleinen Displays als Bottom Sheet
+- Personendetails auf kleinen Displays als Bottom Sheet mit antippbarem Hintergrund zum Schliessen
 - Safe-Area-Unterstützung für Geräte mit Displayausschnitt bzw. Gestenleiste
 - Web-App-Manifest und App-Icon für eine spätere Nutzung vom Homescreen
 - responsive Desktop-/Tablet-Darstellung und Dark-Mode-Unterstützung
