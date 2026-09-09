@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import RelationshipFinder from './RelationshipFinder'
+import { usePrivacy } from './PrivacyContext'
+import { isProtectedPerson } from './privacy'
 import { peopleById } from './data'
 import type { Person } from './types'
 
@@ -37,7 +39,10 @@ function CompactPerson({
   selected?: boolean
   onSelect: (id: string) => void
 }) {
+  const { mode } = usePrivacy()
   const partner = person.partners[0]
+  const protectedPerson = isProtectedPerson(person, mode)
+
   return (
     <button
       type="button"
@@ -49,10 +54,15 @@ function CompactPerson({
         <b>#{person.number}</b>
       </span>
       <strong>{person.name}</strong>
-      <span className="focus-card-life">
-        {person.birth ? `* ${formatDate(person.birth)}` : 'Geburtsdatum offen'}
-        {person.death ? ` · † ${formatDate(person.death)}` : ''}
+      <span className={`focus-card-life${protectedPerson ? ' protected-value' : ''}`}>
+        {protectedPerson
+          ? 'Lebensdaten geschützt'
+          : <>
+              {person.birth ? `* ${formatDate(person.birth)}` : 'Geburtsdatum offen'}
+              {person.death ? ` · † ${formatDate(person.death)}` : ''}
+            </>}
       </span>
+      {protectedPerson && <span className="privacy-badge">Geschützt</span>}
       {partner && <span className="focus-card-partner">∞ {partner.name}</span>}
     </button>
   )
