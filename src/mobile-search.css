@@ -1,0 +1,160 @@
+.mobile-search-sheet { display: none; }
+
+@media (max-width: 820px) {
+  .mobile-search-sheet {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    flex-direction: column;
+    padding: max(16px, env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+    background: var(--surface-strong);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(14px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+  }
+
+  .mobile-search-sheet.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .mobile-search-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 4px 2px 14px;
+  }
+
+  .mobile-search-header h2 {
+    margin: 3px 0 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -.03em;
+  }
+
+  .mobile-search-privacy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 13px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .mobile-search-privacy strong { font-size: 11px; }
+  .mobile-search-privacy span { font-size: 10px; line-height: 1.35; }
+
+  .mobile-search-input {
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 7px 24px rgba(46,48,41,.06);
+  }
+
+  .mobile-search-input > span { color: var(--muted); font-size: 22px; }
+  .mobile-search-input input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 16px;
+  }
+
+  .mobile-search-input button {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  .mobile-search-body {
+    flex: 1;
+    min-height: 0;
+    margin-top: 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 10px;
+  }
+
+  .mobile-search-result {
+    width: 100%;
+    min-height: 76px;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border: 0;
+    border-bottom: 1px solid #ebe9e2;
+    background: transparent;
+    text-align: left;
+  }
+
+  .mobile-search-result-number {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .mobile-search-result-copy { min-width: 0; display: flex; flex-direction: column; }
+  .mobile-search-result-copy strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+  }
+  .mobile-search-result-copy small { margin-top: 2px; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+  .mobile-search-result-copy > span { margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.25; }
+  .mobile-search-result-arrow { color: var(--muted); font-size: 16px; }
+
+  .mobile-search-empty {
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 7px;
+    padding: 28px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .mobile-search-empty strong { color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: 18px; }
+  .mobile-search-empty span { max-width: 280px; font-size: 11px; line-height: 1.45; }
+}
+
+@media (max-width: 480px) {
+  .toolbar > .search-wrap { display: none; }
+  .toolbar { justify-content: flex-end; }
+  .toolbar-controls { width: 100%; }
+  .view-control { flex: 1 1 auto; }
+  .view-control .segmented { width: 100%; }
+  .view-control .segmented button { flex: 1; }
+}
