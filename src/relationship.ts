@@ -12,7 +12,7 @@ export interface RelationshipResult {
 
 function pathToRoot(personId: string) {
   const path: Person[] = []
-  let current = peopleById[personId]
+  let current: Person | undefined = peopleById[personId]
   while (current) {
     path.unshift(current)
     current = current.parentId ? peopleById[current.parentId] : undefined
@@ -64,13 +64,15 @@ export function getRelationship(a: Person, b: Person): RelationshipResult | null
   const sharedLength = Math.min(pathA.length, pathB.length)
 
   for (let index = 0; index < sharedLength; index += 1) {
-    if (pathA[index].id !== pathB[index].id) break
+    if (pathA[index]?.id !== pathB[index]?.id) break
     commonIndex = index
   }
 
   if (commonIndex < 0) return null
 
   const commonAncestor = pathA[commonIndex]
+  if (!commonAncestor) return null
+
   const distanceFromA = pathA.length - commonIndex - 1
   const distanceFromB = pathB.length - commonIndex - 1
 
