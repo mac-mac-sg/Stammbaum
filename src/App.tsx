@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import FocusedFamilyView from './FocusedFamilyView'
+import MobileSearchSheet from './MobileSearchSheet'
 import { usePrivacy } from './PrivacyContext'
 import {
   isProtectedPartner,
@@ -297,6 +298,7 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [depthLimit, setDepthLimit] = useState(5)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches ? 'focus' : 'tree',
   )
@@ -328,6 +330,7 @@ export default function App() {
     if (!person) return
     setSelectedId(id)
     setDetailOpen(Boolean(options.details))
+    setMobileSearchOpen(false)
     if (person.generation > depthLimit) setDepthLimit(person.generation)
     setQuery('')
     if (options.focusTree && viewMode === 'tree') focusPerson(id)
@@ -335,12 +338,17 @@ export default function App() {
 
   const switchView = (mode: ViewMode) => {
     setDetailOpen(false)
+    setMobileSearchOpen(false)
     setViewMode(mode)
     if (mode === 'tree') focusPerson(selectedPerson.id, 0.72)
   }
 
   const openSearch = () => {
     setDetailOpen(false)
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches) {
+      setMobileSearchOpen(true)
+      return
+    }
     window.setTimeout(() => {
       searchRef.current?.focus()
       searchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -560,6 +568,12 @@ export default function App() {
         className={`sheet-backdrop${detailOpen ? ' is-open' : ''}`}
         aria-label="Personendetails schliessen"
         onClick={() => setDetailOpen(false)}
+      />
+
+      <MobileSearchSheet
+        open={mobileSearchOpen}
+        onClose={() => setMobileSearchOpen(false)}
+        onSelect={(id) => navigatePerson(id)}
       />
 
       <nav className="mobile-nav" aria-label="App-Navigation">
