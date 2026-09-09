@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+import FocusedFamilyView from './FocusedFamilyView'
 import { people, peopleById, rootId } from './data'
 import type { Person } from './types'
 
@@ -7,6 +8,8 @@ const monthNames = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
 ]
+
+type ViewMode = 'focus' | 'tree'
 
 function formatDate(value?: string) {
   if (!value) return 'unbekannt'
@@ -261,6 +264,9 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [depthLimit, setDepthLimit] = useState(5)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches ? 'focus' : 'tree',
+  )
   const zoomRef = useRef<any>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -278,17 +284,26 @@ export default function App() {
   const focusPerson = (id: string, scale = 0.86) => {
     window.setTimeout(() => {
       zoomRef.current?.zoomToElement?.(`person-${id}`, scale, 450)
-    }, 80)
+    }, 100)
   }
 
-  const selectPerson = (id: string, focus = false) => {
+  const navigatePerson = (
+    id: string,
+    options: { focusTree?: boolean; details?: boolean } = {},
+  ) => {
     const person = peopleById[id]
     if (!person) return
     setSelectedId(id)
-    setDetailOpen(true)
+    setDetailOpen(Boolean(options.details))
     if (person.generation > depthLimit) setDepthLimit(person.generation)
     setQuery('')
-    if (focus) focusPerson(id)
+    if (options.focusTree && viewMode === 'tree') focusPerson(id)
+  }
+
+  const switchView = (mode: ViewMode) => {
+    setDetailOpen(false)
+    setViewMode(mode)
+    if (mode === 'tree') focusPerson(selectedPerson.id, 0.72)
   }
 
   const openSearch = () => {
@@ -353,7 +368,11 @@ export default function App() {
               {results.length > 0 && (
                 <div className="search-results">
                   {results.map((person) => (
-                    <button type="button" key={person.id} onClick={() => selectPerson(person.id, true)}>
+                    <button
+                      type="button"
+                      key={person.id}
+                      onClick={() => navigatePerson(person.id, { focusTree: true })}
+                    >
                       <span>
                         <strong>{person.name}</strong>
                         <small>#{person.number} · Generation {person.generation}</small>
@@ -368,71 +387,107 @@ export default function App() {
               )}
             </div>
 
-            <div className="depth-control">
-              <span>Baumtiefe</span>
-              <div className="segmented">
-                {[2, 3, 4, 5].map((depth) => (
+            <div className="toolbar-controls">
+              <div className="view-control">
+                <span>Ansicht</span>
+                <div className="segmented view-segmented">
                   <button
                     type="button"
-                    key={depth}
-                    className={depthLimit === depth ? 'active' : ''}
-                    onClick={() => setDepthLimit(depth)}
-                    aria-label={`Bis Generation ${depth} anzeigen`}
+                    className={viewMode === 'focus' ? 'active' : ''}
+                    onClick={() => switchView('focus')}
                   >
-                    {depth}
+                    Fokus
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    className={viewMode === 'tree' ? 'active' : ''}
+                    onClick={() => switchView('tree')}
+                  >
+                    Gesamt
+                  </button>
+                </div>
               </div>
+
+              {viewMode === 'tree' && (
+                <div className="depth-control">
+                  <span>Baumtiefe</span>
+                  <div className="segmented">
+                    {[2, 3, 4, 5].map((depth) => (
+                      <button
+                        type="button"
+                        key={depth}
+                        className={depthLimit === depth ? 'active' : ''}
+                        onClick={() => setDepthLimit(depth)}
+                        aria-label={`Bis Generation ${depth} anzeigen`}
+                      >
+                        {depth}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="canvas-frame">
-            <TransformWrapper
-              ref={zoomRef}
-              initialScale={0.34}
-              minScale={0.16}
-              maxScale={1.6}
-              centerOnInit
-              limitToBounds={false}
-              wheel={{ step: 0.08 }}
-              doubleClick={{ disabled: true }}
-            >
-              {({ zoomIn, zoomOut, resetTransform }) => (
-                <>
-                  <div className="zoom-controls">
-                    <button type="button" onClick={() => zoomIn()} aria-label="Vergrössern">+</button>
-                    <button type="button" onClick={() => zoomOut()} aria-label="Verkleinern">−</button>
-                    <button type="button" onClick={() => resetTransform()} aria-label="Ansicht zurücksetzen">↺</button>
-                  </div>
-                  <TransformComponent wrapperClass="tree-viewport" contentClass="tree-transform">
-                    <div className="family-tree">
-                      <ul className="tree-root">
-                        <TreeNode
-                          personId={rootId}
-                          depthLimit={depthLimit}
-                          selectedId={selectedId}
-                          pathIds={pathIds}
-                          onSelect={(id) => selectPerson(id)}
-                        />
-                      </ul>
+          <div className={`canvas-frame${viewMode === 'focus' ? ' is-focus' : ''}`}>
+            {viewMode === 'focus' ? (
+              <FocusedFamilyView
+                person={selectedPerson}
+                onSelect={(id) => navigatePerson(id)}
+                onOpenDetails={() => setDetailOpen(true)}
+              />
+            ) : (
+              <TransformWrapper
+                ref={zoomRef}
+                initialScale={0.34}
+                minScale={0.16}
+                maxScale={1.6}
+                centerOnInit
+                limitToBounds={false}
+                wheel={{ step: 0.08 }}
+                doubleClick={{ disabled: true }}
+              >
+                {({ zoomIn, zoomOut, resetTransform }) => (
+                  <>
+                    <div className="zoom-controls">
+                      <button type="button" onClick={() => zoomIn()} aria-label="Vergrössern">+</button>
+                      <button type="button" onClick={() => zoomOut()} aria-label="Verkleinern">−</button>
+                      <button type="button" onClick={() => resetTransform()} aria-label="Ansicht zurücksetzen">↺</button>
                     </div>
-                  </TransformComponent>
-                </>
-              )}
-            </TransformWrapper>
+                    <TransformComponent wrapperClass="tree-viewport" contentClass="tree-transform">
+                      <div className="family-tree">
+                        <ul className="tree-root">
+                          <TreeNode
+                            personId={rootId}
+                            depthLimit={depthLimit}
+                            selectedId={selectedId}
+                            pathIds={pathIds}
+                            onSelect={(id) => navigatePerson(id, { details: true })}
+                          />
+                        </ul>
+                      </div>
+                    </TransformComponent>
+                  </>
+                )}
+              </TransformWrapper>
+            )}
 
-            <button
-              type="button"
-              className="selected-chip"
-              onClick={() => setDetailOpen(true)}
-              aria-label={`Details zu ${selectedPerson.name} öffnen`}
-            >
-              <span>Ausgewählt</span>
-              <strong>{selectedPerson.name}</strong>
-            </button>
+            {viewMode === 'tree' && (
+              <button
+                type="button"
+                className="selected-chip"
+                onClick={() => setDetailOpen(true)}
+                aria-label={`Details zu ${selectedPerson.name} öffnen`}
+              >
+                <span>Ausgewählt</span>
+                <strong>{selectedPerson.name}</strong>
+              </button>
+            )}
 
             <div className="canvas-help">
-              Ziehen zum Verschieben · Pinch zum Zoomen · Person antippen für Details
+              {viewMode === 'focus'
+                ? 'Verwandte antippen, um den Familienfokus zu verschieben'
+                : 'Ziehen zum Verschieben · Pinch zum Zoomen · Person antippen für Details'}
             </div>
           </div>
         </section>
@@ -441,7 +496,7 @@ export default function App() {
           person={selectedPerson}
           open={detailOpen}
           onClose={() => setDetailOpen(false)}
-          onSelect={(id) => selectPerson(id, true)}
+          onSelect={(id) => navigatePerson(id, { focusTree: true, details: true })}
         />
       </main>
 
@@ -453,16 +508,16 @@ export default function App() {
       />
 
       <nav className="mobile-nav" aria-label="App-Navigation">
-        <button type="button" onClick={() => focusPerson(selectedPerson.id)}>
-          <span aria-hidden="true">◎</span>
-          <small>Im Baum</small>
+        <button type="button" onClick={() => switchView(viewMode === 'focus' ? 'tree' : 'focus')}>
+          <span aria-hidden="true">{viewMode === 'focus' ? '⌘' : '◎'}</span>
+          <small>{viewMode === 'focus' ? 'Gesamt' : 'Fokus'}</small>
         </button>
         <button type="button" onClick={openSearch}>
           <span aria-hidden="true">⌕</span>
           <small>Suchen</small>
         </button>
         <button type="button" className="primary" onClick={() => setDetailOpen(true)}>
-          <span aria-hidden="true">⌘</span>
+          <span aria-hidden="true">●</span>
           <small>Person</small>
         </button>
       </nav>
