@@ -1,20 +1,21 @@
-# Stammbaum
+# Stammbaum Villiger
 
-Private, interaktive Stammbaum-App auf Basis der Familienunterlagen «Nachkommen von Sebastian Villiger».
+Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienunterlagen «Nachkommen von Sebastian Villiger».
 
-## Aktueller Stand
+## Aktueller Funktionsumfang
 
-- 104 nummerierte Personen aus den bereitgestellten Scans erfasst
-- fünf Generationen mit Eltern-Kind-Verknüpfungen
-- Ehe-, Partner- und Verlobungsbeziehungen als Zusatzdaten
+- 104 nummerierte Personen aus den Scans
+- Eltern-Kind-Verknüpfungen über fünf Generationen
+- dokumentierte Ehe-, Partner- und Verlobungsbeziehungen
+- **Familienfokus** als Standardansicht auf Smartphones
+- Elternlinie, Geschwister und Kinder als touch-freundliche Karten
+- vollständiger, zoombarer Stammbaum als alternative Gesamtansicht
 - Suche nach Name, Ort, Jahr und Partnername
-- zoombarer und verschiebbarer Stammbaum
-- Detailansicht mit Lebensdaten, Familie, Abstammungslinie und Quellenhinweis
-- Smartphone-optimierte Bedienung mit Pinch-Zoom, grossen Touch-Flächen und Bottom Navigation
-- Personendetails auf kleinen Displays als Bottom Sheet mit antippbarem Hintergrund zum Schliessen
-- Safe-Area-Unterstützung für Geräte mit Displayausschnitt bzw. Gestenleiste
-- Web-App-Manifest und App-Icon für eine spätere Nutzung vom Homescreen
-- responsive Desktop-/Tablet-Darstellung und Dark-Mode-Unterstützung
+- Personendetails mit Lebensdaten, Beziehungen, Kindern, Abstammungslinie und Quellenhinweisen
+- Bottom-Sheet-Details auf kleinen Displays
+- responsive Gestaltung inklusive Dark Mode
+- Web-App-Manifest und Homescreen-Metadaten
+- GitHub Actions CI für den Produktions-Build
 
 ## Entwicklung
 
@@ -29,15 +30,20 @@ Produktions-Build:
 npm run build
 ```
 
+## Datenschutz
+
+Das Repository und der Prototyp sind bewusst privat. Die Daten enthalten Angaben zu möglicherweise noch lebenden Personen. Eine öffentliche Bereitstellung ist erst sinnvoll, wenn ein Datenschutzmodus für lebende Personen umgesetzt ist.
+
 ## Datenqualität
 
-Die Daten wurden aus den vom Eigentümer bereitgestellten Familienunterlagen übertragen. Unsichere, unvollständige oder schwer lesbare Angaben werden nicht geraten. Bekannte Unklarheiten sind unter `docs/DATA_QUALITY.md` dokumentiert.
+Unklare oder unvollständige Angaben aus den Scans werden nicht geraten. Sie sind in `docs/DATA_QUALITY.md` dokumentiert. Das Smartphone-Bedienkonzept ist in `docs/MOBILE_UX.md` beschrieben.
 
-Die Anwendung ist derzeit als **privater Prototyp** vorgesehen. Die Unterlagen enthalten personenbezogene Daten lebender Personen und sollen nicht ungeprüft öffentlich bereitgestellt werden.
+## Nächste Schritte
 
-## Mobile UX
-
-Das Smartphone-Bedienkonzept und die nächsten Ausbaustufen sind unter `docs/MOBILE_UX.md` dokumentiert.
+1. Verwandtschafts-Finder zwischen zwei Personen
+2. Datenschutzmodus für lebende Personen
+3. weitere fachliche Verifikation schwer lesbarer Scanstellen
+4. optionaler Deployment-/Installationspfad als PWA
 
 ## Branch
 
