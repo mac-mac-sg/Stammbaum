@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import { PrivacyProvider } from './PrivacyContext'
+import { registerServiceWorker } from './registerServiceWorker'
 import './styles.css'
 import './focus.css'
 import './mobile.css'
@@ -17,3 +18,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </PrivacyProvider>
   </React.StrictMode>,
 )
+
+registerServiceWorker()
