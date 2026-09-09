@@ -1,24 +1,22 @@
 # Stammbaum
 
-Interaktive, private Stammbaum-App auf Basis der eingescannten Familienunterlagen **«Nachkommen von Sebastian Villiger»**.
+Private, interaktive Stammbaum-App auf Basis der Familienunterlagen «Nachkommen von Sebastian Villiger».
 
-## Stand
+## Aktueller Stand
 
-Der erste Prototyp enthält:
-
-- 104 nummerierte Nachkommen über fünf Generationen
-- 48 in den Scans genannte Ehe-, Partner- oder Verlobungsbeziehungen
-- Eltern-Kind-Verknüpfungen gemäss der Nummerierung der Vorlage
-- zoombaren und verschiebbaren Stammbaum
+- 104 nummerierte Personen aus den bereitgestellten Scans erfasst
+- fünf Generationen mit Eltern-Kind-Verknüpfungen
+- Ehe-, Partner- und Verlobungsbeziehungen als Zusatzdaten
 - Suche nach Name, Ort, Jahr und Partnername
-- Personendetails mit Lebensdaten, Familie, Beziehungen und Quellenhinweis
-- Hervorhebung der Abstammungslinie zur ausgewählten Person
-- responsive Darstellung inklusive Dark Mode
-- explizite Kennzeichnung unklarer oder unvollständiger Angaben
+- zoombarer und verschiebbarer Stammbaum
+- Detailansicht mit Lebensdaten, Familie, Abstammungslinie und Quellenhinweis
+- Smartphone-optimierte Bedienung mit Pinch-Zoom, grossen Touch-Flächen und Bottom Navigation
+- Personendetails auf kleinen Displays als Bottom Sheet
+- Safe-Area-Unterstützung für Geräte mit Displayausschnitt bzw. Gestenleiste
+- Web-App-Manifest und App-Icon für eine spätere Nutzung vom Homescreen
+- responsive Desktop-/Tablet-Darstellung und Dark-Mode-Unterstützung
 
-Die App ist aktuell bewusst als **privater Prototyp** angelegt. Die Quelldokumente enthalten personenbezogene Angaben zu vermutlich noch lebenden Personen und sollen nicht ungeprüft öffentlich publiziert werden.
-
-## Lokal starten
+## Entwicklung
 
 ```bash
 npm install
@@ -31,30 +29,12 @@ Produktions-Build:
 npm run build
 ```
 
-## Datenmodell
-
-Die nummerierten Nachkommen aus der Quelle befinden sich in `src/data/`. Jeder Datensatz enthält u. a.:
-
-- Quellennummer
-- Generation
-- Geburts-/Sterbedaten und Orte
-- Verknüpfung zum Elternteil
-- Kinder
-- in der Quelle genannte Beziehungen
-- Quellseite
-- Hinweise zu unsicheren Angaben
-
-Die aktuelle Struktur orientiert sich bewusst an der Nummerierung der historischen Vorlage. Für spätere Funktionen wie einen universellen Verwandtschafts-Finder oder mehrere unabhängige Stammlinien kann das Modell in vollständig normalisierte Personen- und Beziehungsobjekte überführt werden.
-
 ## Datenqualität
 
-Offene bzw. schwer lesbare Angaben werden nicht geraten. Sie sind in `docs/DATA_QUALITY.md` dokumentiert.
+Die Daten wurden aus den vom Eigentümer bereitgestellten Familienunterlagen übertragen. Unsichere, unvollständige oder schwer lesbare Angaben werden nicht geraten. Bekannte Unklarheiten sind unter `docs/DATA_QUALITY.md` dokumentiert.
 
-## Nächste Schritte
+Die Anwendung ist derzeit als **privater Prototyp** vorgesehen. Die Unterlagen enthalten personenbezogene Daten lebender Personen und sollen nicht ungeprüft öffentlich bereitgestellt werden.
 
-1. Datenabgleich gegen die Originalscans
-2. Fotos und Dokumentquellen pro Person
-3. normalisiertes Beziehungsmodell
-4. Verwandtschafts-Finder
-5. Editiermodus mit Änderungsprotokoll
-6. Datenschutzmodus für lebende Personen
+## Branch
+
+Die laufende Erstentwicklung findet im Branch `initial-app` und in Pull Request #1 statt.
