@@ -445,6 +445,13 @@ export default function App() {
         />
       </main>
 
+      <button
+        type="button"
+        className={`sheet-backdrop${detailOpen ? ' is-open' : ''}`}
+        aria-label="Personendetails schliessen"
+        onClick={() => setDetailOpen(false)}
+      />
+
       <nav className="mobile-nav" aria-label="App-Navigation">
         <button type="button" onClick={() => focusPerson(selectedPerson.id)}>
           <span aria-hidden="true">◎</span>
