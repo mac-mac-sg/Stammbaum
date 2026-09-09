@@ -1,6 +1,14 @@
 import { useMemo, useRef, useState } from 'react'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import FocusedFamilyView from './FocusedFamilyView'
+import { usePrivacy } from './PrivacyContext'
+import {
+  isProtectedPartner,
+  isProtectedPerson,
+  protectedSearchParts,
+  privacyModeLabel,
+} from './privacy'
+import type { PrivacyMode } from './privacy'
 import { people, peopleById, rootId } from './data'
 import type { Person } from './types'
 
@@ -19,26 +27,23 @@ function formatDate(value?: string) {
   return `${day}. ${monthNames[month - 1]} ${year}`
 }
 
-function lifeLabel(person: Person) {
+function lifeLabel(person: Person, privacyMode: PrivacyMode) {
+  if (isProtectedPerson(person, privacyMode)) return 'Lebensdaten geschützt'
   const birth = person.birth ? formatDate(person.birth) : '?'
   const death = person.death ? formatDate(person.death) : ''
   return death ? `${birth} – ${death}` : `* ${birth}`
 }
 
-function searchText(person: Person) {
+function searchText(person: Person, privacyMode: PrivacyMode) {
+  const partnerParts = person.partners.flatMap((partner) => {
+    if (isProtectedPartner(partner, privacyMode)) return [partner.name]
+    return [partner.name, partner.birth, partner.birthPlace, partner.death, partner.deathPlace]
+  })
+
   return [
     person.name,
-    person.birth,
-    person.birthPlace,
-    person.death,
-    person.deathPlace,
-    ...person.partners.flatMap((partner) => [
-      partner.name,
-      partner.birth,
-      partner.birthPlace,
-      partner.death,
-      partner.deathPlace,
-    ]),
+    ...protectedSearchParts(person, privacyMode),
+    ...partnerParts,
   ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
 }
 
@@ -63,7 +68,10 @@ function PersonCard({
   onSelect: (id: string) => void
   inPath: boolean
 }) {
+  const { mode } = usePrivacy()
   const partner = person.partners[0]
+  const protectedPerson = isProtectedPerson(person, mode)
+
   return (
     <button
       id={`person-${person.id}`}
@@ -73,7 +81,8 @@ function PersonCard({
     >
       <span className="source-number">{person.number}</span>
       <span className="person-name">{person.name}</span>
-      <span className="person-life">{lifeLabel(person)}</span>
+      <span className={`person-life${protectedPerson ? ' protected-value' : ''}`}>{lifeLabel(person, mode)}</span>
+      {protectedPerson && <span className="privacy-badge">Geschützt</span>}
       {partner && (
         <span className="partner-line">
           <span aria-hidden="true">∞</span>
@@ -145,9 +154,11 @@ function DetailPanel({
   onClose: () => void
   onSelect: (id: string) => void
 }) {
+  const { mode } = usePrivacy()
   const parent = person.parentId ? peopleById[person.parentId] : undefined
   const children = person.childIds.map((id) => peopleById[id]).filter(Boolean)
   const path = getPathToRoot(person.id).map((id) => peopleById[id])
+  const protectedPerson = isProtectedPerson(person, mode)
 
   return (
     <aside className={`detail-panel${open ? ' is-open' : ''}`} aria-label={`Details zu ${person.name}`}>
@@ -156,6 +167,7 @@ function DetailPanel({
         <div>
           <span className="eyebrow">Person #{person.number} · Generation {person.generation}</span>
           <h2>{person.name}</h2>
+          {protectedPerson && <span className="privacy-badge">Lebensdaten geschützt</span>}
         </div>
         <button className="icon-button" type="button" onClick={onClose} aria-label="Details schliessen">
           ×
@@ -167,19 +179,27 @@ function DetailPanel({
         <dl className="facts">
           <div>
             <dt>Geburt</dt>
-            <dd>{person.birth ? formatDate(person.birth) : 'nicht angegeben'}</dd>
+            <dd className={protectedPerson ? 'protected-value' : undefined}>
+              {protectedPerson ? 'im Schutzmodus verborgen' : person.birth ? formatDate(person.birth) : 'nicht angegeben'}
+            </dd>
           </div>
           <div>
             <dt>Geburtsort</dt>
-            <dd>{person.birthPlace ?? 'nicht angegeben'}</dd>
+            <dd className={protectedPerson ? 'protected-value' : undefined}>
+              {protectedPerson ? 'im Schutzmodus verborgen' : person.birthPlace ?? 'nicht angegeben'}
+            </dd>
           </div>
           <div>
             <dt>Tod</dt>
-            <dd>{person.death ? formatDate(person.death) : 'kein Sterbedatum in der Quelle'}</dd>
+            <dd className={protectedPerson ? 'protected-value' : undefined}>
+              {protectedPerson ? 'im Schutzmodus verborgen' : person.death ? formatDate(person.death) : 'kein Sterbedatum in der Quelle'}
+            </dd>
           </div>
           <div>
             <dt>Sterbeort</dt>
-            <dd>{person.deathPlace ?? 'nicht angegeben'}</dd>
+            <dd className={protectedPerson ? 'protected-value' : undefined}>
+              {protectedPerson ? 'im Schutzmodus verborgen' : person.deathPlace ?? 'nicht angegeben'}
+            </dd>
           </div>
         </dl>
       </section>
@@ -188,25 +208,34 @@ function DetailPanel({
         <section className="detail-section">
           <h3>Beziehungen</h3>
           <div className="relationship-list">
-            {person.partners.map((partner, index) => (
-              <article className="relationship-card" key={`${partner.name}-${index}`}>
-                <strong>{partner.name}</strong>
-                <span>{partner.relationship}{partner.status ? ` · ${partner.status}` : ''}</span>
-                {(partner.birth || partner.birthPlace) && (
-                  <span>
-                    Geboren {partner.birth ? formatDate(partner.birth) : 'Datum unbekannt'}
-                    {partner.birthPlace ? ` · ${partner.birthPlace}` : ''}
-                  </span>
-                )}
-                {(partner.death || partner.deathPlace) && (
-                  <span>
-                    Gestorben {partner.death ? formatDate(partner.death) : 'Datum unbekannt'}
-                    {partner.deathPlace ? ` · ${partner.deathPlace}` : ''}
-                  </span>
-                )}
-                {partner.notes && <span className="uncertain-note">{partner.notes}</span>}
-              </article>
-            ))}
+            {person.partners.map((partner, index) => {
+              const protectedPartner = isProtectedPartner(partner, mode)
+              return (
+                <article className="relationship-card" key={`${partner.name}-${index}`}>
+                  <strong>{partner.name}</strong>
+                  <span>{partner.relationship}{partner.status ? ` · ${partner.status}` : ''}</span>
+                  {protectedPartner ? (
+                    <span className="protected-value">Lebensdaten im Schutzmodus verborgen</span>
+                  ) : (
+                    <>
+                      {(partner.birth || partner.birthPlace) && (
+                        <span>
+                          Geboren {partner.birth ? formatDate(partner.birth) : 'Datum unbekannt'}
+                          {partner.birthPlace ? ` · ${partner.birthPlace}` : ''}
+                        </span>
+                      )}
+                      {(partner.death || partner.deathPlace) && (
+                        <span>
+                          Gestorben {partner.death ? formatDate(partner.death) : 'Datum unbekannt'}
+                          {partner.deathPlace ? ` · ${partner.deathPlace}` : ''}
+                        </span>
+                      )}
+                    </>
+                  )}
+                  {!protectedPartner && partner.notes && <span className="uncertain-note">{partner.notes}</span>}
+                </article>
+              )
+            })}
           </div>
         </section>
       )}
@@ -248,7 +277,10 @@ function DetailPanel({
         <section className="detail-section source-section">
           <h3>Quelle & Datenqualität</h3>
           <p>Nachkommen von Sebastian Villiger, Seite {person.source} von 9.</p>
-          {person.notes && <p className="uncertain-note">{person.notes}</p>}
+          {!protectedPerson && person.notes && <p className="uncertain-note">{person.notes}</p>}
+          {protectedPerson && person.notes && (
+            <p className="protected-value">Zusatznotizen werden für potenziell lebende Personen im Schutzmodus ebenfalls verborgen.</p>
+          )}
           <p className="source-hint">
             Angaben wurden aus den bereitgestellten Scans übertragen. Unklare oder unvollständige
             Stellen werden ausdrücklich nicht ergänzt.
@@ -260,6 +292,7 @@ function DetailPanel({
 }
 
 export default function App() {
+  const { mode: privacyMode, toggleMode } = usePrivacy()
   const [selectedId, setSelectedId] = useState('p095')
   const [query, setQuery] = useState('')
   const [depthLimit, setDepthLimit] = useState(5)
@@ -277,9 +310,9 @@ export default function App() {
     const normalized = query.trim().toLocaleLowerCase('de-CH')
     if (!normalized) return []
     return people
-      .filter((person) => searchText(person).includes(normalized))
+      .filter((person) => searchText(person, privacyMode).includes(normalized))
       .slice(0, 10)
-  }, [query])
+  }, [privacyMode, query])
 
   const focusPerson = (id: string, scale = 0.86) => {
     window.setTimeout(() => {
@@ -329,18 +362,35 @@ export default function App() {
           </div>
         </div>
 
-        <div className="header-stats" aria-label="Datenbestand">
-          <div>
-            <strong>{people.length}</strong>
-            <span>Personen</span>
-          </div>
-          <div>
-            <strong>5</strong>
-            <span>Generationen</span>
-          </div>
-          <div>
-            <strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong>
-            <span>Beziehungen</span>
+        <div className="header-actions">
+          <button
+            type="button"
+            className={`privacy-toggle${privacyMode === 'protected' ? ' is-protected' : ''}`}
+            onClick={toggleMode}
+            aria-pressed={privacyMode === 'protected'}
+            aria-label={`${privacyModeLabel(privacyMode)}. Ansicht wechseln.`}
+            title={`${privacyModeLabel(privacyMode)} – antippen zum Wechseln`}
+          >
+            <span className="privacy-icon" aria-hidden="true">{privacyMode === 'protected' ? '◈' : '○'}</span>
+            <span className="privacy-copy">
+              <strong>{privacyMode === 'protected' ? 'Schutzmodus' : 'Vollansicht'}</strong>
+              <small>{privacyMode === 'protected' ? 'Lebensdaten verborgen' : 'Private Daten sichtbar'}</small>
+            </span>
+          </button>
+
+          <div className="header-stats" aria-label="Datenbestand">
+            <div>
+              <strong>{people.length}</strong>
+              <span>Personen</span>
+            </div>
+            <div>
+              <strong>5</strong>
+              <span>Generationen</span>
+            </div>
+            <div>
+              <strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong>
+              <span>Beziehungen</span>
+            </div>
           </div>
         </div>
       </header>
@@ -357,7 +407,7 @@ export default function App() {
                   id="family-search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Name, Ort oder Jahr"
+                  placeholder={privacyMode === 'protected' ? 'Name suchen' : 'Name, Ort oder Jahr'}
                   autoComplete="off"
                   enterKeyHint="search"
                 />
@@ -367,19 +417,24 @@ export default function App() {
               </div>
               {results.length > 0 && (
                 <div className="search-results">
-                  {results.map((person) => (
-                    <button
-                      type="button"
-                      key={person.id}
-                      onClick={() => navigatePerson(person.id, { focusTree: true })}
-                    >
-                      <span>
-                        <strong>{person.name}</strong>
-                        <small>#{person.number} · Generation {person.generation}</small>
-                      </span>
-                      <span>{person.birth ? formatDate(person.birth) : 'Datum offen'}</span>
-                    </button>
-                  ))}
+                  {results.map((person) => {
+                    const protectedResult = isProtectedPerson(person, privacyMode)
+                    return (
+                      <button
+                        type="button"
+                        key={person.id}
+                        onClick={() => navigatePerson(person.id, { focusTree: true })}
+                      >
+                        <span>
+                          <strong>{person.name}</strong>
+                          <small>#{person.number} · Generation {person.generation}</small>
+                        </span>
+                        <span className={protectedResult ? 'protected-value' : undefined}>
+                          {protectedResult ? 'geschützt' : person.birth ? formatDate(person.birth) : 'Datum offen'}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
               {query && results.length === 0 && (
@@ -523,7 +578,7 @@ export default function App() {
       </nav>
 
       <footer>
-        <span>Privater Prototyp · keine Veröffentlichung personenbezogener Daten vorgesehen</span>
+        <span>{privacyMode === 'protected' ? 'Schutzmodus aktiv · Lebensdaten potenziell lebender Personen verborgen' : 'Private Vollansicht · personenbezogene Daten sichtbar'}</span>
         <span>Quelle: Familienunterlagen «Nachkommen von Sebastian Villiger»</span>
       </footer>
     </div>
