@@ -1,6 +1,7 @@
 .mobile-nav,
 .selected-chip,
-.sheet-handle {
+.sheet-handle,
+.sheet-backdrop {
   display: none;
 }
 
@@ -171,8 +172,7 @@
     font-weight: 700;
   }
 
-  .segmented button:nth-child(1),
-  .segmented button:nth-child(2) {
+  .segmented button:nth-child(1) {
     display: none;
   }
 
@@ -264,6 +264,24 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 11px;
+  }
+
+  .sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    padding: 0;
+    border: 0;
+    background: rgba(25, 28, 24, .22);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+
+  .sheet-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .detail-panel {
