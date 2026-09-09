@@ -25,17 +25,22 @@ Der Fokusmodus löst das zentrale Darstellungsproblem eines grossen Stammbaums a
 
 Die Darstellung basiert ausschliesslich auf den bereits erfassten Eltern-Kind-Beziehungen. Wo die Quelle nur eine Person der Abstammungslinie als strukturierte Person enthält, wird kein zweiter Elternteil erfunden. Ein dokumentierter Ehe- oder Lebenspartner wird auf der Personenkarte separat angezeigt.
 
+## Verwandtschafts-Finder
+
+Vom Familienfokus aus kann für die aktuell gewählte Person eine zweite erfasste Person gesucht werden. Die App berechnet den gemeinsamen Vorfahren bzw. die gemeinsame Bezugsperson, einen verständlichen Verwandtschaftsbegriff und den Verbindungspfad im strukturierten Nachkommenbaum.
+
+Die Berechnung nutzt nur die erfassten Eltern-Kind-Kanten. Ehe- und Lebenspartner sind aktuell Zusatzdaten und deshalb nicht Teil des Verwandtschaftsgraphen. Diese Einschränkung wird in der Oberfläche angezeigt.
+
 ## Web-App-Verhalten
 
 `manifest.webmanifest`, Theme-Color und Standalone-Metadaten sind vorbereitet. Damit kann die App nach einem späteren HTTPS-Deployment app-ähnlich vom Homescreen genutzt werden. Offline-Caching wird bewusst erst zusammen mit dem Deployment ergänzt, damit keine veralteten genealogischen Daten im Browser-Cache festhängen.
 
 ## Nächste mobile Ausbaustufen
 
-1. Verwandtschafts-Finder zwischen zwei Personen
-2. Datenschutzmodus für lebende Personen
-3. optionale Vollbildsuche bei sehr kleinen Displays
-4. echte Installierbarkeit inklusive kontrolliertem Service-Worker nach Festlegung des Deployments
+1. Datenschutzmodus für lebende Personen
+2. optionale Vollbildsuche bei sehr kleinen Displays
+3. echte Installierbarkeit inklusive kontrolliertem Service-Worker nach Festlegung des Deployments
 
 ## Umgesetzt am 9. September 2026
 
-Der Familienfokus ist produktions-buildfähig im Branch `initial-app` umgesetzt. Der vollständige Stammbaum bleibt als alternative Gesamtansicht erhalten.
+Familienfokus und Verwandtschafts-Finder sind im Branch `initial-app` umgesetzt. Der vollständige Stammbaum bleibt als alternative Gesamtansicht erhalten.
