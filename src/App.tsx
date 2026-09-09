@@ -133,10 +133,12 @@ function TreeNode({
 
 function DetailPanel({
   person,
+  open,
   onClose,
   onSelect,
 }: {
   person: Person
+  open: boolean
   onClose: () => void
   onSelect: (id: string) => void
 }) {
@@ -145,7 +147,8 @@ function DetailPanel({
   const path = getPathToRoot(person.id).map((id) => peopleById[id])
 
   return (
-    <aside className="detail-panel" aria-label={`Details zu ${person.name}`}>
+    <aside className={`detail-panel${open ? ' is-open' : ''}`} aria-label={`Details zu ${person.name}`}>
+      <div className="sheet-handle" aria-hidden="true" />
       <div className="detail-topbar">
         <div>
           <span className="eyebrow">Person #{person.number} · Generation {person.generation}</span>
@@ -257,7 +260,9 @@ export default function App() {
   const [selectedId, setSelectedId] = useState('p095')
   const [query, setQuery] = useState('')
   const [depthLimit, setDepthLimit] = useState(5)
+  const [detailOpen, setDetailOpen] = useState(false)
   const zoomRef = useRef<any>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const selectedPerson = peopleById[selectedId] ?? peopleById[rootId]
   const pathIds = useMemo(() => new Set(getPathToRoot(selectedPerson.id)), [selectedPerson.id])
@@ -270,17 +275,28 @@ export default function App() {
       .slice(0, 10)
   }, [query])
 
+  const focusPerson = (id: string, scale = 0.86) => {
+    window.setTimeout(() => {
+      zoomRef.current?.zoomToElement?.(`person-${id}`, scale, 450)
+    }, 80)
+  }
+
   const selectPerson = (id: string, focus = false) => {
     const person = peopleById[id]
     if (!person) return
     setSelectedId(id)
+    setDetailOpen(true)
     if (person.generation > depthLimit) setDepthLimit(person.generation)
     setQuery('')
-    if (focus) {
-      window.setTimeout(() => {
-        zoomRef.current?.zoomToElement?.(`person-${id}`, 0.9, 500)
-      }, 80)
-    }
+    if (focus) focusPerson(id)
+  }
+
+  const openSearch = () => {
+    setDetailOpen(false)
+    window.setTimeout(() => {
+      searchRef.current?.focus()
+      searchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 40)
   }
 
   return (
@@ -301,7 +317,7 @@ export default function App() {
         <div className="header-stats" aria-label="Datenbestand">
           <div>
             <strong>{people.length}</strong>
-            <span>Nachkommen</span>
+            <span>Personen</span>
           </div>
           <div>
             <strong>5</strong>
@@ -322,11 +338,13 @@ export default function App() {
               <div className="search-box">
                 <span aria-hidden="true">⌕</span>
                 <input
+                  ref={searchRef}
                   id="family-search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Name, Ort oder Jahr"
                   autoComplete="off"
+                  enterKeyHint="search"
                 />
                 {query && (
                   <button type="button" onClick={() => setQuery('')} aria-label="Suche leeren">×</button>
@@ -359,6 +377,7 @@ export default function App() {
                     key={depth}
                     className={depthLimit === depth ? 'active' : ''}
                     onClick={() => setDepthLimit(depth)}
+                    aria-label={`Bis Generation ${depth} anzeigen`}
                   >
                     {depth}
                   </button>
@@ -370,13 +389,13 @@ export default function App() {
           <div className="canvas-frame">
             <TransformWrapper
               ref={zoomRef}
-              initialScale={0.38}
-              minScale={0.18}
-              maxScale={1.5}
+              initialScale={0.34}
+              minScale={0.16}
+              maxScale={1.6}
               centerOnInit
               limitToBounds={false}
               wheel={{ step: 0.08 }}
-              doubleClick={{ mode: 'zoomIn' }}
+              doubleClick={{ disabled: true }}
             >
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <>
@@ -402,18 +421,44 @@ export default function App() {
               )}
             </TransformWrapper>
 
+            <button
+              type="button"
+              className="selected-chip"
+              onClick={() => setDetailOpen(true)}
+              aria-label={`Details zu ${selectedPerson.name} öffnen`}
+            >
+              <span>Ausgewählt</span>
+              <strong>{selectedPerson.name}</strong>
+            </button>
+
             <div className="canvas-help">
-              Ziehen zum Verschieben · Scrollen/Pinch zum Zoomen · Person antippen für Details
+              Ziehen zum Verschieben · Pinch zum Zoomen · Person antippen für Details
             </div>
           </div>
         </section>
 
         <DetailPanel
           person={selectedPerson}
-          onClose={() => setSelectedId(rootId)}
+          open={detailOpen}
+          onClose={() => setDetailOpen(false)}
           onSelect={(id) => selectPerson(id, true)}
         />
       </main>
+
+      <nav className="mobile-nav" aria-label="App-Navigation">
+        <button type="button" onClick={() => focusPerson(selectedPerson.id)}>
+          <span aria-hidden="true">◎</span>
+          <small>Im Baum</small>
+        </button>
+        <button type="button" onClick={openSearch}>
+          <span aria-hidden="true">⌕</span>
+          <small>Suchen</small>
+        </button>
+        <button type="button" className="primary" onClick={() => setDetailOpen(true)}>
+          <span aria-hidden="true">⌘</span>
+          <small>Person</small>
+        </button>
+      </nav>
 
       <footer>
         <span>Privater Prototyp · keine Veröffentlichung personenbezogener Daten vorgesehen</span>
