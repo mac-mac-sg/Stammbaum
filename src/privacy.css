@@ -1,3 +1,10 @@
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
 .privacy-toggle {
   min-height: 42px;
   display: inline-flex;
@@ -42,6 +49,11 @@
 
 @media (max-width: 820px) {
   .app-header { padding-right: 10px; }
+
+  .header-actions {
+    margin-left: auto;
+    gap: 0;
+  }
 
   .privacy-toggle {
     flex: 0 0 auto;
