@@ -35,3 +35,7 @@ Die Darstellung basiert ausschliesslich auf den bereits erfassten Eltern-Kind-Be
 2. Datenschutzmodus für lebende Personen
 3. optionale Vollbildsuche bei sehr kleinen Displays
 4. echte Installierbarkeit inklusive kontrolliertem Service-Worker nach Festlegung des Deployments
+
+## Umgesetzt am 9. September 2026
+
+Der Familienfokus ist produktions-buildfähig im Branch `initial-app` umgesetzt. Der vollständige Stammbaum bleibt als alternative Gesamtansicht erhalten.
