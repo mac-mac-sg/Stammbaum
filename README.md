@@ -35,6 +35,10 @@ Die Daten wurden aus den vom Eigentümer bereitgestellten Familienunterlagen üb
 
 Die Anwendung ist derzeit als **privater Prototyp** vorgesehen. Die Unterlagen enthalten personenbezogene Daten lebender Personen und sollen nicht ungeprüft öffentlich bereitgestellt werden.
 
+## Mobile UX
+
+Das Smartphone-Bedienkonzept und die nächsten Ausbaustufen sind unter `docs/MOBILE_UX.md` dokumentiert.
+
 ## Branch
 
 Die laufende Erstentwicklung findet im Branch `initial-app` und in Pull Request #1 statt.
