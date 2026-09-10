@@ -106,7 +106,11 @@ export function getFamilyMember(id: string) {
 
 export function relationLabel(member: FamilyMember) {
   if (member.kind === 'descendant') return 'Nachkomme'
-  if (member.relationship === 'Ehe') return member.relationshipStatus === 'geschieden' ? 'ehem. Ehepartner/in' : 'Ehepartner/in'
+  if (member.relationship === 'Ehe') {
+    if (member.relationshipStatus === 'geschieden') return 'ehem. Ehepartner/in'
+    if (member.relationshipStatus === 'annulliert') return 'annullierte Ehe'
+    return 'Ehepartner/in'
+  }
   if (member.relationship === 'Verlobung') return 'Verlobte/r'
   return 'Partner/in'
 }
