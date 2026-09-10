@@ -4,7 +4,7 @@ export const people90to104: Person[] = [
   {"id":"p090","number":90,"name":"Williams Schlegel","birth":"2005-02-15","birthPlace":"Rorschacherberg","gender":"m","source":8,"generation":5,"parentId":"p056","childIds":[],"partners":[]},
   {"id":"p091","number":91,"name":"Raphael Schlegel","birth":"2008-01-15","birthPlace":"Rorschacherberg","gender":"m","source":8,"generation":5,"parentId":"p056","childIds":[],"partners":[]},
   {"id":"p092","number":92,"name":"Roxana Maurer","birth":"1999-06-09","birthPlace":"Uster","gender":"f","source":8,"generation":5,"parentId":"p057","childIds":[],"partners":[]},
-  {"id":"p093","number":93,"name":"Nadine Jerg","birth":"1986-06-05","birthPlace":"Goldach / Frauenfeld","gender":"f","source":8,"generation":5,"parentId":"p058","childIds":[],"partners":[{"name":"Thomas Korsch","birthPlace":"Frauenfeld","relationship":"Partnerschaft","notes":"Geburtsdatum im Scan unvollständig: «10. 5. ??»."}]},
+  {"id":"p093","number":93,"name":"Nadine Jerg","birth":"1986-06-05","birthPlace":"Goldach / Frauenfeld","gender":"f","source":8,"generation":5,"parentId":"p058","childIds":[],"partners":[]},
   {"id":"p094","number":94,"name":"Stefanie Jerg","birth":"1990-09-25","birthPlace":"Goldach","gender":"f","source":8,"generation":5,"parentId":"p058","childIds":[],"partners":[]},
   {"id":"p095","number":95,"name":"Marco Raith","birth":"1990-04-21","birthPlace":"Goldach / SG","gender":"m","source":7,"generation":5,"parentId":"p059","childIds":[],"partners":[]},
   {"id":"p096","number":96,"name":"Sandro Raith","birth":"1992-07-11","birthPlace":"Goldach / SG","death":"2010-05-15","gender":"m","source":7,"generation":5,"parentId":"p059","childIds":[],"partners":[]},
