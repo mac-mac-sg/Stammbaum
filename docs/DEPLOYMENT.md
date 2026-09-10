@@ -2,41 +2,95 @@
 
 Die App enthält personenbezogene Familiendaten. Ein Deployment darf deshalb **nicht als öffentlich erreichbare statische Website** erfolgen. Das Repository bleibt privat und auch die ausgelieferten HTML-/JavaScript-Dateien müssen vor anonymem Zugriff geschützt werden.
 
-## Empfohlenes Zielbild
+## Zielbild
 
-Die Anwendung wird als kleiner Container betrieben:
+Das Deployment folgt demselben Grundprinzip wie bei Essens-Check: Änderungen werden im Pull Request geprüft und eine Version auf `main` wird automatisch veröffentlicht. Der Unterschied liegt nur im Zielsystem: Statt GitHub Pages wird ein privater HTTPS-Server verwendet.
 
-1. Vite erzeugt den statischen Produktions-Build.
-2. Caddy liefert ausschliesslich den fertigen `dist`-Ordner aus.
-3. Der Container startet nur, wenn `STAMMBAUM_USER` und `STAMMBAUM_PASSWORD` gesetzt sind.
-4. Caddy schützt **jede Route und jedes Asset** mit HTTP Basic Authentication.
-5. Vor dem Container liegt ein HTTPS-Endpunkt des gewählten Hosters bzw. Reverse Proxys.
-6. Optional kann später zusätzlich ein Identity-Aware Proxy mit individuellen Familien-Logins vorgeschaltet werden.
+Ablauf:
 
-Wichtig: Ein rein clientseitiger Login in React wäre für diesen Anwendungsfall nicht ausreichend. Die genealogischen Daten befinden sich im ausgelieferten JavaScript-Bundle und müssen deshalb bereits **vor dem Download der App-Dateien** geschützt werden.
+1. Pull Request wird durch `.github/workflows/ci.yml` geprüft.
+2. Datenvalidierung, TypeScript/Vite-Build, Container-Build und Authentifizierungs-Smoke-Test müssen erfolgreich sein.
+3. Nach einem Merge auf `main` startet `.github/workflows/deploy-private.yml` automatisch.
+4. GitHub Actions baut den geprüften Produktionscontainer und überträgt ihn verschlüsselt per SSH auf den privaten Server.
+5. Das App-Passwort wird als separate Datei übertragen und nicht als Docker-Environment-Variable gespeichert.
+6. Caddy startet mit dem konfigurierten Hostnamen und beschafft bzw. erneuert das HTTPS-Zertifikat automatisch.
+7. Der Workflow prüft danach, dass anonymer Zugriff `401` liefert und authentifizierter Zugriff sowie `/sw.js` `200` liefern.
 
-## Container lokal bauen
+Die genealogischen Daten liegen im JavaScript-Bundle. Ein rein clientseitiger Login in React wäre daher nicht ausreichend. Der Zugriffsschutz greift **vor dem Download** von HTML, JavaScript, Manifest, Service Worker und Assets.
+
+## Einmalige Server-Voraussetzungen
+
+Benötigt wird ein kleiner Linux-Server/VPS mit:
+
+- öffentlicher IPv4- oder IPv6-Adresse,
+- installiertem Docker,
+- SSH-Zugang,
+- freien Ports 80 und 443,
+- einem Benutzer, der Docker ohne interaktive Passwortabfrage ausführen darf.
+
+Für den gewünschten Hostnamen, beispielsweise `familie.example.ch`, muss ein DNS-A/AAAA-Eintrag auf diesen Server zeigen. Port 80 und 443 müssen von aussen erreichbar sein, damit Caddy HTTPS automatisch einrichten kann.
+
+## Einmalige GitHub-Secrets
+
+Im Repository unter **Settings → Secrets and variables → Actions** werden folgende Repository- oder Environment-Secrets benötigt:
+
+| Secret | Inhalt |
+| --- | --- |
+| `STAMMBAUM_DEPLOY_HOST` | IP-Adresse oder SSH-Hostname des Servers |
+| `STAMMBAUM_DEPLOY_USER` | SSH-Benutzer auf dem Server |
+| `STAMMBAUM_DEPLOY_SSH_KEY` | privater SSH-Key für diesen Deployment-Benutzer |
+| `STAMMBAUM_DEPLOY_KNOWN_HOSTS` | vertrauenswürdiger `known_hosts`-Eintrag des Servers |
+| `STAMMBAUM_DOMAIN` | öffentlicher Hostname **ohne** `https://`, z. B. `familie.example.ch` |
+| `STAMMBAUM_USER` | Benutzername für den Zugriff auf die Stammbaum-App |
+| `STAMMBAUM_PASSWORD` | langes, einmaliges Passwort für die Stammbaum-App |
+
+Der `known_hosts`-Eintrag sollte auf einem vertrauenswürdigen eigenen Rechner erzeugt und der Host-Key geprüft werden; er wird bewusst nicht während des Deployments mit einem ungeprüften `ssh-keyscan` erzeugt.
+
+Das Workflow-Environment heisst `production`. Optional können dort später Approval-Regeln oder weitere Deployment-Schutzregeln eingerichtet werden.
+
+## Automatisches Deployment
+
+Nach Einrichtung der Secrets genügt der normale Entwicklungsablauf:
+
+```text
+initial-app / Feature Branch
+        ↓
+Pull Request + CI
+        ↓
+Merge nach main
+        ↓
+Privat veröffentlichen
+        ↓
+https://STAMMBAUM_DOMAIN
+```
+
+Das Deployment kann zusätzlich über **Actions → Privat veröffentlichen → Run workflow** manuell erneut gestartet werden.
+
+GitHub Actions überträgt kein Repository auf den Server. Übertragen wird nur das fertig gebaute Container-Image sowie die Laufzeit-Passwortdatei. Der Server benötigt deshalb keinen GitHub-Zugriff und keinen Registry-Token.
+
+## Laufzeit auf dem Server
+
+Die Anwendung läuft als Container `stammbaum-villiger` mit `--restart unless-stopped`. Caddy-Daten und Zertifikate liegen in den persistenten Docker-Volumes:
+
+- `stammbaum-caddy-data`
+- `stammbaum-caddy-config`
+
+Das Passwort liegt im Home-Verzeichnis des Deployment-Benutzers unter `stammbaum-production/secrets/password` mit restriktiven Dateirechten und wird read-only in den Container gemountet. Im Container wird daraus beim Start nur ein Caddy-kompatibler Passwort-Hash erzeugt.
+
+## Lokaler Container-Test
+
+Der Container kann weiterhin ohne Domain lokal getestet werden:
 
 ```bash
 docker build -t stammbaum-villiger .
-```
 
-Lokal starten:
-
-```bash
 docker run --rm -p 8080:8080 \
   -e STAMMBAUM_USER="familie" \
   -e STAMMBAUM_PASSWORD="ein-langes-einmaliges-passwort" \
   stammbaum-villiger
 ```
 
-Danach ist die App unter `http://localhost:8080` erreichbar. Für ein echtes Smartphone-Deployment muss der externe Zugriff über **HTTPS** erfolgen, damit Service Worker und PWA-Funktionen zuverlässig verfügbar sind.
-
-## Secrets
-
-`STAMMBAUM_USER` und `STAMMBAUM_PASSWORD` gehören ausschliesslich in die Secret-/Environment-Verwaltung des Hosting-Systems. Sie dürfen nicht in Git, `.env`-Dateien im Repository, Screenshots oder Dokumentation mit echten Werten geschrieben werden.
-
-Der Container erzeugt beim Start aus dem Passwort einen Caddy-kompatiblen Hash. Das Klartextpasswort wird nicht in die Caddy-Konfiguration geschrieben.
+Ohne `STAMMBAUM_SITE_ADDRESS` hört Caddy standardmässig auf Port 8080. Im Produktionsworkflow wird stattdessen `STAMMBAUM_SITE_ADDRESS` auf den konfigurierten Domainnamen gesetzt; dadurch übernimmt Caddy HTTPS direkt auf Port 443.
 
 ## Sicherheitsheader
 
@@ -52,7 +106,7 @@ App-Shell und Service Worker werden nicht langfristig durch den Server gecacht; 
 
 ## PWA und lokale Daten
 
-Nach erfolgreichem HTTPS-Login kann die App vom Browser lokal gecacht und auf unterstützten Smartphones zum Homescreen hinzugefügt werden. Das bedeutet zugleich: Auf einem bereits autorisierten Gerät können Familiendaten im Browser-Cache, im Service-Worker-Cache und in `localStorage` verbleiben.
+Nach erfolgreichem HTTPS-Login kann die App vom Browser lokal gecacht und auf unterstützten Smartphones zum Homescreen hinzugefügt werden. Auf einem bereits autorisierten Gerät können Familiendaten daher im Browser-Cache, im Service-Worker-Cache und in `localStorage` verbleiben.
 
 Daher gelten zusätzlich folgende Betriebsregeln:
 
@@ -67,13 +121,16 @@ Daher gelten zusätzlich folgende Betriebsregeln:
 Vor Freigabe an Familienmitglieder prüfen:
 
 - Repository ist weiterhin privat.
-- Die öffentliche URL liefert ohne Authentifizierung **keine** App-Datei aus.
-- HTTPS ist aktiv und ohne Zertifikatswarnung erreichbar.
-- Ein anonymer Aufruf von `/`, `/assets/...`, `/sw.js` und `/manifest.webmanifest` wird abgewehrt.
+- DNS zeigt auf den vorgesehenen privaten Server.
+- GitHub-Production-Secrets sind vollständig gesetzt.
+- Der GitHub-Workflow `Privat veröffentlichen` ist erfolgreich.
+- Die öffentliche URL liefert ohne Authentifizierung `401`.
+- HTTPS ist ohne Zertifikatswarnung erreichbar.
+- `/`, `/assets/...`, `/sw.js` und `/manifest.webmanifest` sind anonym nicht abrufbar.
 - Schutzmodus ist beim Erststart aktiv.
-- PWA-Installation wurde auf mindestens einem Android- und einem iOS-Gerät geprüft.
-- Abmelden/Entzug des Serverzugangs und Löschen lokaler Browserdaten wurden getestet.
+- PWA-Installation wurde auf den tatsächlich verwendeten Smartphone-Plattformen geprüft.
+- Zugangsentzug und Löschen lokaler Browserdaten wurden getestet.
 
 ## Spätere Ausbaustufe
 
-Für mehrere Familienmitglieder ist ein vorgelagerter Identity-Aware Proxy mit individuellen Benutzerkonten die bessere Dauerlösung als ein gemeinsam genutztes Passwort. Der Caddy-Schutz kann bis dahin als fail-closed Basisschutz dienen. Ein Wechsel auf individuelle Authentifizierung sollte erst erfolgen, wenn das konkrete Hosting-Ziel feststeht.
+Für mehrere Familienmitglieder ist ein vorgelagerter Identity-Aware Proxy mit individuellen Benutzerkonten langfristig besser als ein gemeinsam genutztes Passwort. Der aktuelle serverseitige Caddy-Schutz ist bewusst als einfache, fail-closed Baseline umgesetzt und kann später ersetzt werden, ohne das React-Datenmodell ändern zu müssen.
