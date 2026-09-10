@@ -30,7 +30,9 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 - vierteilige mobile Bottom Navigation für **Start**, **Familie**, **Suchen** und **Person**
 - responsive Gestaltung inklusive Dark Mode
 - Web-App-Manifest, Homescreen-Metadaten und kontrollierter Service Worker
-- automatische Datenvalidierung inklusive Partnergraph plus Produktions-Build in GitHub Actions CI
+- Installationshinweis auf unterstützten Smartphones nach einem sicheren HTTPS-Deployment
+- fail-closed **Docker/Caddy-Deployment** mit serverseitiger Basic Authentication und Sicherheitsheadern
+- automatische Datenvalidierung, Produktions-Build und Container-Build in GitHub Actions CI
 
 ## Datenmodell
 
@@ -63,6 +65,14 @@ Produktions-Build:
 npm run build
 ```
 
+Privaten Container bauen:
+
+```bash
+docker build -t stammbaum-villiger .
+```
+
+Details zu Authentifizierung, HTTPS und Betriebsregeln stehen in `docs/DEPLOYMENT.md`.
+
 ## Datenschutz
 
 Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Oberfläche standardmässig im Schutzmodus. Für nummerierte Personen und Partnerpersonen kann in der privaten Vollansicht ein expliziter Lebensstatus gesetzt werden. Solange dieser auf `unknown` steht, greift die konservative 120-Jahre-Heuristik.
@@ -70,6 +80,8 @@ Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Obe
 Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie überschreiben weder die Scanquelle noch die im Repository erfassten Ausgangsdaten. Für Sicherung oder Gerätewechsel können Personen- und Partnerkorrekturen gemeinsam als JSON exportiert und wieder importiert werden. Exportdateien können personenbezogene Daten enthalten und sind entsprechend privat zu behandeln. Details stehen in `docs/PRIVACY.md`.
 
 Favoriten und Verlauf werden ebenfalls nur lokal im Browser gespeichert. Dabei werden stabile interne Personen-IDs, nicht zusätzliche Kopien der Lebensdaten, persistiert.
+
+Ein öffentliches statisches Deployment ist ausdrücklich nicht vorgesehen. Der Produktionscontainer startet nur mit gesetzten Zugangsdaten; die App-Dateien selbst liegen hinter der serverseitigen Authentifizierung.
 
 ## Datenqualität
 
@@ -79,7 +91,7 @@ Der Verwandtschafts-Finder unterscheidet zwischen Blutsverwandtschaft und Verbin
 
 ## Nächste Schritte
 
-1. privates/authentifiziertes Deployment mit installierbarer PWA
+1. konkretes privates Hosting-Ziel festlegen und HTTPS-Endpunkt anbinden
 2. fachliche Verifikation schwer lesbarer Scanstellen
 3. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
 4. zusätzliche Familienquellen für bisher unbekannte Partnerlinien
