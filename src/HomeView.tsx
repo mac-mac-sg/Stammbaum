@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import CorrectionDataSheet from './CorrectionDataSheet'
+import InstallAppCard from './InstallAppCard'
 import { people } from './data'
 import { useEdits } from './EditContext'
 import { useFamilyNavigation } from './FamilyNavigationContext'
@@ -184,6 +185,8 @@ export default function HomeView({
           <b aria-hidden="true">→</b>
         </button>
       </section>
+
+      <InstallAppCard />
 
       <section className="home-section">
         <div className="home-section-heading">
