@@ -4,7 +4,7 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 
 ## Aktueller Funktionsumfang
 
-- 104 nummerierte Nachkommen aus den Scans
+- 104 nummerierte Personen aus den Scans (Sebastian Villiger plus die dokumentierten Nachkommen)
 - zusätzlich **eigenständige Partnerpersonen** mit stabilen IDs im Familiengraph
 - Eltern-Kind-Verknüpfungen über fünf Generationen
 - dokumentierte Ehe-, Partner- und Verlobungsbeziehungen als strukturierte Paarverbindungen
@@ -12,15 +12,16 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 - Elternlinie, Partnerpersonen, Geschwister und Kinder als touch-freundliche Karten
 - Partnerpersonen mit eigener Detailansicht und eigener Datenschutzbehandlung
 - vollständiger, zoombarer Stammbaum als alternative Gesamtansicht
-- im Gesamtbaum werden Nachkomme und Partnerperson als **verbundene Paar-Karten nebeneinander** dargestellt; Kinder liegen darunter auf der gemeinsamen Familienachse
+- im Gesamtbaum werden nummerierte Person und Partnerperson als **verbundene Paar-Karten nebeneinander** dargestellt; Kinder liegen darunter auf der gemeinsamen Familienachse
 - kompakte Suche sowie **Vollbildsuche auf kleinen Smartphones**; Partnerpersonen sind dort ebenfalls auffindbar
 - **Verwandtschafts-Finder** über Abstammungs- und Partnerschaftsverbindungen inklusive Verbindungspfad
 - Personendetails mit Lebensdaten, Beziehungen, Kindern, Abstammungslinie und Quellenhinweisen
 - **Schutzmodus für potenziell lebende Personen**, standardmässig aktiv und lokal gespeichert
-- **expliziter Lebensstatus** (`living`, `deceased`, `unknown`) als lokale fachliche Korrektur für nummerierte Nachkommen
+- **expliziter Lebensstatus** (`living`, `deceased`, `unknown`) als lokale fachliche Korrektur für nummerierte Personen und Partnerpersonen
 - **nicht-destruktiver Editiermodus** für Lebensdaten, Orte und Zusatznotizen
-- lokale Korrekturen wirken sofort in Baum, Fokus, Suche und Datenschutzlogik
-- **Export und Import lokaler Korrekturen als JSON**, inklusive Validierung bekannter Personen-IDs
+- Partnerpersonen können zusätzlich in **Beziehungstyp und Beziehungsstatus** korrigiert werden
+- lokale Korrekturen wirken sofort in Baum, Fokus, Suche, Verwandtschafts-Finder und Datenschutzlogik
+- **Export und Import lokaler Korrekturen als JSON**, inklusive Partnerkorrekturen und Abwärtskompatibilität zu Version 1
 - Bottom-Sheet- und Vollbild-Interaktionen auf kleinen Displays
 - responsive Gestaltung inklusive Dark Mode
 - Web-App-Manifest, Homescreen-Metadaten und kontrollierter Service Worker
@@ -28,9 +29,9 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 
 ## Datenmodell
 
-Die ursprünglichen Scans nummerieren nur die Nachkommen von Sebastian Villiger. Partnerinnen und Partner wurden deshalb zunächst als Zusatzfelder der jeweiligen Person erfasst. Die App erzeugt daraus nun einen normalisierten Familiengraph:
+Die ursprünglichen Scans nummerieren Sebastian Villiger und seine dokumentierten Nachkommen. Partnerinnen und Partner wurden deshalb zunächst als Zusatzfelder der jeweiligen Person erfasst. Die App erzeugt daraus einen normalisierten Familiengraph:
 
-- nummerierte Nachkommen behalten ihre IDs `p001` bis `p104`,
+- nummerierte Personen behalten ihre IDs `p001` bis `p104`,
 - jede dokumentierte Partnerbeziehung erzeugt eine stabile Partner-ID nach dem Muster `partner:p095:1`,
 - Partnerpersonen erhalten Name, Lebensdaten, Quelle und Beziehungstyp aus dem vorhandenen Datensatz,
 - Paarverbindungen werden als eigene Relationen modelliert,
@@ -59,9 +60,9 @@ npm run build
 
 ## Datenschutz
 
-Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Oberfläche standardmässig im Schutzmodus. Für nummerierte Nachkommen kann in der privaten Vollansicht ein expliziter Lebensstatus gesetzt werden. Solange dieser auf `unknown` steht, greift weiterhin die konservative 120-Jahre-Heuristik. Partnerpersonen werden derzeit anhand ihrer vorhandenen Geburts-/Sterbedaten mit derselben konservativen Heuristik geschützt.
+Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Oberfläche standardmässig im Schutzmodus. Für nummerierte Personen und Partnerpersonen kann in der privaten Vollansicht ein expliziter Lebensstatus gesetzt werden. Solange dieser auf `unknown` steht, greift die konservative 120-Jahre-Heuristik.
 
-Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie überschreiben weder die Scanquelle noch die im Repository erfassten Ausgangsdaten. Für Sicherung oder Gerätewechsel können sie als JSON exportiert und wieder importiert werden. Exportdateien können personenbezogene Daten enthalten und sind entsprechend privat zu behandeln. Details stehen in `docs/PRIVACY.md`.
+Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie überschreiben weder die Scanquelle noch die im Repository erfassten Ausgangsdaten. Für Sicherung oder Gerätewechsel können Personen- und Partnerkorrekturen gemeinsam als JSON exportiert und wieder importiert werden. Exportdateien können personenbezogene Daten enthalten und sind entsprechend privat zu behandeln. Details stehen in `docs/PRIVACY.md`.
 
 ## Datenqualität
 
@@ -71,10 +72,10 @@ Der Verwandtschafts-Finder unterscheidet zwischen Blutsverwandtschaft und Verbin
 
 ## Nächste Schritte
 
-1. strukturierte Bearbeitung von Partnerdaten und zusätzlichen Beziehungen
-2. fachliche Verifikation schwer lesbarer Scanstellen
-3. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
-4. privates/authentifiziertes Deployment mit installierbarer PWA
+1. fachliche Verifikation schwer lesbarer Scanstellen
+2. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
+3. privates/authentifiziertes Deployment mit installierbarer PWA
+4. zusätzliche Familienquellen für bisher unbekannte Partnerlinien
 5. später optional Fotos und Dokumente pro Person
 
 ## Branch
