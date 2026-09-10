@@ -3,6 +3,7 @@ import { people } from './data'
 import { useEdits } from './EditContext'
 import { buildFamilyMembers, relationLabel } from './familyGraph'
 import type { FamilyMember } from './familyGraph'
+import { searchFamilyMembers } from './memberSearch'
 import { usePrivacy } from './PrivacyContext'
 import { isPotentiallyLivingRecord, isProtectedPerson } from './privacy'
 
@@ -22,11 +23,11 @@ function formatDate(value?: string) {
 export default function MobileSearchSheet({
   open,
   onClose,
-  onSelect,
+  onSelectMember,
 }: {
   open: boolean
   onClose: () => void
-  onSelect: (id: string) => void
+  onSelectMember: (member: FamilyMember) => void
 }) {
   const { mode } = usePrivacy()
   const {
@@ -65,21 +66,10 @@ export default function MobileSearchSheet({
     return person ? isProtectedPerson(person, mode, getLifeStatus(member.id)) : true
   }
 
-  const results = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase('de-CH')
-    if (!normalized) return []
-
-    return members
-      .filter((member) => {
-        const protectedMember = memberProtected(member)
-        const searchText = [
-          member.name,
-          ...(protectedMember ? [] : [member.birth, member.birthPlace, member.death, member.deathPlace]),
-        ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
-        return searchText.includes(normalized)
-      })
-      .slice(0, 28)
-  }, [getLifeStatus, getPartnerLifeStatus, getPerson, members, mode, query])
+  const results = useMemo(
+    () => searchFamilyMembers(members, query, memberProtected, 28),
+    [getLifeStatus, getPartnerLifeStatus, getPerson, members, mode, query],
+  )
 
   const close = () => {
     setQuery('')
@@ -87,10 +77,8 @@ export default function MobileSearchSheet({
   }
 
   const choose = (member: FamilyMember) => {
-    const destination = member.kind === 'partner' ? member.linkedPersonId : member.id
-    if (!destination) return
     close()
-    onSelect(destination)
+    onSelectMember(member)
   }
 
   return (
@@ -159,7 +147,7 @@ export default function MobileSearchSheet({
                   {protectedMember ? 'Lebensdaten geschützt' : member.birth ? formatDate(member.birth) : 'Geburtsdatum offen'}
                   {!protectedMember && member.birthPlace ? ` · ${member.birthPlace}` : ''}
                 </span>
-                {member.kind === 'partner' && <span className="member-kind-tag">Partnerperson · öffnet Familienfokus</span>}
+                {member.kind === 'partner' && <span className="member-kind-tag">Partnerperson · Details öffnen</span>}
               </span>
               <span className="mobile-search-result-arrow" aria-hidden="true">→</span>
             </button>
