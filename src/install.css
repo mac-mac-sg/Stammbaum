@@ -1,0 +1,63 @@
+.install-card {
+  min-height: 88px;
+  padding: 14px 15px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--surface-strong);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.install-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.install-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.install-copy strong {
+  font-size: 13px;
+}
+
+.install-copy small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.install-card > button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--accent-strong);
+  border-radius: 11px;
+  background: var(--accent-strong);
+  color: white;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+@media (max-width: 820px) {
+  .install-card {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 13px;
+  }
+
+  .install-card > button {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 46px;
+  }
+}
