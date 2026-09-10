@@ -12,10 +12,9 @@ Die App wird smartphone-first weiterentwickelt. Die Desktop-Ansicht bleibt erhal
 - Verschieben erfolgt per Drag, Zoomen per Pinch-Geste oder über die drei Zoom-Schaltflächen.
 - Auf sehr kleinen Displays wird die kompakte Suchleiste ausgeblendet; «Suchen» in der Bottom Navigation öffnet stattdessen eine Vollbildsuche.
 - Die mobile Vollbildsuche verwendet 16px Schriftgrösse, grosse Trefferflächen und springt direkt in den Familienfokus der ausgewählten Person.
-- Die Generationstiefe 3 bis 5 ist in der Gesamtansicht direkt neben der Suche erreichbar; Generation 2 bleibt auf grösseren Displays verfügbar.
 - Unten befindet sich eine dauerhaft erreichbare Navigation für Ansichtswechsel, «Suchen» und «Person».
-- Die aktuell gewählte Person wird in der Gesamtansicht als kompakter Chip angezeigt.
 - Personendetails öffnen auf kleinen Displays als Bottom Sheet und blockieren nicht dauerhaft die Baumansicht.
+- Der Editiermodus öffnet auf Smartphones als eigene Vollbildansicht mit grossen Eingabefeldern und fixierter Speicheraktion.
 - Interaktive Elemente haben für Touch-Bedienung vergrösserte Trefferflächen.
 - `env(safe-area-inset-*)` berücksichtigt Geräte mit Notch, Dynamic Island oder Gestenleiste.
 - `100dvh` statt statischem `100vh` vermeidet Höhenprobleme mit ein- und ausgeblendeter Browser-Chrome.
@@ -36,28 +35,32 @@ Die Berechnung nutzt nur die erfassten Eltern-Kind-Kanten. Ehe- und Lebenspartne
 
 Der **Schutzmodus** ist beim ersten Öffnen standardmässig aktiv und bleibt danach lokal im Browser gespeichert. Er kann über die Schaltfläche in der Kopfzeile jederzeit in die private Vollansicht umgeschaltet werden.
 
-Als potenziell lebend gilt technisch ein Datensatz ohne erfasstes Sterbedatum, dessen Geburtsjahr höchstens 120 Jahre zurückliegt. Fehlt zusätzlich ein Geburtsdatum, wird der Datensatz vorsichtshalber ebenfalls geschützt. Diese Regel ist bewusst konservativ und ersetzt keine fachliche Kennzeichnung «lebend/verstorben» im Datenbestand.
+Für eine Person kann in der privaten Vollansicht neu ein expliziter Lebensstatus gesetzt werden: `living`, `deceased` oder `unknown`. Dieser Status hat Vorrang vor der Heuristik. Bei `unknown` gilt weiterhin die konservative 120-Jahre-Regel.
 
-Im Schutzmodus werden für potenziell lebende Personen:
+Im Schutzmodus werden für geschützte Personen Geburts- und Sterbedaten, Orte sowie Zusatznotizen ausgeblendet. Datum und Ort werden dort auch nicht als Suchkriterien verwendet. Namen und genealogische Beziehungen bleiben sichtbar, damit Stammbaum und Verwandtschafts-Finder weiterhin funktionieren.
 
-- Geburts- und Sterbedaten sowie Orte ausgeblendet,
-- Zusatznotizen ausgeblendet,
-- Lebensdaten auf Baum- und Fokuskarten durch «Lebensdaten geschützt» ersetzt,
-- Datum und Ort nicht als Suchkriterien verwendet,
-- entsprechende Lebensdaten von dokumentierten Partnern ebenfalls verborgen.
+## Lokaler Editiermodus
 
-Namen und genealogische Beziehungen bleiben sichtbar, damit der Stammbaum und der Verwandtschafts-Finder weiterhin funktionieren.
+Der Editiermodus ist bewusst nicht-destruktiv. Er ist nur in der privaten Vollansicht verfügbar und erlaubt aktuell die Pflege von:
+
+- Lebensstatus
+- Geburtsdatum und Geburtsort
+- Sterbedatum und Sterbeort
+- Zusatznotiz bzw. Korrekturhinweis
+
+Die Änderung wird lokal auf dem Gerät gespeichert und sofort in Baum, Fokus, Suche und Datenschutzlogik verwendet. Die Ausgangsdaten aus den Scans bleiben unverändert. Eine lokale Korrektur ist visuell markiert und kann pro Person wieder vollständig verworfen werden.
 
 ## Web-App-Verhalten
 
-`manifest.webmanifest`, Theme-Color und Standalone-Metadaten sind vorbereitet. Damit kann die App nach einem späteren HTTPS-Deployment app-ähnlich vom Homescreen genutzt werden. Offline-Caching wird bewusst erst zusammen mit dem Deployment ergänzt, damit keine veralteten genealogischen Daten im Browser-Cache festhängen.
+`manifest.webmanifest`, Theme-Color, Standalone-Metadaten und ein kontrollierter Service Worker sind vorbereitet. Damit kann die App nach einem HTTPS-Deployment app-ähnlich vom Homescreen genutzt werden. Die genealogischen Ausgangsdaten bleiben versioniert im Repository; lokale Korrekturen werden separat im Browser gehalten.
 
 ## Nächste mobile Ausbaustufen
 
-1. fachliche Kennzeichnung des Lebensstatus statt ausschliesslicher Heuristik
-2. echte Installierbarkeit inklusive kontrolliertem Service-Worker nach Festlegung des Deployments
-3. optionaler Editiermodus für Ergänzungen und Korrekturen
+1. Export/Import und Freigabe lokaler Korrekturen
+2. strukturierte Pflege von Partnern und zusätzlichen Beziehungen
+3. privates/authentifiziertes Deployment
+4. später optional Fotos und Dokumente pro Person
 
-## Umgesetzt am 9. September 2026
+## Umgesetzt am 10. September 2026
 
-Familienfokus, Verwandtschafts-Finder, Schutzmodus und mobile Vollbildsuche sind im Branch `initial-app` umgesetzt. Der vollständige Stammbaum bleibt als alternative Gesamtansicht erhalten.
+Familienfokus, Verwandtschafts-Finder, Schutzmodus, mobile Vollbildsuche, expliziter Lebensstatus und lokaler Editiermodus sind im Branch `initial-app` umgesetzt. Der vollständige Stammbaum bleibt als alternative Gesamtansicht erhalten.
