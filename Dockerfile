@@ -20,5 +20,5 @@ COPY --from=build /app/dist /srv
 
 RUN chmod +x /usr/local/bin/stammbaum-entrypoint
 
-EXPOSE 8080
+EXPOSE 80 443 8080
 ENTRYPOINT ["/usr/local/bin/stammbaum-entrypoint"]
