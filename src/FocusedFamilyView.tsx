@@ -158,12 +158,8 @@ export default function FocusedFamilyView({
             <span>Im Fokus</span>
             <small>Generation {person.generation}</small>
           </div>
-          <CompactPerson person={person} selected label="Ausgewählte Person" onSelect={() => onOpenDetails()} />
-          <div className="focus-actions">
-            <button type="button" className="focus-details-button" onClick={onOpenDetails}>
-              Personendetails
-              <span aria-hidden="true">→</span>
-            </button>
+          <CompactPerson person={person} selected label="Antippen für Details" onSelect={() => onOpenDetails()} />
+          <div className="focus-actions single-action">
             <button type="button" className="focus-relationship-button" onClick={() => setRelationshipOpen(true)}>
               Verwandtschaft finden
               <span aria-hidden="true">↔</span>
