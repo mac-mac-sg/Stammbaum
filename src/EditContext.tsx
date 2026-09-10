@@ -14,6 +14,11 @@ export interface PersonEdit {
   updatedAt: string
 }
 
+export interface ImportEditsResult {
+  imported: number
+  skipped: number
+}
+
 interface EditContextValue {
   edits: Record<string, PersonEdit>
   getPerson: (id: string) => Person | undefined
@@ -22,11 +27,42 @@ interface EditContextValue {
   hasEdit: (id: string) => boolean
   saveEdit: (id: string, edit: Omit<PersonEdit, 'updatedAt'>) => void
   resetEdit: (id: string) => void
+  importEdits: (value: unknown) => ImportEditsResult
+  clearAllEdits: () => void
   editedCount: number
 }
 
 const STORAGE_KEY = 'stammbaum-person-edits-v1'
 const EditContext = createContext<EditContextValue | null>(null)
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function sanitizeEdit(value: unknown): PersonEdit | null {
+  if (!isObject(value)) return null
+
+  const lifeStatus = value.lifeStatus
+  if (
+    lifeStatus !== undefined &&
+    lifeStatus !== 'unknown' &&
+    lifeStatus !== 'living' &&
+    lifeStatus !== 'deceased'
+  ) return null
+
+  const result: PersonEdit = {
+    updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString(),
+  }
+
+  for (const field of ['birth', 'birthPlace', 'death', 'deathPlace', 'notes'] as const) {
+    const fieldValue = value[field]
+    if (fieldValue !== undefined && typeof fieldValue !== 'string') return null
+    if (typeof fieldValue === 'string') result[field] = fieldValue
+  }
+
+  if (lifeStatus) result.lifeStatus = lifeStatus
+  return result
+}
 
 function readStoredEdits(): Record<string, PersonEdit> {
   if (typeof window === 'undefined') return {}
@@ -34,7 +70,15 @@ function readStoredEdits(): Record<string, PersonEdit> {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return {}
     const parsed = JSON.parse(raw)
-    return parsed && typeof parsed === 'object' ? parsed : {}
+    if (!isObject(parsed)) return {}
+
+    const safe: Record<string, PersonEdit> = {}
+    for (const [id, value] of Object.entries(parsed)) {
+      if (!peopleById[id]) continue
+      const edit = sanitizeEdit(value)
+      if (edit) safe[id] = edit
+    }
+    return safe
   } catch {
     return {}
   }
@@ -85,6 +129,32 @@ export function EditProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const importEdits = useCallback((value: unknown): ImportEditsResult => {
+    const container = isObject(value) && isObject(value.edits) ? value.edits : value
+    if (!isObject(container)) return { imported: 0, skipped: 1 }
+
+    const imported: Record<string, PersonEdit> = {}
+    let skipped = 0
+
+    for (const [id, rawEdit] of Object.entries(container)) {
+      if (!peopleById[id]) {
+        skipped += 1
+        continue
+      }
+      const edit = sanitizeEdit(rawEdit)
+      if (!edit) {
+        skipped += 1
+        continue
+      }
+      imported[id] = edit
+    }
+
+    setEdits((current) => ({ ...current, ...imported }))
+    return { imported: Object.keys(imported).length, skipped }
+  }, [])
+
+  const clearAllEdits = useCallback(() => setEdits({}), [])
+
   const value = useMemo<EditContextValue>(() => ({
     edits,
     getPerson,
@@ -93,8 +163,10 @@ export function EditProvider({ children }: { children: ReactNode }) {
     hasEdit,
     saveEdit,
     resetEdit,
+    importEdits,
+    clearAllEdits,
     editedCount: Object.keys(edits).length,
-  }), [edits, getEdit, getLifeStatus, getPerson, hasEdit, resetEdit, saveEdit])
+  }), [clearAllEdits, edits, getEdit, getLifeStatus, getPerson, hasEdit, importEdits, resetEdit, saveEdit])
 
   return <EditContext.Provider value={value}>{children}</EditContext.Provider>
 }
