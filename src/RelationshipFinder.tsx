@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
+import { useEdits } from './EditContext'
 import { usePrivacy } from './PrivacyContext'
 import { isProtectedPerson, protectedSearchParts } from './privacy'
 import { people } from './data'
 import { getRelationship } from './relationship'
 import type { Person } from './types'
-import type { PrivacyMode } from './privacy'
+import type { LifeStatus, PrivacyMode } from './privacy'
 
-function searchable(person: Person, privacyMode: PrivacyMode) {
+function searchable(person: Person, privacyMode: PrivacyMode, lifeStatus: LifeStatus) {
   return [
     person.name,
-    ...protectedSearchParts(person, privacyMode),
+    ...protectedSearchParts(person, privacyMode, lifeStatus),
   ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
 }
 
@@ -25,19 +26,27 @@ export default function RelationshipFinder({
   onNavigate: (id: string) => void
 }) {
   const { mode } = usePrivacy()
+  const { getLifeStatus, getPerson } = useEdits()
   const [query, setQuery] = useState('')
   const [targetId, setTargetId] = useState<string | null>(null)
 
-  const target = targetId ? people.find((candidate) => candidate.id === targetId) : undefined
+  const effectivePeople = useMemo(
+    () => people.map((candidate) => getPerson(candidate.id) ?? candidate),
+    [getPerson],
+  )
+  const target = targetId ? getPerson(targetId) : undefined
   const result = target ? getRelationship(person, target) : null
 
   const matches = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('de-CH')
     if (!normalized) return []
-    return people
-      .filter((candidate) => candidate.id !== person.id && searchable(candidate, mode).includes(normalized))
+    return effectivePeople
+      .filter((candidate) => (
+        candidate.id !== person.id &&
+        searchable(candidate, mode, getLifeStatus(candidate.id)).includes(normalized)
+      ))
       .slice(0, 8)
-  }, [mode, person.id, query])
+  }, [effectivePeople, getLifeStatus, mode, person.id, query])
 
   const chooseTarget = (candidate: Person) => {
     setTargetId(candidate.id)
@@ -91,7 +100,7 @@ export default function RelationshipFinder({
                     <strong>{candidate.name}</strong>
                     <span>
                       #{candidate.number} · Generation {candidate.generation}
-                      {isProtectedPerson(candidate, mode) ? ' · geschützt' : ''}
+                      {isProtectedPerson(candidate, mode, getLifeStatus(candidate.id)) ? ' · geschützt' : ''}
                     </span>
                   </button>
                 )) : <p>Keine passende Person gefunden.</p>}
@@ -150,7 +159,7 @@ export default function RelationshipFinder({
         )}
 
         <p className="relationship-note">
-          Berechnet werden nur die strukturierten Abstammungsverbindungen aus den vorhandenen Familienunterlagen. Ehe- und Lebenspartner sind aktuell nicht als eigenständige Personen im Beziehungsgraphen verknüpft. Im Schutzmodus werden Lebensdaten potenziell lebender Personen nicht für die Suche verwendet.
+          Berechnet werden nur die strukturierten Abstammungsverbindungen aus den vorhandenen Familienunterlagen. Ehe- und Lebenspartner sind aktuell nicht als eigenständige Personen im Beziehungsgraphen verknüpft. Im Schutzmodus werden Lebensdaten geschützter Personen nicht für die Suche verwendet.
         </p>
       </aside>
     </>
