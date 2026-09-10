@@ -1,0 +1,291 @@
+.edit-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 115;
+  border: 0;
+  background: rgba(25, 28, 24, .24);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+
+.edit-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.edit-sheet {
+  position: fixed;
+  z-index: 120;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  padding: 24px 22px 30px;
+  border-left: 1px solid var(--line);
+  background: var(--surface-strong);
+  box-shadow: -18px 0 50px rgba(30, 32, 28, .16);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(calc(100% + 24px));
+  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+  visibility: hidden;
+}
+
+.edit-sheet.is-open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.edit-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.edit-header h2 {
+  margin: 5px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.08;
+}
+
+.edit-notice {
+  margin: 18px 0;
+  padding: 12px 13px;
+  border: 1px solid #d9ddd5;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.edit-form {
+  display: grid;
+  gap: 18px;
+}
+
+.edit-form fieldset {
+  margin: 0;
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid #ebe9e2;
+  display: grid;
+  gap: 12px;
+}
+
+.edit-form legend {
+  margin-bottom: 11px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.edit-form label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.edit-form input[type="text"],
+.edit-form input:not([type]),
+.edit-form textarea,
+.edit-form label > input:not([type="radio"]) {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.edit-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.edit-form input:focus,
+.edit-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(82, 106, 85, .1);
+}
+
+.status-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.status-options label {
+  min-height: 54px;
+  padding: 9px 8px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.status-options label.is-selected {
+  border-color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+.status-options input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.status-options strong {
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.edit-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.edit-error {
+  padding: 11px 12px;
+  border: 1px solid #dfb6a3;
+  border-radius: 10px;
+  background: #f7ece7;
+  color: #784633;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.edit-actions button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.edit-reset {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+
+.edit-save {
+  border: 1px solid var(--accent-strong);
+  background: var(--accent-strong);
+  color: white;
+}
+
+.edit-button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.edit-button:hover { background: var(--accent-soft); }
+
+.local-edit-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 7px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #f3eee2;
+  color: #6f5b35;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.detail-topbar-actions {
+  display: flex;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 820px) {
+  .edit-sheet {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    padding: max(14px, env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+    border: 0;
+    border-radius: 0;
+    transform: translateY(100%);
+  }
+
+  .edit-sheet.is-open {
+    transform: translateY(0);
+  }
+
+  .edit-sheet .sheet-handle {
+    display: none;
+  }
+
+  .edit-header h2 {
+    font-size: 24px;
+  }
+
+  .edit-form input,
+  .edit-form textarea {
+    font-size: 16px;
+  }
+
+  .status-options {
+    grid-template-columns: 1fr;
+  }
+
+  .status-options label {
+    min-height: 48px;
+    justify-content: flex-start;
+    padding: 0 12px;
+  }
+
+  .status-options strong {
+    font-size: 12px;
+  }
+
+  .edit-actions {
+    position: sticky;
+    bottom: 0;
+    margin: 0 -16px calc(-20px - env(safe-area-inset-bottom));
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line);
+    flex-direction: column-reverse;
+  }
+
+  .edit-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+}
