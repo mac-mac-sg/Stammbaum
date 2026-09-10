@@ -1,6 +1,6 @@
 # PWA und Offline-Nutzung
 
-Die App ist für eine spätere Installation auf Smartphones als Progressive Web App vorbereitet.
+Die App ist für die Installation auf Smartphones als Progressive Web App vorbereitet und wird über GitHub Pages unter dem Projektpfad `/Stammbaum/` ausgeliefert.
 
 ## Bereits umgesetzt
 
@@ -12,21 +12,23 @@ Die App ist für eine spätere Installation auf Smartphones als Progressive Web 
 - Network-first für Navigationen mit Offline-Fallback
 - Cache-first mit Hintergrundaktualisierung für bereits geladene statische Ressourcen
 - ausschliesslich Same-Origin-Caching
+- Pages-kompatibler Vite-Basispfad `/Stammbaum/`
 
-## Datenschutz
+## Öffentliche Bereitstellung
 
-Der Service Worker speichert lokal auf dem Gerät Ressourcen, die für die Offline-Nutzung benötigt werden. Da die genealogischen Daten derzeit Teil des ausgelieferten Frontend-Bundles sind, können diese bei installierter bzw. offline genutzter App im Browser-Cache des Geräts liegen.
+Die App wird bewusst öffentlich über GitHub Pages bereitgestellt. Der Schutzmodus reduziert die sichtbaren Angaben in der Bedienoberfläche, ist aber **keine Zugriffskontrolle**. Da die genealogischen Ausgangsdaten Teil des ausgelieferten Frontend-Bundles sind, können sie technisch von einem Besucher der öffentlichen Website abgerufen werden.
 
-Deshalb gilt für ein späteres Deployment:
+Lokale Korrekturen, Favoriten und Verlauf werden dagegen nur im Browser des jeweiligen Geräts gespeichert und nicht automatisch an GitHub Pages übertragen.
 
-1. Die Anwendung sollte nur über einen privaten bzw. authentifizierten Zugang bereitgestellt werden.
-2. Auf gemeinsam genutzten Geräten sollte die App nicht dauerhaft installiert werden.
-3. Browser-/Website-Daten müssen gelöscht werden, wenn lokale Offline-Daten entfernt werden sollen.
-4. Der Schutzmodus reduziert die sichtbaren Angaben, ersetzt aber keine Zugriffskontrolle auf das ausgelieferte Datenpaket.
+## Offline-Daten auf dem Gerät
+
+Der Service Worker speichert Ressourcen lokal, die für die Offline-Nutzung benötigt werden. Damit können auch Teile des öffentlich ausgelieferten genealogischen Datenbestands im Browser-Cache des Geräts verbleiben.
+
+Bei einem Gerätewechsel oder wenn lokale Daten entfernt werden sollen, müssen die Website-/App-Daten des Browsers gelöscht werden. JSON-Korrekturexporte können zusätzliche personenbezogene Daten enthalten und sollten nicht unbeabsichtigt veröffentlicht werden.
 
 ## Deployment-Voraussetzung
 
-Service Worker benötigen ausser auf `localhost` eine HTTPS-Verbindung. Die App registriert den Worker deshalb erst nach einem echten sicheren Deployment. In der lokalen Vite-Entwicklung wird kein Service Worker registriert, um veraltete Entwicklungsdateien im Cache zu vermeiden.
+GitHub Pages liefert die Anwendung automatisch per HTTPS aus. Dadurch stehen Service Worker und PWA-Funktionen auf der produktiven Pages-URL zur Verfügung. In der lokalen Vite-Entwicklung wird kein Service Worker registriert, damit keine veralteten Entwicklungsdateien im Cache verbleiben.
 
 ## Cache-Strategie
 
