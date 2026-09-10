@@ -65,7 +65,7 @@ Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie
 
 ## Datenqualität
 
-Unklare oder unvollständige Angaben aus den Scans werden nicht geraten. Sie sind in `docs/DATA_QUALITY.md` dokumentiert. Das Smartphone-Bedienkonzept ist in `docs/MOBILE_UX.md` beschrieben.
+Unklare oder unvollständige Angaben aus den Scans werden nicht geraten. Sie sind in `docs/DATA_QUALITY.md` dokumentiert. Das Smartphone-Bedienkonzept ist in `docs/MOBILE_UX.md` beschrieben; die Normalisierung von Partnerdaten in `docs/PARTNER_GRAPH.md`.
 
 Der Verwandtschafts-Finder unterscheidet zwischen Blutsverwandtschaft und Verbindungen über Ehe/Partnerschaft. Bei Partnerpersonen wird nur die belegte Paarverbindung in den Graph aufgenommen. Eine Abstammung auf der Partnerseite wird erst ergänzt, wenn dafür eine Quelle vorhanden ist.
 
