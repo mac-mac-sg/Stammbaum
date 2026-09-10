@@ -5,6 +5,10 @@ export type LifeStatus = 'living' | 'deceased' | 'unknown'
 
 const MAX_PLAUSIBLE_AGE = 120
 
+type LivingRecord = Pick<Person | Partner, 'birth' | 'death'> & {
+  lifeStatus?: LifeStatus
+}
+
 function extractYear(value?: string) {
   if (!value) return undefined
   const match = value.match(/^(\d{4})/)
@@ -12,8 +16,8 @@ function extractYear(value?: string) {
 }
 
 export function isPotentiallyLivingRecord(
-  record: Pick<Person | Partner, 'birth' | 'death'>,
-  explicitStatus: LifeStatus = 'unknown',
+  record: LivingRecord,
+  explicitStatus: LifeStatus = record.lifeStatus ?? 'unknown',
 ) {
   if (explicitStatus === 'living') return true
   if (explicitStatus === 'deceased') return false
