@@ -5,6 +5,7 @@ import FocusedFamilyView from './FocusedFamilyView'
 import HomeView from './HomeView'
 import MobileSearchSheet from './MobileSearchSheet'
 import PartnerPersonSheet from './PartnerPersonSheet'
+import SettingsMenu from './SettingsMenu'
 import { useEdits } from './EditContext'
 import { useFamilyNavigation } from './FamilyNavigationContext'
 import { buildFamilyMembers, partnerMemberId, partnerMembersForPerson, relationLabel } from './familyGraph'
@@ -408,6 +409,7 @@ export default function App() {
   const [editOpen, setEditOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [selectedTreePartner, setSelectedTreePartner] = useState<FamilyMember | undefined>()
+  const [treeOverview, setTreeOverview] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches ? 'home' : 'tree',
   )
@@ -443,8 +445,8 @@ export default function App() {
 
   const focusPerson = (id: string, scale = 0.86) => {
     window.setTimeout(() => {
-      zoomRef.current?.zoomToElement?.(`person-${id}`, scale, 450)
-    }, 100)
+      zoomRef.current?.zoomToElement?.(`person-${id}`, scale, 240)
+    }, 30)
   }
 
   const navigatePerson = (
@@ -453,6 +455,7 @@ export default function App() {
   ) => {
     const person = getPerson(id)
     if (!person) return
+    setTreeOverview(false)
     recordVisit(id)
     setSelectedId(id)
     setDetailOpen(Boolean(options.details))
@@ -465,12 +468,24 @@ export default function App() {
   }
 
   const switchView = (mode: ViewMode) => {
+    setTreeOverview(false)
     setDetailOpen(false)
     setEditOpen(false)
     setMobileSearchOpen(false)
     setSelectedTreePartner(undefined)
     setViewMode(mode)
     if (mode === 'tree') focusPerson(selectedPerson.id, 0.72)
+  }
+
+  const openWholeTree = () => {
+    setDetailOpen(false)
+    setEditOpen(false)
+    setMobileSearchOpen(false)
+    setSelectedTreePartner(undefined)
+    setQuery('')
+    setDepthLimit(5)
+    setTreeOverview(true)
+    setViewMode('tree')
   }
 
   const openSearch = () => {
@@ -489,6 +504,7 @@ export default function App() {
 
   const openTreePartner = (member: FamilyMember) => {
     const effectiveMember = getPartnerMember(member.id) ?? member
+    setTreeOverview(false)
     recordVisit(effectiveMember.id)
     setDetailOpen(false)
     setEditOpen(false)
@@ -532,6 +548,7 @@ export default function App() {
             <div><strong>5</strong><span>Generationen</span></div>
             <div><strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong><span>Partner</span></div>
           </div>
+          <SettingsMenu />
         </div>
       </header>
 
@@ -614,10 +631,10 @@ export default function App() {
           <div className={`canvas-frame${viewMode === 'focus' ? ' is-focus' : ''}${viewMode === 'home' ? ' is-home' : ''}`}>
             {viewMode === 'home' ? (
               <HomeView
-                selectedPerson={selectedPerson}
                 onOpenPerson={openHomePerson}
                 onOpenPartner={openHomePartner}
                 onOpenSearch={openSearch}
+                onOpenTree={openWholeTree}
               />
             ) : viewMode === 'focus' ? (
               <FocusedFamilyView
@@ -649,8 +666,8 @@ export default function App() {
                           <TreeNode
                             personId={rootId}
                             depthLimit={depthLimit}
-                            selectedId={selectedId}
-                            pathIds={pathIds}
+                            selectedId={treeOverview ? '' : selectedId}
+                            pathIds={treeOverview ? new Set<string>() : pathIds}
                             onSelect={(id) => navigatePerson(id, { details: true })}
                             onPartnerSelect={openTreePartner}
                           />
@@ -662,7 +679,7 @@ export default function App() {
               </TransformWrapper>
             )}
 
-            {viewMode === 'tree' && (
+            {viewMode === 'tree' && !treeOverview && (
               <button
                 type="button"
                 className="selected-chip"
@@ -678,7 +695,9 @@ export default function App() {
               <div className="canvas-help">
                 {viewMode === 'focus'
                   ? 'Verwandte antippen, um den Familienfokus zu verschieben'
-                  : 'Ziehen · Pinch zum Zoomen · Person oder Partner antippen für Details'}
+                  : treeOverview
+                    ? 'Gesamtbaum · Person oder Partner antippen für Details'
+                    : 'Ziehen · Pinch zum Zoomen · Person oder Partner antippen für Details'}
               </div>
             )}
           </div>
@@ -736,9 +755,9 @@ export default function App() {
           <span aria-hidden="true">⌕</span>
           <small>Suche</small>
         </button>
-        <button type="button" className={(viewMode === 'focus' || viewMode === 'tree') && !mobileSearchOpen ? 'active' : ''} onClick={() => switchView('focus')}>
+        <button type="button" className={(viewMode === 'focus' || viewMode === 'tree') && !mobileSearchOpen ? 'active' : ''} onClick={openWholeTree}>
           <span aria-hidden="true">◎</span>
-          <small>Familie</small>
+          <small>Stammbaum</small>
         </button>
       </nav>
 

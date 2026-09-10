@@ -6,7 +6,6 @@ import { familyMembersById, relationLabel } from './familyGraph'
 import type { FamilyMember } from './familyGraph'
 import { usePrivacy } from './PrivacyContext'
 import { isPotentiallyLivingRecord, isProtectedPerson } from './privacy'
-import type { Person } from './types'
 
 const monthNames = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -22,15 +21,15 @@ function formatDate(value?: string) {
 }
 
 export default function HomeView({
-  selectedPerson,
   onOpenPerson,
   onOpenPartner,
   onOpenSearch,
+  onOpenTree,
 }: {
-  selectedPerson: Person
   onOpenPerson: (id: string) => void
   onOpenPartner: (member: FamilyMember) => void
   onOpenSearch: () => void
+  onOpenTree: () => void
 }) {
   const { mode } = usePrivacy()
   const {
@@ -78,7 +77,10 @@ export default function HomeView({
     [getPartnerMember, getPerson, recentIds],
   )
 
-  const protectedSelected = isProtectedPerson(selectedPerson, mode, getLifeStatus(selectedPerson.id))
+  const partnerCount = useMemo(
+    () => people.reduce((sum, person) => sum + person.partners.length, 0),
+    [],
+  )
 
   const memberProtected = (member: FamilyMember) => {
     if (mode !== 'protected') return false
@@ -128,32 +130,41 @@ export default function HomeView({
 
   return (
     <div className="home-view" aria-label="Startseite">
-      <div className="home-intro">
-        <span className="eyebrow">Familienarchiv</span>
-        <h2>Familie entdecken</h2>
-        <p>Suche eine Person oder setze dort fort, wo du zuletzt warst.</p>
-      </div>
+      <section className="home-discovery">
+        <div className="home-discovery-copy">
+          <span className="eyebrow">Familienarchiv</span>
+          <h2>Stammbaum entdecken</h2>
+          <p>Erkunde die Familie als Ganzes. Bewege dich frei durch fünf Generationen und öffne Personen erst dort, wo sie dich interessieren.</p>
+
+          <button type="button" className="home-tree-action" onClick={onOpenTree}>
+            <span>
+              <strong>Gesamtbaum öffnen</strong>
+              <small>Alle erfassten Familienzweige auf einen Blick</small>
+            </span>
+            <b aria-hidden="true">→</b>
+          </button>
+        </div>
+
+        <div className="home-discovery-visual" aria-hidden="true">
+          <div className="home-tree-level home-tree-level-1"><i /></div>
+          <div className="home-tree-stem" />
+          <div className="home-tree-level home-tree-level-2"><i /><i /><i /></div>
+          <div className="home-tree-stem is-wide" />
+          <div className="home-tree-level home-tree-level-3"><i /><i /><i /><i /><i /></div>
+        </div>
+
+        <div className="home-discovery-stats" aria-label="Umfang des Stammbaums">
+          <span><strong>{people.length}</strong><small>Personen</small></span>
+          <span><strong>5</strong><small>Generationen</small></span>
+          <span><strong>{partnerCount}</strong><small>Partner</small></span>
+        </div>
+      </section>
 
       <button type="button" className="home-search" onClick={onOpenSearch}>
         <span aria-hidden="true">⌕</span>
-        <span><strong>Person suchen</strong><small>{people.length} nummerierte Personen plus erfasste Partner</small></span>
+        <span><strong>Gezielt eine Person suchen</strong><small>Name suchen und direkt in den Familienkontext springen</small></span>
         <b aria-hidden="true">→</b>
       </button>
-
-      <section className="home-current home-current-simple">
-        <span>Weiter bei</span>
-        <strong>{selectedPerson.name}</strong>
-        <small className={protectedSelected ? 'protected-value' : undefined}>
-          {protectedSelected
-            ? 'Lebensdaten geschützt'
-            : selectedPerson.birth
-              ? `* ${formatDate(selectedPerson.birth)}`
-              : `Generation ${selectedPerson.generation}`}
-        </small>
-        <button type="button" className="home-primary-action" onClick={() => onOpenPerson(selectedPerson.id)}>
-          Familie öffnen <span aria-hidden="true">→</span>
-        </button>
-      </section>
 
       <section className="home-section">
         <div className="home-section-heading">
