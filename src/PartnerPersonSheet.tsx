@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import EditPartnerSheet from './EditPartnerSheet'
 import { useEdits } from './EditContext'
+import { useFamilyNavigation } from './FamilyNavigationContext'
 import { usePrivacy } from './PrivacyContext'
 import { isPotentiallyLivingRecord, lifeStatusLabel } from './privacy'
 import { relationLabel } from './familyGraph'
@@ -39,14 +40,21 @@ export default function PartnerPersonSheet({
     getPartnerMember,
     hasPartnerEdit,
   } = useEdits()
+  const { isFavorite, recordVisit, toggleFavorite } = useFamilyNavigation()
   const [editOpen, setEditOpen] = useState(false)
 
-  if (!member || member.kind !== 'partner') return null
+  const effectiveMember = member?.kind === 'partner' ? getPartnerMember(member.id) ?? member : undefined
 
-  const effectiveMember = getPartnerMember(member.id) ?? member
+  useEffect(() => {
+    if (open && effectiveMember) recordVisit(effectiveMember.id)
+  }, [effectiveMember, open, recordVisit])
+
+  if (!effectiveMember || effectiveMember.kind !== 'partner') return null
+
   const lifeStatus = getPartnerLifeStatus(effectiveMember.id)
   const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(effectiveMember, lifeStatus)
   const locallyEdited = hasPartnerEdit(effectiveMember.id)
+  const favorite = isFavorite(effectiveMember.id)
 
   const close = () => {
     setEditOpen(false)
@@ -76,6 +84,13 @@ export default function PartnerPersonSheet({
             {locallyEdited && <span className="local-edit-badge">Lokal korrigiert</span>}
           </div>
           <div className="partner-person-actions">
+            <button
+              type="button"
+              className={`favorite-button${favorite ? ' is-active' : ''}`}
+              onClick={() => toggleFavorite(effectiveMember.id)}
+              aria-label={favorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+              title={favorite ? 'Favorit entfernen' : 'Als Favorit speichern'}
+            >{favorite ? '★' : '☆'}</button>
             {mode === 'private' && (
               <button type="button" className="edit-button" onClick={() => setEditOpen(true)}>Bearbeiten</button>
             )}
