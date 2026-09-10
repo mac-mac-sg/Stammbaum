@@ -3,9 +3,13 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import EditPersonSheet from './EditPersonSheet'
 import FocusedFamilyView from './FocusedFamilyView'
 import MobileSearchSheet from './MobileSearchSheet'
+import PartnerPersonSheet from './PartnerPersonSheet'
 import { useEdits } from './EditContext'
+import { partnerMembersForPerson, relationLabel } from './familyGraph'
+import type { FamilyMember } from './familyGraph'
 import { usePrivacy } from './PrivacyContext'
 import {
+  isPotentiallyLivingRecord,
   isProtectedPartner,
   isProtectedPerson,
   lifeStatusLabel,
@@ -74,7 +78,6 @@ function PersonCard({
 }) {
   const { mode } = usePrivacy()
   const { getLifeStatus, hasEdit } = useEdits()
-  const partner = person.partners[0]
   const lifeStatus = getLifeStatus(person.id)
   const protectedPerson = isProtectedPerson(person, mode, lifeStatus)
 
@@ -90,15 +93,37 @@ function PersonCard({
       <span className={`person-life${protectedPerson ? ' protected-value' : ''}`}>{lifeLabel(person, mode, lifeStatus)}</span>
       {protectedPerson && <span className="privacy-badge">Geschützt</span>}
       {hasEdit(person.id) && <span className="local-edit-badge">Lokal korrigiert</span>}
-      {partner && (
-        <span className="partner-line">
-          <span aria-hidden="true">∞</span>
-          <span>{partner.name}</span>
-        </span>
-      )}
-      {person.partners.length > 1 && (
-        <span className="partner-count">+ {person.partners.length - 1} weitere Beziehung</span>
-      )}
+    </button>
+  )
+}
+
+function TreePartnerCard({
+  member,
+  onOpen,
+}: {
+  member: FamilyMember
+  onOpen: (member: FamilyMember) => void
+}) {
+  const { mode } = usePrivacy()
+  const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(member)
+
+  return (
+    <button
+      type="button"
+      className="tree-partner-card"
+      onClick={() => onOpen(member)}
+      aria-label={`${member.name}, ${relationLabel(member)} – Details öffnen`}
+    >
+      <span className="tree-partner-type">{relationLabel(member)}</span>
+      <strong>{member.name}</strong>
+      <span className={`tree-partner-life${protectedMember ? ' protected-value' : ''}`}>
+        {protectedMember
+          ? 'Lebensdaten geschützt'
+          : member.birth
+            ? `* ${formatDate(member.birth)}`
+            : member.birthPlace ?? 'Lebensdaten offen'}
+      </span>
+      {protectedMember && <span className="privacy-badge">Geschützt</span>}
     </button>
   )
 }
@@ -109,12 +134,14 @@ function TreeNode({
   selectedId,
   pathIds,
   onSelect,
+  onPartnerSelect,
 }: {
   personId: string
   depthLimit: number
   selectedId: string
   pathIds: Set<string>
   onSelect: (id: string) => void
+  onPartnerSelect: (member: FamilyMember) => void
 }) {
   const { getPerson } = useEdits()
   const person = getPerson(personId)
@@ -124,15 +151,25 @@ function TreeNode({
     person.generation < depthLimit
       ? person.childIds.filter((childId) => peopleById[childId])
       : []
+  const partnerMembers = partnerMembersForPerson(person)
 
   return (
-    <li>
-      <PersonCard
-        person={person}
-        selected={person.id === selectedId}
-        onSelect={onSelect}
-        inPath={pathIds.has(person.id)}
-      />
+    <li className={partnerMembers.length > 0 ? 'tree-node-has-partners' : undefined}>
+      <div className={`tree-family-unit${partnerMembers.length > 0 ? ' has-partners' : ''}`}>
+        <PersonCard
+          person={person}
+          selected={person.id === selectedId}
+          onSelect={onSelect}
+          inPath={pathIds.has(person.id)}
+        />
+        {partnerMembers.length > 0 && (
+          <div className="tree-partner-group" aria-label={`Partnerinnen und Partner von ${person.name}`}>
+            {partnerMembers.map((partner) => (
+              <TreePartnerCard key={partner.id} member={partner} onOpen={onPartnerSelect} />
+            ))}
+          </div>
+        )}
+      </div>
       {visibleChildren.length > 0 && (
         <ul>
           {visibleChildren.map((childId) => (
@@ -143,6 +180,7 @@ function TreeNode({
               selectedId={selectedId}
               pathIds={pathIds}
               onSelect={onSelect}
+              onPartnerSelect={onPartnerSelect}
             />
           ))}
         </ul>
@@ -320,6 +358,7 @@ export default function App() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [selectedTreePartner, setSelectedTreePartner] = useState<FamilyMember | undefined>()
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches ? 'focus' : 'tree',
   )
@@ -357,6 +396,7 @@ export default function App() {
     setDetailOpen(Boolean(options.details))
     setEditOpen(false)
     setMobileSearchOpen(false)
+    setSelectedTreePartner(undefined)
     if (person.generation > depthLimit) setDepthLimit(person.generation)
     setQuery('')
     if (options.focusTree && viewMode === 'tree') focusPerson(id)
@@ -366,6 +406,7 @@ export default function App() {
     setDetailOpen(false)
     setEditOpen(false)
     setMobileSearchOpen(false)
+    setSelectedTreePartner(undefined)
     setViewMode(mode)
     if (mode === 'tree') focusPerson(selectedPerson.id, 0.72)
   }
@@ -373,6 +414,7 @@ export default function App() {
   const openSearch = () => {
     setDetailOpen(false)
     setEditOpen(false)
+    setSelectedTreePartner(undefined)
     if (typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches) {
       setMobileSearchOpen(true)
       return
@@ -385,7 +427,15 @@ export default function App() {
 
   const togglePrivacy = () => {
     setEditOpen(false)
+    setSelectedTreePartner(undefined)
     toggleMode()
+  }
+
+  const openTreePartner = (member: FamilyMember) => {
+    setDetailOpen(false)
+    setEditOpen(false)
+    setMobileSearchOpen(false)
+    setSelectedTreePartner(member)
   }
 
   return (
@@ -416,9 +466,9 @@ export default function App() {
           </button>
 
           <div className="header-stats" aria-label="Datenbestand">
-            <div><strong>{people.length}</strong><span>Personen</span></div>
+            <div><strong>{people.length}</strong><span>Nachkommen</span></div>
             <div><strong>5</strong><span>Generationen</span></div>
-            <div><strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong><span>Beziehungen</span></div>
+            <div><strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong><span>Partner</span></div>
           </div>
         </div>
       </header>
@@ -500,8 +550,8 @@ export default function App() {
             ) : (
               <TransformWrapper
                 ref={zoomRef}
-                initialScale={0.34}
-                minScale={0.16}
+                initialScale={0.30}
+                minScale={0.12}
                 maxScale={1.6}
                 centerOnInit
                 limitToBounds={false}
@@ -524,6 +574,7 @@ export default function App() {
                             selectedId={selectedId}
                             pathIds={pathIds}
                             onSelect={(id) => navigatePerson(id, { details: true })}
+                            onPartnerSelect={openTreePartner}
                           />
                         </ul>
                       </div>
@@ -548,7 +599,7 @@ export default function App() {
             <div className="canvas-help">
               {viewMode === 'focus'
                 ? 'Verwandte antippen, um den Familienfokus zu verschieben'
-                : 'Ziehen zum Verschieben · Pinch zum Zoomen · Person antippen für Details'}
+                : 'Ziehen · Pinch zum Zoomen · Nachkommen oder Partner antippen für Details'}
             </div>
           </div>
         </section>
@@ -579,6 +630,14 @@ export default function App() {
           setEditOpen(false)
           setDetailOpen(true)
         }}
+      />
+
+      <PartnerPersonSheet
+        member={selectedTreePartner}
+        linkedPerson={selectedTreePartner?.linkedPersonId ? getPerson(selectedTreePartner.linkedPersonId) : undefined}
+        open={Boolean(selectedTreePartner)}
+        onClose={() => setSelectedTreePartner(undefined)}
+        onNavigateLinked={(id) => navigatePerson(id, { focusTree: true, details: true })}
       />
 
       <MobileSearchSheet
