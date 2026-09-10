@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { people } from './data'
 import { useEdits } from './EditContext'
+import { buildFamilyMembers, relationLabel } from './familyGraph'
+import type { FamilyMember } from './familyGraph'
 import { usePrivacy } from './PrivacyContext'
-import { isProtectedPartner, isProtectedPerson, protectedSearchParts } from './privacy'
+import { isPotentiallyLivingRecord, isProtectedPerson } from './privacy'
 import type { Person } from './types'
 
 const monthNames = [
@@ -41,35 +43,41 @@ export default function MobileSearchSheet({
     () => people.map((person) => getPerson(person.id) ?? person),
     [getPerson],
   )
+  const members = useMemo(() => buildFamilyMembers(effectivePeople), [effectivePeople])
+
+  const memberProtected = (member: FamilyMember) => {
+    if (mode !== 'protected') return false
+    if (member.kind === 'partner') return isPotentiallyLivingRecord(member)
+    const person = getPerson(member.id)
+    return person ? isProtectedPerson(person, mode, getLifeStatus(member.id)) : true
+  }
 
   const results = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('de-CH')
     if (!normalized) return []
 
-    return effectivePeople
-      .filter((person) => {
-        const partnerParts = person.partners.flatMap((partner) => {
-          if (isProtectedPartner(partner, mode)) return [partner.name]
-          return [partner.name, partner.birth, partner.birthPlace, partner.death, partner.deathPlace]
-        })
+    return members
+      .filter((member) => {
+        const protectedMember = memberProtected(member)
         const searchText = [
-          person.name,
-          ...protectedSearchParts(person, mode, getLifeStatus(person.id)),
-          ...partnerParts,
+          member.name,
+          ...(protectedMember ? [] : [member.birth, member.birthPlace, member.death, member.deathPlace]),
         ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
         return searchText.includes(normalized)
       })
-      .slice(0, 24)
-  }, [effectivePeople, getLifeStatus, mode, query])
+      .slice(0, 28)
+  }, [getLifeStatus, getPerson, members, mode, query])
 
   const close = () => {
     setQuery('')
     onClose()
   }
 
-  const choose = (id: string) => {
+  const choose = (member: FamilyMember) => {
+    const destination = member.kind === 'partner' ? member.linkedPersonId : member.id
+    if (!destination) return
     close()
-    onSelect(id)
+    onSelect(destination)
   }
 
   return (
@@ -105,8 +113,8 @@ export default function MobileSearchSheet({
       <div className="mobile-search-body">
         {!query && (
           <div className="mobile-search-empty">
-            <strong>{effectivePeople.length} Personen</strong>
-            <span>Suche nach einer Person und springe direkt in ihren Familienfokus.</span>
+            <strong>{members.length} Personendatensätze</strong>
+            <span>{effectivePeople.length} Nachkommen plus {members.length - effectivePeople.length} erfasste Partnerpersonen.</span>
           </div>
         )}
 
@@ -117,18 +125,29 @@ export default function MobileSearchSheet({
           </div>
         )}
 
-        {results.map((person: Person) => {
-          const protectedPerson = isProtectedPerson(person, mode, getLifeStatus(person.id))
+        {results.map((member) => {
+          const protectedMember = memberProtected(member)
+          const linked = member.kind === 'partner' && member.linkedPersonId ? getPerson(member.linkedPersonId) : undefined
+          const descendant = member.kind === 'descendant' ? getPerson(member.id) : undefined
+
           return (
-            <button type="button" className="mobile-search-result" key={person.id} onClick={() => choose(person.id)}>
-              <span className="mobile-search-result-number">#{person.number}</span>
+            <button type="button" className="mobile-search-result" key={member.id} onClick={() => choose(member)}>
+              <span className="mobile-search-result-number">
+                {member.kind === 'descendant' ? `#${member.number}` : '∞'}
+              </span>
               <span className="mobile-search-result-copy">
-                <strong>{person.name}</strong>
-                <small>Generation {person.generation}{hasEdit(person.id) ? ' · lokal korrigiert' : ''}</small>
-                <span className={protectedPerson ? 'protected-value' : undefined}>
-                  {protectedPerson ? 'Lebensdaten geschützt' : person.birth ? formatDate(person.birth) : 'Geburtsdatum offen'}
-                  {!protectedPerson && person.birthPlace ? ` · ${person.birthPlace}` : ''}
+                <strong>{member.name}</strong>
+                <small>
+                  {member.kind === 'descendant'
+                    ? `Generation ${member.generation}${hasEdit(member.id) ? ' · lokal korrigiert' : ''}`
+                    : `${relationLabel(member)}${linked ? ` von ${linked.name}` : ''}`}
+                </small>
+                <span className={protectedMember ? 'protected-value' : undefined}>
+                  {protectedMember ? 'Lebensdaten geschützt' : member.birth ? formatDate(member.birth) : 'Geburtsdatum offen'}
+                  {!protectedMember && member.birthPlace ? ` · ${member.birthPlace}` : ''}
                 </span>
+                {member.kind === 'partner' && <span className="member-kind-tag">Partnerperson · öffnet Familienfokus</span>}
+                {descendant && member.kind === 'descendant' && descendant.name !== member.name ? <span>{descendant.name}</span> : null}
               </span>
               <span className="mobile-search-result-arrow" aria-hidden="true">→</span>
             </button>
