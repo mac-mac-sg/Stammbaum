@@ -117,6 +117,63 @@
 .home-search small { color: var(--muted); font-size: 10px; }
 .home-search b { color: var(--accent-strong); }
 
+.home-utilities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.home-utilities > button {
+  min-width: 0;
+  min-height: 72px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-strong);
+  color: var(--text);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-utilities > button > span:first-child {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.home-utilities > button > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.home-utilities strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.home-utilities small {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.home-utilities b {
+  color: var(--accent-strong);
+  font-size: 12px;
+}
+
 .home-section {
   display: grid;
   gap: 10px;
@@ -262,6 +319,8 @@
 
   .home-hero-actions button { min-height: 48px; }
   .home-search { min-height: 76px; }
+  .home-utilities { grid-template-columns: 1fr; }
+  .home-utilities > button { min-height: 68px; }
   .home-card-list { grid-template-columns: 1fr; }
 
   .home-person-main,
