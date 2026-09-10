@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import CorrectionDataSheet from './CorrectionDataSheet'
 import { useEdits } from './EditContext'
 import { lifeStatusLabel } from './privacy'
 import type { LifeStatus } from './privacy'
@@ -42,6 +43,7 @@ export default function EditPersonSheet({
   const { getLifeStatus, hasEdit, resetEdit, saveEdit } = useEdits()
   const [form, setForm] = useState<FormState>(() => toFormState(person, getLifeStatus(person.id)))
   const [error, setError] = useState('')
+  const [dataToolsOpen, setDataToolsOpen] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -57,6 +59,11 @@ export default function EditPersonSheet({
 
   const update = (field: keyof FormState, value: string) => {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  const close = () => {
+    setDataToolsOpen(false)
+    onClose()
   }
 
   const submit = (event: FormEvent) => {
@@ -81,14 +88,14 @@ export default function EditPersonSheet({
       notes: form.notes.trim(),
       lifeStatus: form.lifeStatus,
     })
-    onClose()
+    close()
   }
 
   const reset = () => {
     resetEdit(person.id)
     setForm(toFormState(person, 'unknown'))
     setError('')
-    onClose()
+    close()
   }
 
   return (
@@ -97,7 +104,7 @@ export default function EditPersonSheet({
         type="button"
         className={`edit-backdrop${open ? ' is-open' : ''}`}
         aria-label="Bearbeitung schliessen"
-        onClick={onClose}
+        onClick={close}
       />
       <aside className={`edit-sheet${open ? ' is-open' : ''}`} aria-label={`${person.name} bearbeiten`} aria-hidden={!open}>
         <div className="sheet-handle" aria-hidden="true" />
@@ -106,11 +113,14 @@ export default function EditPersonSheet({
             <span className="eyebrow">Lokale Korrektur</span>
             <h2>{person.name}</h2>
           </div>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Bearbeitung schliessen">×</button>
+          <button type="button" className="icon-button" onClick={close} aria-label="Bearbeitung schliessen">×</button>
         </div>
 
         <div className="edit-notice">
-          Diese Angaben werden nur auf diesem Gerät gespeichert. Die Scanquelle und die Daten im Repository bleiben unverändert.
+          <span>Diese Angaben werden nur auf diesem Gerät gespeichert. Die Scanquelle und die Daten im Repository bleiben unverändert.</span>
+          <button type="button" className="edit-data-tools" onClick={() => setDataToolsOpen(true)}>
+            Sichern / importieren
+          </button>
         </div>
 
         <form className="edit-form" onSubmit={submit}>
@@ -171,6 +181,8 @@ export default function EditPersonSheet({
           </div>
         </form>
       </aside>
+
+      <CorrectionDataSheet open={dataToolsOpen} onClose={() => setDataToolsOpen(false)} />
     </>
   )
 }
