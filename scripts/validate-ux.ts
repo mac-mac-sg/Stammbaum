@@ -32,6 +32,8 @@ for (const label of ['<small>Start</small>', '<small>Suche</small>', '<small>Fam
 assert(!app.includes('<small>Person</small>'), 'Der redundante mobile Navigationspunkt Person muss entfernt bleiben.')
 assert(mobileSearch.includes('onSelectMember(member)'), 'Partner-Suchergebnisse müssen direkt als FamilyMember geöffnet werden.')
 assert(uxCss.includes('.toolbar .search-wrap') && uxCss.includes('display: none'), 'Die doppelte mobile Suche muss in der Familienansicht verborgen bleiben.')
+assert(uxCss.includes('backdrop-filter: blur(20px) saturate(160%)'), 'Die mobile Navigation muss den Glass-Effekt behalten.')
+assert(uxCss.includes('--mobile-nav-glass') && uxCss.includes('--mobile-nav-glass-shadow'), 'Die Glass-Navigation braucht themefähige Flächen- und Schattenvariablen.')
 assert((relationship.match(/Andere Person vergleichen/g) ?? []).length >= 2, 'Der Verwandtschafts-Finder braucht auch nach einem Fehlschlag einen Rückweg.')
 assert(settings.includes('technisch öffentlich abrufbar'), 'Die Datenschutzeinstellung muss den öffentlichen Bereitstellungscharakter erklären.')
 assert(!manifest.includes('Privates Familienarchiv'), 'Das Manifest darf die öffentliche App nicht als privat bezeichnen.')
