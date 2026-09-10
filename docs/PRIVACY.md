@@ -2,12 +2,20 @@
 
 ## Zweck
 
-Die Familienunterlagen enthalten personenbezogene Angaben zu möglicherweise noch lebenden Personen. Die App besitzt deshalb zwei Darstellungsmodi:
+Die Familienunterlagen enthalten personenbezogene Angaben zu möglicherweise noch lebenden Personen. Die App wird bewusst öffentlich über GitHub Pages bereitgestellt. Der Datenschutzmodus dient deshalb ausschliesslich dazu, in der normalen Bedienoberfläche unnötige Detailangaben auszublenden; er ist **keine technische Zugriffskontrolle**.
 
-- **Schutzmodus**: Standard beim ersten Öffnen. Lebensdaten potenziell lebender Personen werden verborgen.
-- **Private Vollansicht**: Alle aus den Unterlagen erfassten Angaben sowie lokale Korrekturen werden angezeigt.
+Die App besitzt zwei Darstellungsmodi:
 
-Die Wahl wird nur lokal im Browser unter `stammbaum-privacy-mode` gespeichert. Der Modus kann über die Kopfzeile oder direkt auf der Smartphone-Startseite gewechselt werden.
+- **Schutzmodus**: Standard beim ersten Öffnen. Lebensdaten potenziell lebender Personen werden in der Oberfläche verborgen.
+- **Vollansicht**: Alle aus den Unterlagen erfassten Angaben sowie lokale Korrekturen werden angezeigt.
+
+Die Wahl wird nur lokal im Browser unter `stammbaum-privacy-mode` gespeichert.
+
+## Öffentliche Datenbasis
+
+Die genealogischen Ausgangsdaten sind Bestandteil des ausgelieferten Frontend-Bundles. Bei einem öffentlichen GitHub-Pages-Deployment können diese Dateien technisch von jedem Besucher heruntergeladen und analysiert werden, unabhängig davon, welcher Darstellungsmodus in der Oberfläche aktiv ist.
+
+Der Schutzmodus darf daher nicht als Zugriffsschutz oder Vertraulichkeitsgarantie verstanden werden. Die öffentliche Bereitstellung dieser Ausgangsdaten wurde für dieses Projekt bewusst akzeptiert.
 
 ## Lebensstatus und Heuristik
 
@@ -26,7 +34,7 @@ Ein erfasstes Sterbedatum hebt die heuristische Einstufung auf. Ein explizit ges
 
 ## Lokale Korrekturen
 
-In der privaten Vollansicht können für nummerierte Personen Lebensstatus, Geburts- und Sterbedaten, Orte sowie Zusatznotizen korrigiert oder ergänzt werden. Für Partnerpersonen können zusätzlich Beziehungstyp und Beziehungsstatus gepflegt werden.
+In der Vollansicht können für nummerierte Personen Lebensstatus, Geburts- und Sterbedaten, Orte sowie Zusatznotizen korrigiert oder ergänzt werden. Für Partnerpersonen können zusätzlich Beziehungstyp und Beziehungsstatus gepflegt werden.
 
 Diese Korrekturen:
 
@@ -35,28 +43,22 @@ Diese Korrekturen:
 - sind in Baum, Familienfokus, Suche, Verwandtschafts-Finder und Datenschutzlogik sofort wirksam,
 - können pro Person bzw. Partnerperson vollständig verworfen werden.
 
-Korrekturen nummerierter Personen werden unter `stammbaum-person-edits-v1` gespeichert, Partnerkorrekturen unter `stammbaum-partner-edits-v1`. Beide Speicherbereiche bilden eine nicht-destruktive Arbeitsebene, bis ein fachliches Freigabe- und Persistenzmodell definiert ist.
+Korrekturen nummerierter Personen werden unter `stammbaum-person-edits-v1` gespeichert, Partnerkorrekturen unter `stammbaum-partner-edits-v1`.
 
 ## Favoriten und Verlauf
 
 Für den Smartphone-Schnellzugriff werden zwei weitere rein lokale Navigationsspeicher verwendet:
 
 - `stammbaum-favorite-members-v1` für Favoriten,
-- `stammbaum-recent-members-v1` für die zuletzt angesehenen Personen.
+- `stammbaum-recent-members-v1` für zuletzt angesehene Personen.
 
-Dort werden ausschliesslich stabile interne IDs wie `p095` oder `partner:p095:1` gespeichert. Namen, Geburtsdaten, Orte oder andere Lebensdaten werden für diese Funktion nicht zusätzlich in den Navigationsspeicher kopiert. Die Darstellung auf der Startseite wird jeweils aus dem aktuellen Familiengraphen erzeugt und respektiert den aktiven Schutzmodus.
-
-Der Verlauf ist auf zwölf eindeutige Einträge begrenzt und kann auf der Startseite vollständig geleert werden. Favoriten bleiben bestehen, bis sie vom Benutzer wieder entfernt werden.
+Dort werden nur stabile interne IDs gespeichert. Namen, Geburtsdaten, Orte oder andere Lebensdaten werden für diese Funktion nicht zusätzlich dupliziert.
 
 ## Export und Import
 
-Lokale Korrekturen können als versionierte JSON-Datei exportiert und auf einem anderen Gerät wieder importiert werden. Das aktuelle Exportformat Version 2 trennt `personEdits` und `partnerEdits`; ältere Version-1-Sicherungen mit dem Feld `edits` bleiben importierbar.
+Lokale Korrekturen können als versionierte JSON-Datei exportiert und auf einem anderen Gerät wieder importiert werden. Das aktuelle Exportformat Version 2 trennt `personEdits` und `partnerEdits`; ältere Version-1-Sicherungen bleiben importierbar.
 
-Beim Import werden nur bekannte Personen- bzw. Partner-IDs und formal gültige Korrektureinträge übernommen; andere Einträge werden übersprungen. Importierte Korrekturen werden mit bereits vorhandenen lokalen Korrekturen zusammengeführt.
-
-Favoriten und Verlauf sind bewusst **nicht** Bestandteil des Korrekturexports. Der Export dient der Sicherung fachlicher Änderungen, nicht der Synchronisation des persönlichen Navigationszustands.
-
-Die Exportdatei kann vollständige personenbezogene Angaben enthalten. Sie ist deshalb wie eine private Familiendatei zu behandeln und sollte nicht öffentlich geteilt oder ungeschützt abgelegt werden.
+Favoriten und Verlauf sind bewusst nicht Bestandteil des Korrekturexports. Exportdateien können vollständige personenbezogene Angaben enthalten und sollten nicht unbeabsichtigt veröffentlicht oder in das öffentliche Repository eingecheckt werden.
 
 ## Im Schutzmodus verborgen
 
@@ -82,4 +84,4 @@ Die Exportdatei kann vollständige personenbezogene Angaben enthalten. Sie ist d
 
 ## Fachliche Grenze
 
-Der explizite Lebensstatus und weitere lokale Korrekturen sind noch kein freigegebener Bestandteil des zentralen genealogischen Datensatzes. Für einen langfristig belastbaren Familienbestand sollten Änderungen später mit Herkunft, Änderungsdatum und fachlicher Freigabe zentral gespeichert werden. Bis dahin verhindert die Kombination aus explizitem Status und 120-Jahre-Heuristik, dass fehlende Sterbedaten automatisch als Freigabe sensibler Lebensdaten interpretiert werden.
+Der explizite Lebensstatus und lokale Korrekturen sind noch kein freigegebener Bestandteil des zentralen genealogischen Datensatzes. Für einen langfristig belastbaren Familienbestand sollten Änderungen später mit Herkunft, Änderungsdatum und fachlicher Freigabe zentral gespeichert werden.
