@@ -1,6 +1,4 @@
-import { useMemo, useState } from 'react'
-import CorrectionDataSheet from './CorrectionDataSheet'
-import InstallAppCard from './InstallAppCard'
+import { useMemo } from 'react'
 import { people } from './data'
 import { useEdits } from './EditContext'
 import { useFamilyNavigation } from './FamilyNavigationContext'
@@ -28,17 +26,14 @@ export default function HomeView({
   onOpenPerson,
   onOpenPartner,
   onOpenSearch,
-  onOpenTree,
 }: {
   selectedPerson: Person
   onOpenPerson: (id: string) => void
   onOpenPartner: (member: FamilyMember) => void
   onOpenSearch: () => void
-  onOpenTree: () => void
 }) {
-  const { mode, toggleMode } = usePrivacy()
+  const { mode } = usePrivacy()
   const {
-    editedCount,
     getLifeStatus,
     getPartnerLifeStatus,
     getPartnerMember,
@@ -51,7 +46,6 @@ export default function HomeView({
     recentIds,
     toggleFavorite,
   } = useFamilyNavigation()
-  const [correctionsOpen, setCorrectionsOpen] = useState(false)
 
   const resolveMember = (id: string): FamilyMember | undefined => {
     const base = familyMembersById[id]
@@ -134,32 +128,11 @@ export default function HomeView({
 
   return (
     <div className="home-view" aria-label="Startseite">
-      <section className="home-hero">
-        <div className="home-hero-copy">
-          <span className="eyebrow">Privates Familienarchiv</span>
-          <h2>Familie entdecken</h2>
-          <p>Personen suchen, Familienzweige verfolgen und Beziehungen nachvollziehen.</p>
-        </div>
-        <div className="home-current">
-          <span>Aktueller Fokus</span>
-          <strong>{selectedPerson.name}</strong>
-          <small className={protectedSelected ? 'protected-value' : undefined}>
-            {protectedSelected
-              ? 'Lebensdaten geschützt'
-              : selectedPerson.birth
-                ? `* ${formatDate(selectedPerson.birth)}`
-                : `Generation ${selectedPerson.generation}`}
-          </small>
-        </div>
-        <div className="home-hero-actions">
-          <button type="button" className="home-primary-action" onClick={() => onOpenPerson(selectedPerson.id)}>
-            Familienfokus öffnen <span aria-hidden="true">→</span>
-          </button>
-          <button type="button" className="home-secondary-action" onClick={onOpenTree}>
-            Gesamtbaum ansehen
-          </button>
-        </div>
-      </section>
+      <div className="home-intro">
+        <span className="eyebrow">Familienarchiv</span>
+        <h2>Familie entdecken</h2>
+        <p>Suche eine Person oder setze dort fort, wo du zuletzt warst.</p>
+      </div>
 
       <button type="button" className="home-search" onClick={onOpenSearch}>
         <span aria-hidden="true">⌕</span>
@@ -167,26 +140,20 @@ export default function HomeView({
         <b aria-hidden="true">→</b>
       </button>
 
-      <section className="home-utilities" aria-label="App-Einstellungen">
-        <button type="button" onClick={toggleMode}>
-          <span aria-hidden="true">{mode === 'protected' ? '◈' : '○'}</span>
-          <span>
-            <strong>{mode === 'protected' ? 'Schutzmodus aktiv' : 'Private Vollansicht'}</strong>
-            <small>{mode === 'protected' ? 'Lebensdaten geschützt' : 'Alle erfassten Angaben sichtbar'}</small>
-          </span>
-          <b aria-hidden="true">→</b>
-        </button>
-        <button type="button" onClick={() => setCorrectionsOpen(true)}>
-          <span aria-hidden="true">↥</span>
-          <span>
-            <strong>Lokale Korrekturen</strong>
-            <small>{editedCount} {editedCount === 1 ? 'Änderung' : 'Änderungen'} · sichern oder importieren</small>
-          </span>
-          <b aria-hidden="true">→</b>
+      <section className="home-current home-current-simple">
+        <span>Weiter bei</span>
+        <strong>{selectedPerson.name}</strong>
+        <small className={protectedSelected ? 'protected-value' : undefined}>
+          {protectedSelected
+            ? 'Lebensdaten geschützt'
+            : selectedPerson.birth
+              ? `* ${formatDate(selectedPerson.birth)}`
+              : `Generation ${selectedPerson.generation}`}
+        </small>
+        <button type="button" className="home-primary-action" onClick={() => onOpenPerson(selectedPerson.id)}>
+          Familie öffnen <span aria-hidden="true">→</span>
         </button>
       </section>
-
-      <InstallAppCard />
 
       <section className="home-section">
         <div className="home-section-heading">
@@ -201,7 +168,7 @@ export default function HomeView({
         ) : (
           <div className="home-empty-card">
             <strong>Noch keine Favoriten</strong>
-            <span>Öffne eine Person und tippe auf den Stern, um sie hier dauerhaft abzulegen.</span>
+            <span>Öffne eine Person und tippe auf den Stern, um sie hier abzulegen.</span>
           </div>
         )}
       </section>
@@ -222,8 +189,6 @@ export default function HomeView({
           </div>
         )}
       </section>
-
-      <CorrectionDataSheet open={correctionsOpen} onClose={() => setCorrectionsOpen(false)} />
     </div>
   )
 }
