@@ -20,6 +20,8 @@ assert(michelle[0].sourceDate === '2026-09-10', 'Die Herkunftsdatierung von Mich
 assert(publicSearch('Thomas Korsch').length === 0, 'Thomas Korsch darf nicht mehr im Familiengraph vorhanden sein.')
 
 const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+const home = readFileSync(new URL('../src/HomeView.tsx', import.meta.url), 'utf8')
+const homeCss = readFileSync(new URL('../src/home.css', import.meta.url), 'utf8')
 const mobileSearch = readFileSync(new URL('../src/MobileSearchSheet.tsx', import.meta.url), 'utf8')
 const mobileSearchCss = readFileSync(new URL('../src/mobile-search.css', import.meta.url), 'utf8')
 const settings = readFileSync(new URL('../src/SettingsMenu.tsx', import.meta.url), 'utf8')
@@ -31,6 +33,14 @@ for (const label of ['<small>Start</small>', '<small>Suche</small>', '<small>Fam
   assert(app.includes(label), `Mobile Navigation muss ${label} enthalten.`)
 }
 assert(!app.includes('<small>Person</small>'), 'Der redundante mobile Navigationspunkt Person muss entfernt bleiben.')
+assert(home.includes('Stammbaum entdecken'), 'Die Startseite muss den Stammbaum und nicht eine einzelne Person ins Zentrum stellen.')
+assert(home.includes('Gesamtbaum öffnen'), 'Die Startseite braucht einen direkten Einstieg in den Gesamtbaum.')
+assert(!home.includes('Weiter bei'), 'Die Startseite darf nicht mehr mit einer zuletzt gewählten Person beginnen.')
+assert(app.includes('onOpenTree={openWholeTree}'), 'Der Gesamtbaum-Einstieg muss sauber über die App-Navigation verdrahtet sein.')
+assert(app.includes('setTreeOverview(true)'), 'Der Gesamtbaum-Einstieg muss ohne Personenfokus starten.')
+assert(app.includes("selectedId={treeOverview ? '' : selectedId}"), 'Im neutralen Gesamtbaum darf keine Person vorausgewählt sein.')
+assert(homeCss.includes('.home-discovery') && homeCss.includes('.home-tree-action'), 'Die tree-first Startseite braucht ihre eigene visuelle Hierarchie.')
+assert(homeCss.includes('prefers-reduced-motion'), 'Bewegung auf der Startseite muss reduzierte Bewegung respektieren.')
 assert(mobileSearch.includes('onSelectMember(member)'), 'Partner-Suchergebnisse müssen direkt als FamilyMember geöffnet werden.')
 assert(uxCss.includes('.toolbar .search-wrap') && uxCss.includes('display: none'), 'Die doppelte mobile Suche muss in der Familienansicht verborgen bleiben.')
 assert(uxCss.includes('backdrop-filter: blur(20px) saturate(160%)'), 'Die mobile Navigation muss den Glass-Effekt behalten.')
