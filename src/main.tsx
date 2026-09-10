@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import SettingsMenu from './SettingsMenu'
 import { EditProvider } from './EditContext'
 import { FamilyNavigationProvider } from './FamilyNavigationContext'
 import { PrivacyProvider } from './PrivacyContext'
@@ -20,6 +21,7 @@ import './partner-person.css'
 import './tree-couples.css'
 import './home.css'
 import './install.css'
+import './theme.css'
 
 assertValidGenealogy(people, peopleById, rootId)
 
@@ -27,6 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <EditProvider>
       <PrivacyProvider>
+        <SettingsMenu />
         <FamilyNavigationProvider>
           <App />
         </FamilyNavigationProvider>
