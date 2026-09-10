@@ -15,6 +15,7 @@ export interface FamilyMember {
   death?: string
   deathPlace?: string
   notes?: string
+  lifeStatus?: 'living' | 'deceased' | 'unknown'
   linkedPersonId?: string
   partnerIndex?: number
   relationship?: Partner['relationship']
@@ -62,6 +63,7 @@ export function partnerMembersForPerson(person: Person): FamilyMember[] {
     death: partner.death,
     deathPlace: partner.deathPlace,
     notes: partner.notes,
+    lifeStatus: partner.lifeStatus,
     linkedPersonId: person.id,
     partnerIndex,
     relationship: partner.relationship,
