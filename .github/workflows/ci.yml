@@ -16,3 +16,5 @@ jobs:
       - run: npm install
       - run: npm run validate:data
       - run: npm run build
+      - name: Build private deployment container
+        run: docker build -t stammbaum-villiger:ci .
