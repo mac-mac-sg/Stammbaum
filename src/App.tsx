@@ -7,16 +7,15 @@ import MobileSearchSheet from './MobileSearchSheet'
 import PartnerPersonSheet from './PartnerPersonSheet'
 import { useEdits } from './EditContext'
 import { useFamilyNavigation } from './FamilyNavigationContext'
-import { partnerMemberId, partnerMembersForPerson, relationLabel } from './familyGraph'
+import { buildFamilyMembers, partnerMemberId, partnerMembersForPerson, relationLabel } from './familyGraph'
 import type { FamilyMember } from './familyGraph'
+import { searchFamilyMembers } from './memberSearch'
 import { usePrivacy } from './PrivacyContext'
 import {
   isPotentiallyLivingRecord,
   isProtectedPartner,
   isProtectedPerson,
   lifeStatusLabel,
-  protectedSearchParts,
-  privacyModeLabel,
 } from './privacy'
 import type { LifeStatus, PrivacyMode } from './privacy'
 import { people, peopleById, rootId } from './data'
@@ -42,19 +41,6 @@ function lifeLabel(person: Person, privacyMode: PrivacyMode, lifeStatus: LifeSta
   const birth = person.birth ? formatDate(person.birth) : '?'
   const death = person.death ? formatDate(person.death) : ''
   return death ? `${birth} – ${death}` : `* ${birth}`
-}
-
-function searchText(person: Person, privacyMode: PrivacyMode, lifeStatus: LifeStatus) {
-  const partnerParts = person.partners.flatMap((partner) => {
-    if (isProtectedPartner(partner, privacyMode)) return [partner.name]
-    return [partner.name, partner.birth, partner.birthPlace, partner.death, partner.deathPlace]
-  })
-
-  return [
-    person.name,
-    ...protectedSearchParts(person, privacyMode, lifeStatus),
-    ...partnerParts,
-  ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
 }
 
 function getPathToRoot(personId: string) {
@@ -202,12 +188,14 @@ function DetailPanel({
   open,
   onClose,
   onSelect,
+  onPartnerSelect,
   onEdit,
 }: {
   person: Person
   open: boolean
   onClose: () => void
   onSelect: (id: string) => void
+  onPartnerSelect: (member: FamilyMember) => void
   onEdit: () => void
 }) {
   const { mode } = usePrivacy()
@@ -298,9 +286,9 @@ function DetailPanel({
               const protectedPartner = effectivePartner
                 ? mode === 'protected' && isPotentiallyLivingRecord(effectivePartner, getPartnerLifeStatus(partnerId))
                 : isProtectedPartner(partner, mode)
-              const shownPartner = effectivePartner ?? {
+              const shownPartner: FamilyMember = effectivePartner ?? {
                 id: partnerId,
-                kind: 'partner' as const,
+                kind: 'partner',
                 name: partner.name,
                 generation: person.generation,
                 source: person.source,
@@ -311,10 +299,21 @@ function DetailPanel({
                 notes: partner.notes,
                 relationship: partner.relationship,
                 relationshipStatus: partner.status,
+                sourceType: partner.sourceType ?? 'scan',
+                sourceLabel: partner.sourceLabel,
+                sourceDate: partner.sourceDate,
+                linkedPersonId: person.id,
+                partnerIndex: index,
               }
 
               return (
-                <article className="relationship-card" key={partnerId}>
+                <button
+                  type="button"
+                  className="relationship-card relationship-card-button"
+                  key={partnerId}
+                  onClick={() => onPartnerSelect(shownPartner)}
+                  aria-label={`Details zu ${shownPartner.name} öffnen`}
+                >
                   <strong>{shownPartner.name}</strong>
                   <span>{shownPartner.relationship}{shownPartner.relationshipStatus ? ` · ${shownPartner.relationshipStatus}` : ''}</span>
                   {protectedPartner ? (
@@ -336,7 +335,8 @@ function DetailPanel({
                     </>
                   )}
                   {!protectedPartner && shownPartner.notes && <span className="uncertain-note">{shownPartner.notes}</span>}
-                </article>
+                  <span className="relationship-card-arrow">Details öffnen →</span>
+                </button>
               )
             })}
           </div>
@@ -392,15 +392,16 @@ function DetailPanel({
 }
 
 export default function App() {
-  const { mode: privacyMode, toggleMode } = usePrivacy()
+  const { mode: privacyMode } = usePrivacy()
   const {
     editedCount,
     getLifeStatus,
+    getPartnerLifeStatus,
     getPartnerMember,
     getPerson,
   } = useEdits()
-  const { recordVisit } = useFamilyNavigation()
-  const [selectedId, setSelectedId] = useState('p095')
+  const { lastPersonId, recordVisit } = useFamilyNavigation()
+  const [selectedId, setSelectedId] = useState(() => lastPersonId ?? 'p095')
   const [query, setQuery] = useState('')
   const [depthLimit, setDepthLimit] = useState(5)
   const [detailOpen, setDetailOpen] = useState(false)
@@ -419,14 +420,26 @@ export default function App() {
     () => people.map((person) => getPerson(person.id) ?? person),
     [getPerson],
   )
+  const familyMembers = useMemo(
+    () => buildFamilyMembers(effectivePeople).map((member) => (
+      member.kind === 'partner' ? getPartnerMember(member.id) ?? member : member
+    )),
+    [effectivePeople, getPartnerMember],
+  )
 
-  const results = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase('de-CH')
-    if (!normalized) return []
-    return effectivePeople
-      .filter((person) => searchText(person, privacyMode, getLifeStatus(person.id)).includes(normalized))
-      .slice(0, 10)
-  }, [effectivePeople, getLifeStatus, privacyMode, query])
+  const memberProtected = (member: FamilyMember) => {
+    if (privacyMode !== 'protected') return false
+    if (member.kind === 'partner') {
+      return isPotentiallyLivingRecord(member, getPartnerLifeStatus(member.id))
+    }
+    const person = getPerson(member.id)
+    return person ? isProtectedPerson(person, privacyMode, getLifeStatus(member.id)) : true
+  }
+
+  const results = useMemo(
+    () => searchFamilyMembers(familyMembers, query, memberProtected, 10),
+    [familyMembers, getLifeStatus, getPartnerLifeStatus, getPerson, privacyMode, query],
+  )
 
   const focusPerson = (id: string, scale = 0.86) => {
     window.setTimeout(() => {
@@ -474,12 +487,6 @@ export default function App() {
     }, 40)
   }
 
-  const togglePrivacy = () => {
-    setEditOpen(false)
-    setSelectedTreePartner(undefined)
-    toggleMode()
-  }
-
   const openTreePartner = (member: FamilyMember) => {
     const effectiveMember = getPartnerMember(member.id) ?? member
     recordVisit(effectiveMember.id)
@@ -489,17 +496,24 @@ export default function App() {
     setSelectedTreePartner(effectiveMember)
   }
 
+  const openMember = (member: FamilyMember, forceFamilyView = false) => {
+    if (member.kind === 'partner') {
+      if (member.linkedPersonId) navigatePerson(member.linkedPersonId)
+      if (forceFamilyView) setViewMode('focus')
+      openTreePartner(member)
+      return
+    }
+
+    if (forceFamilyView) setViewMode('focus')
+    navigatePerson(member.id, { focusTree: !forceFamilyView })
+  }
+
   const openHomePerson = (id: string) => {
     setViewMode('focus')
     navigatePerson(id)
   }
 
-  const openHomePartner = (member: FamilyMember) => {
-    if (!member.linkedPersonId) return
-    navigatePerson(member.linkedPersonId)
-    setViewMode('focus')
-    openTreePartner(member)
-  }
+  const openHomePartner = (member: FamilyMember) => openMember(member, true)
 
   return (
     <div className="app-shell">
@@ -513,21 +527,6 @@ export default function App() {
         </div>
 
         <div className="header-actions">
-          <button
-            type="button"
-            className={`privacy-toggle${privacyMode === 'protected' ? ' is-protected' : ''}`}
-            onClick={togglePrivacy}
-            aria-pressed={privacyMode === 'protected'}
-            aria-label={`${privacyModeLabel(privacyMode)}. Ansicht wechseln.`}
-            title={`${privacyModeLabel(privacyMode)} – antippen zum Wechseln`}
-          >
-            <span className="privacy-icon" aria-hidden="true">{privacyMode === 'protected' ? '◈' : '○'}</span>
-            <span className="privacy-copy">
-              <strong>{privacyMode === 'protected' ? 'Schutzmodus' : 'Vollansicht'}</strong>
-              <small>{privacyMode === 'protected' ? 'Lebensdaten verborgen' : `${editedCount} lokale Änderungen`}</small>
-            </span>
-          </button>
-
           <div className="header-stats" aria-label="Datenbestand">
             <div><strong>{people.length}</strong><span>Personen</span></div>
             <div><strong>5</strong><span>Generationen</span></div>
@@ -557,16 +556,23 @@ export default function App() {
                 </div>
                 {results.length > 0 && (
                   <div className="search-results">
-                    {results.map((person) => {
-                      const protectedResult = isProtectedPerson(person, privacyMode, getLifeStatus(person.id))
+                    {results.map((member) => {
+                      const protectedResult = memberProtected(member)
+                      const linked = member.kind === 'partner' && member.linkedPersonId
+                        ? getPerson(member.linkedPersonId)
+                        : undefined
                       return (
-                        <button type="button" key={person.id} onClick={() => navigatePerson(person.id, { focusTree: true })}>
+                        <button type="button" key={member.id} onClick={() => openMember(member)}>
                           <span>
-                            <strong>{person.name}</strong>
-                            <small>#{person.number} · Generation {person.generation}</small>
+                            <strong>{member.name}</strong>
+                            <small>
+                              {member.kind === 'descendant'
+                                ? `#${member.number} · Generation ${member.generation}`
+                                : `${relationLabel(member)}${linked ? ` von ${linked.name}` : ''}`}
+                            </small>
                           </span>
                           <span className={protectedResult ? 'protected-value' : undefined}>
-                            {protectedResult ? 'geschützt' : person.birth ? formatDate(person.birth) : 'Datum offen'}
+                            {protectedResult ? 'geschützt' : member.birth ? formatDate(member.birth) : 'Datum offen'}
                           </span>
                         </button>
                       )
@@ -580,8 +586,8 @@ export default function App() {
                 <div className="view-control">
                   <span>Ansicht</span>
                   <div className="segmented view-segmented">
-                    <button type="button" className={viewMode === 'focus' ? 'active' : ''} onClick={() => switchView('focus')}>Fokus</button>
-                    <button type="button" className={viewMode === 'tree' ? 'active' : ''} onClick={() => switchView('tree')}>Gesamt</button>
+                    <button type="button" className={viewMode === 'focus' ? 'active' : ''} onClick={() => switchView('focus')}>Familie</button>
+                    <button type="button" className={viewMode === 'tree' ? 'active' : ''} onClick={() => switchView('tree')}>Gesamtbaum</button>
                   </div>
                 </div>
 
@@ -612,7 +618,6 @@ export default function App() {
                 onOpenPerson={openHomePerson}
                 onOpenPartner={openHomePartner}
                 onOpenSearch={openSearch}
-                onOpenTree={() => switchView('tree')}
               />
             ) : viewMode === 'focus' ? (
               <FocusedFamilyView
@@ -684,6 +689,7 @@ export default function App() {
           open={detailOpen}
           onClose={() => setDetailOpen(false)}
           onSelect={(id) => navigatePerson(id, { focusTree: true, details: true })}
+          onPartnerSelect={openTreePartner}
           onEdit={() => {
             setDetailOpen(false)
             setEditOpen(true)
@@ -718,31 +724,21 @@ export default function App() {
       <MobileSearchSheet
         open={mobileSearchOpen}
         onClose={() => setMobileSearchOpen(false)}
-        onSelect={(id) => {
-          setViewMode('focus')
-          navigatePerson(id)
-        }}
+        onSelectMember={(member) => openMember(member, true)}
       />
 
       <nav className="mobile-nav" aria-label="App-Navigation">
-        <button type="button" className={viewMode === 'home' ? 'active' : ''} onClick={() => switchView('home')}>
+        <button type="button" className={viewMode === 'home' && !mobileSearchOpen ? 'active' : ''} onClick={() => switchView('home')}>
           <span aria-hidden="true">⌂</span>
           <small>Start</small>
         </button>
-        <button type="button" className={viewMode === 'focus' || viewMode === 'tree' ? 'active' : ''} onClick={() => switchView('focus')}>
+        <button type="button" className={mobileSearchOpen ? 'active' : ''} onClick={openSearch}>
+          <span aria-hidden="true">⌕</span>
+          <small>Suche</small>
+        </button>
+        <button type="button" className={(viewMode === 'focus' || viewMode === 'tree') && !mobileSearchOpen ? 'active' : ''} onClick={() => switchView('focus')}>
           <span aria-hidden="true">◎</span>
           <small>Familie</small>
-        </button>
-        <button type="button" onClick={openSearch}>
-          <span aria-hidden="true">⌕</span>
-          <small>Suchen</small>
-        </button>
-        <button type="button" className="primary" onClick={() => {
-          recordVisit(selectedPerson.id)
-          setDetailOpen(true)
-        }}>
-          <span aria-hidden="true">●</span>
-          <small>Person</small>
         </button>
       </nav>
 
@@ -750,7 +746,7 @@ export default function App() {
         <span>
           {privacyMode === 'protected'
             ? 'Schutzmodus aktiv · Lebensdaten potenziell lebender Personen verborgen'
-            : `Private Vollansicht · ${editedCount} lokale ${editedCount === 1 ? 'Änderung' : 'Änderungen'}`}
+            : `Vollansicht · ${editedCount} lokale ${editedCount === 1 ? 'Änderung' : 'Änderungen'}`}
         </span>
         <span>Quelle: Familienunterlagen «Nachkommen von Sebastian Villiger»</span>
       </footer>
