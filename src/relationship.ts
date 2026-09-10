@@ -1,4 +1,6 @@
 import { peopleById } from './data'
+import { descendantMember, linkedDescendant, relationLabel } from './familyGraph'
+import type { FamilyMember } from './familyGraph'
 import type { Person } from './types'
 
 export interface RelationshipResult {
@@ -8,6 +10,14 @@ export interface RelationshipResult {
   labelFromAToB: string
   explanation: string
   path: Person[]
+}
+
+export interface MemberRelationshipResult {
+  labelFromAToB: string
+  explanation: string
+  path: FamilyMember[]
+  commonAncestor?: Person
+  connectionKind: 'blood' | 'partner' | 'mixed'
 }
 
 function pathToRoot(personId: string) {
@@ -106,5 +116,87 @@ export function getRelationship(a: Person, b: Person): RelationshipResult | null
     labelFromAToB,
     explanation,
     path: relationshipPath,
+  }
+}
+
+function directPartnerResult(a: FamilyMember, b: FamilyMember): MemberRelationshipResult | null {
+  if (a.kind === 'partner' && a.linkedPersonId === b.id) {
+    return {
+      labelFromAToB: relationLabel(a),
+      explanation: `${a.name} ist als ${relationLabel(a)} von ${b.name} in den Familienunterlagen erfasst.`,
+      path: [a, b],
+      connectionKind: 'partner',
+    }
+  }
+
+  if (b.kind === 'partner' && b.linkedPersonId === a.id) {
+    return {
+      labelFromAToB: relationLabel(b),
+      explanation: `${a.name} ist mit ${b.name} über die erfasste Beziehung «${b.relationship ?? 'Partnerschaft'}» verbunden.`,
+      path: [a, b],
+      connectionKind: 'partner',
+    }
+  }
+
+  return null
+}
+
+export function getMemberRelationship(a: FamilyMember, b: FamilyMember): MemberRelationshipResult | null {
+  if (a.id === b.id) {
+    return {
+      labelFromAToB: 'dieselbe Person',
+      explanation: `${a.name} und ${b.name} sind dieselbe Person.`,
+      path: [a],
+      connectionKind: a.kind === 'partner' ? 'partner' : 'blood',
+    }
+  }
+
+  const direct = directPartnerResult(a, b)
+  if (direct) return direct
+
+  const linkedA = linkedDescendant(a)
+  const linkedB = linkedDescendant(b)
+  if (!linkedA || !linkedB) return null
+
+  const blood = getRelationship(linkedA, linkedB)
+  if (!blood) return null
+
+  const bloodPath = blood.path.map(descendantMember)
+
+  if (a.kind === 'descendant' && b.kind === 'descendant') {
+    return {
+      labelFromAToB: blood.labelFromAToB,
+      explanation: blood.explanation,
+      path: bloodPath,
+      commonAncestor: blood.commonAncestor,
+      connectionKind: 'blood',
+    }
+  }
+
+  const path: FamilyMember[] = []
+  if (a.kind === 'partner') path.push(a)
+  path.push(...bloodPath)
+  if (b.kind === 'partner') path.push(b)
+
+  if (a.kind === 'partner' && b.kind === 'partner') {
+    return {
+      labelFromAToB: 'über Partnerschaften verbunden',
+      explanation: `${a.name} ist ${relationLabel(a)} von ${linkedA.name}; ${linkedA.name} ist zu ${linkedB.name}: ${blood.labelFromAToB}; ${b.name} ist ${relationLabel(b)} von ${linkedB.name}.`,
+      path,
+      commonAncestor: blood.commonAncestor,
+      connectionKind: 'mixed',
+    }
+  }
+
+  const partner = a.kind === 'partner' ? a : b
+  const linked = a.kind === 'partner' ? linkedA : linkedB
+  const other = a.kind === 'partner' ? linkedB : linkedA
+
+  return {
+    labelFromAToB: partner.relationship === 'Ehe' ? 'angeheiratete Verwandtschaft' : 'familiäre Verbindung über Partnerschaft',
+    explanation: `${partner.name} ist ${relationLabel(partner)} von ${linked.name}. ${linked.name} ist zu ${other.name}: ${blood.labelFromAToB}.`,
+    path,
+    commonAncestor: blood.commonAncestor,
+    connectionKind: 'mixed',
   }
 }
