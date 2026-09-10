@@ -7,7 +7,7 @@ Die Familienunterlagen enthalten personenbezogene Angaben zu möglicherweise noc
 - **Schutzmodus**: Standard beim ersten Öffnen. Lebensdaten potenziell lebender Personen werden verborgen.
 - **Private Vollansicht**: Alle aus den Unterlagen erfassten Angaben sowie lokale Korrekturen werden angezeigt.
 
-Die Wahl wird nur lokal im Browser unter `stammbaum-privacy-mode` gespeichert.
+Die Wahl wird nur lokal im Browser unter `stammbaum-privacy-mode` gespeichert. Der Modus kann über die Kopfzeile oder direkt auf der Smartphone-Startseite gewechselt werden.
 
 ## Lebensstatus und Heuristik
 
@@ -37,11 +37,24 @@ Diese Korrekturen:
 
 Korrekturen nummerierter Personen werden unter `stammbaum-person-edits-v1` gespeichert, Partnerkorrekturen unter `stammbaum-partner-edits-v1`. Beide Speicherbereiche bilden eine nicht-destruktive Arbeitsebene, bis ein fachliches Freigabe- und Persistenzmodell definiert ist.
 
+## Favoriten und Verlauf
+
+Für den Smartphone-Schnellzugriff werden zwei weitere rein lokale Navigationsspeicher verwendet:
+
+- `stammbaum-favorite-members-v1` für Favoriten,
+- `stammbaum-recent-members-v1` für die zuletzt angesehenen Personen.
+
+Dort werden ausschliesslich stabile interne IDs wie `p095` oder `partner:p095:1` gespeichert. Namen, Geburtsdaten, Orte oder andere Lebensdaten werden für diese Funktion nicht zusätzlich in den Navigationsspeicher kopiert. Die Darstellung auf der Startseite wird jeweils aus dem aktuellen Familiengraphen erzeugt und respektiert den aktiven Schutzmodus.
+
+Der Verlauf ist auf zwölf eindeutige Einträge begrenzt und kann auf der Startseite vollständig geleert werden. Favoriten bleiben bestehen, bis sie vom Benutzer wieder entfernt werden.
+
 ## Export und Import
 
 Lokale Korrekturen können als versionierte JSON-Datei exportiert und auf einem anderen Gerät wieder importiert werden. Das aktuelle Exportformat Version 2 trennt `personEdits` und `partnerEdits`; ältere Version-1-Sicherungen mit dem Feld `edits` bleiben importierbar.
 
 Beim Import werden nur bekannte Personen- bzw. Partner-IDs und formal gültige Korrektureinträge übernommen; andere Einträge werden übersprungen. Importierte Korrekturen werden mit bereits vorhandenen lokalen Korrekturen zusammengeführt.
+
+Favoriten und Verlauf sind bewusst **nicht** Bestandteil des Korrekturexports. Der Export dient der Sicherung fachlicher Änderungen, nicht der Synchronisation des persönlichen Navigationszustands.
 
 Die Exportdatei kann vollständige personenbezogene Angaben enthalten. Sie ist deshalb wie eine private Familiendatei zu behandeln und sollte nicht öffentlich geteilt oder ungeschützt abgelegt werden.
 
@@ -65,6 +78,7 @@ Die Exportdatei kann vollständige personenbezogene Angaben enthalten. Sie ist d
 - Abstammungslinie
 - Verwandtschaftsberechnung
 - Quellen-Seitennummer
+- Favoriten- und Verlaufseinträge als Navigationsziele
 
 ## Fachliche Grenze
 
