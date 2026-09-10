@@ -1,3 +1,4 @@
+import { buildFamilyMembers, partnerMemberId } from './familyGraph'
 import type { Person } from './types'
 
 export interface GenealogyValidationResult {
@@ -71,6 +72,48 @@ export function validateGenealogy(
       visited.add(current.id)
       current = current.parentId ? peopleById[current.parentId] : undefined
     }
+  }
+
+  const familyMembers = buildFamilyMembers(people)
+  const familyMemberIds = new Set<string>()
+  for (const member of familyMembers) {
+    if (familyMemberIds.has(member.id)) errors.push(`Doppelte Familiengraph-ID: ${member.id}.`)
+    familyMemberIds.add(member.id)
+
+    if (!member.name.trim()) errors.push(`Familiengraph-Knoten ${member.id} hat keinen Namen.`)
+
+    if (member.kind === 'partner') {
+      if (!member.linkedPersonId || !peopleById[member.linkedPersonId]) {
+        errors.push(`Partnerknoten ${member.id} verweist auf keine gültige Stammbaum-Person.`)
+        continue
+      }
+
+      const linked = peopleById[member.linkedPersonId]
+      const partnerIndex = member.partnerIndex
+      if (partnerIndex === undefined || !linked.partners[partnerIndex]) {
+        errors.push(`Partnerknoten ${member.id} hat keinen gültigen Partnerindex.`)
+        continue
+      }
+
+      const sourcePartner = linked.partners[partnerIndex]
+      if (member.id !== partnerMemberId(linked.id, partnerIndex)) {
+        errors.push(`Partnerknoten ${member.id} verwendet keine stabile erwartete ID.`)
+      }
+      if (member.name !== sourcePartner.name) {
+        errors.push(`Partnerknoten ${member.id} stimmt beim Namen nicht mit dem Quelldatensatz überein.`)
+      }
+      if (member.relationship !== sourcePartner.relationship) {
+        errors.push(`Partnerknoten ${member.id} stimmt beim Beziehungstyp nicht mit dem Quelldatensatz überein.`)
+      }
+      if (member.generation !== linked.generation) {
+        errors.push(`Partnerknoten ${member.id} muss für die Darstellung Generation ${linked.generation} zugeordnet sein.`)
+      }
+    }
+  }
+
+  const expectedMemberCount = people.length + people.reduce((sum, person) => sum + person.partners.length, 0)
+  if (familyMembers.length !== expectedMemberCount) {
+    errors.push(`Familiengraph enthält ${familyMembers.length} statt erwarteter ${expectedMemberCount} Personenknoten.`)
   }
 
   return { errors, warnings }
