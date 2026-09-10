@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import CorrectionDataSheet from './CorrectionDataSheet'
 import { people } from './data'
 import { useEdits } from './EditContext'
 import { useFamilyNavigation } from './FamilyNavigationContext'
@@ -34,8 +35,9 @@ export default function HomeView({
   onOpenSearch: () => void
   onOpenTree: () => void
 }) {
-  const { mode } = usePrivacy()
+  const { mode, toggleMode } = usePrivacy()
   const {
+    editedCount,
     getLifeStatus,
     getPartnerLifeStatus,
     getPartnerMember,
@@ -48,6 +50,7 @@ export default function HomeView({
     recentIds,
     toggleFavorite,
   } = useFamilyNavigation()
+  const [correctionsOpen, setCorrectionsOpen] = useState(false)
 
   const resolveMember = (id: string): FamilyMember | undefined => {
     const base = familyMembersById[id]
@@ -72,7 +75,6 @@ export default function HomeView({
 
   const favorites = useMemo(
     () => favoriteIds.map(resolveMember).filter((member): member is FamilyMember => Boolean(member)),
-    // getPerson/getPartnerMember change when local corrections change.
     [favoriteIds, getPartnerMember, getPerson],
   )
 
@@ -164,6 +166,25 @@ export default function HomeView({
         <b aria-hidden="true">→</b>
       </button>
 
+      <section className="home-utilities" aria-label="App-Einstellungen">
+        <button type="button" onClick={toggleMode}>
+          <span aria-hidden="true">{mode === 'protected' ? '◈' : '○'}</span>
+          <span>
+            <strong>{mode === 'protected' ? 'Schutzmodus aktiv' : 'Private Vollansicht'}</strong>
+            <small>{mode === 'protected' ? 'Lebensdaten geschützt' : 'Alle erfassten Angaben sichtbar'}</small>
+          </span>
+          <b aria-hidden="true">→</b>
+        </button>
+        <button type="button" onClick={() => setCorrectionsOpen(true)}>
+          <span aria-hidden="true">↥</span>
+          <span>
+            <strong>Lokale Korrekturen</strong>
+            <small>{editedCount} {editedCount === 1 ? 'Änderung' : 'Änderungen'} · sichern oder importieren</small>
+          </span>
+          <b aria-hidden="true">→</b>
+        </button>
+      </section>
+
       <section className="home-section">
         <div className="home-section-heading">
           <div>
@@ -198,6 +219,8 @@ export default function HomeView({
           </div>
         )}
       </section>
+
+      <CorrectionDataSheet open={correctionsOpen} onClose={() => setCorrectionsOpen(false)} />
     </div>
   )
 }
