@@ -37,6 +37,9 @@ jobs:
       - name: Genealogische Daten prüfen
         run: npm run validate:data
 
+      - name: UX-Regressions prüfen
+        run: npm run validate:ux
+
       - name: Bauen
         run: npm run build
 
