@@ -59,84 +59,88 @@ export default function SettingsMenu() {
           <span aria-hidden="true">⚙</span>
         </button>
 
-        {open && (
-          <section id="app-settings-panel" className="settings-panel" aria-label="Einstellungen">
-            <div className="settings-panel-header">
-              <div>
-                <span className="eyebrow">App</span>
-                <h2>Einstellungen</h2>
-              </div>
-              <button type="button" className="settings-close" onClick={() => setOpen(false)} aria-label="Einstellungen schliessen">×</button>
+        <section
+          id="app-settings-panel"
+          className="settings-panel"
+          aria-label="Einstellungen"
+          aria-hidden={!open}
+          hidden={!open}
+        >
+          <div className="settings-panel-header">
+            <div>
+              <span className="eyebrow">App</span>
+              <h2>Einstellungen</h2>
             </div>
+            <button type="button" className="settings-close" onClick={() => setOpen(false)} aria-label="Einstellungen schliessen">×</button>
+          </div>
 
-            <div className="settings-section">
-              <div className="settings-section-heading">
-                <strong>Darstellung</strong>
-                <small>Farbschema</small>
-              </div>
-              <div className="settings-theme-options" role="group" aria-label="Farbschema wählen">
-                <button
-                  type="button"
-                  className={theme === 'light' ? 'is-active' : ''}
-                  aria-pressed={theme === 'light'}
-                  onClick={() => setTheme('light')}
-                >
-                  <span aria-hidden="true">☀</span>
-                  <strong>Hell</strong>
-                </button>
-                <button
-                  type="button"
-                  className={theme === 'dark' ? 'is-active' : ''}
-                  aria-pressed={theme === 'dark'}
-                  onClick={() => setTheme('dark')}
-                >
-                  <span aria-hidden="true">◐</span>
-                  <strong>Dunkel</strong>
-                </button>
-              </div>
+          <div className="settings-section">
+            <div className="settings-section-heading">
+              <strong>Darstellung</strong>
+              <small>Farbschema</small>
             </div>
-
-            <div className="settings-section">
-              <div className="settings-section-heading">
-                <strong>Datenschutz</strong>
-                <small>{privacyMode === 'protected' ? 'Schutz aktiv' : 'Vollansicht aktiv'}</small>
-              </div>
+            <div className="settings-theme-options" role="group" aria-label="Farbschema wählen">
               <button
                 type="button"
-                className={`settings-privacy-button${privacyMode === 'protected' ? ' is-protected' : ''}`}
-                onClick={() => setPrivacyMode(privacyMode === 'protected' ? 'private' : 'protected')}
-                aria-pressed={privacyMode === 'protected'}
+                className={theme === 'light' ? 'is-active' : ''}
+                aria-pressed={theme === 'light'}
+                onClick={() => setTheme('light')}
               >
-                <span className="settings-privacy-icon" aria-hidden="true">{privacyMode === 'protected' ? '◈' : '○'}</span>
-                <span>
-                  <strong>{privacyMode === 'protected' ? 'Schutzmodus' : 'Vollansicht'}</strong>
-                  <small>{privacyMode === 'protected' ? 'Lebensdaten potenziell lebender Personen werden ausgeblendet.' : 'Alle erfassten Lebensdaten werden angezeigt.'}</small>
-                </span>
-                <b aria-hidden="true">›</b>
+                <span aria-hidden="true">☀</span>
+                <strong>Hell</strong>
               </button>
-              <p className="settings-public-note">
-                Der Schutzmodus verändert nur die Darstellung. Die über GitHub Pages veröffentlichten Quelldaten sind technisch öffentlich abrufbar.
-              </p>
+              <button
+                type="button"
+                className={theme === 'dark' ? 'is-active' : ''}
+                aria-pressed={theme === 'dark'}
+                onClick={() => setTheme('dark')}
+              >
+                <span aria-hidden="true">◐</span>
+                <strong>Dunkel</strong>
+              </button>
             </div>
+          </div>
 
-            <div className="settings-section">
-              <div className="settings-section-heading">
-                <strong>Daten & App</strong>
-                <small>Gerätelokal</small>
-              </div>
-              <button type="button" className="settings-data-button" onClick={openCorrections}>
-                <span>
-                  <strong>Lokale Korrekturen</strong>
-                  <small>{editedCount} {editedCount === 1 ? 'Änderung' : 'Änderungen'} · sichern oder importieren</small>
-                </span>
-                <b aria-hidden="true">›</b>
-              </button>
-              <div className="settings-install-wrap">
-                <InstallAppCard />
-              </div>
+          <div className="settings-section">
+            <div className="settings-section-heading">
+              <strong>Datenschutz</strong>
+              <small>{privacyMode === 'protected' ? 'Schutz aktiv' : 'Vollansicht aktiv'}</small>
             </div>
-          </section>
-        )}
+            <button
+              type="button"
+              className={`settings-privacy-button${privacyMode === 'protected' ? ' is-protected' : ''}`}
+              onClick={() => setPrivacyMode(privacyMode === 'protected' ? 'private' : 'protected')}
+              aria-pressed={privacyMode === 'protected'}
+            >
+              <span className="settings-privacy-icon" aria-hidden="true">{privacyMode === 'protected' ? '◈' : '○'}</span>
+              <span>
+                <strong>{privacyMode === 'protected' ? 'Schutzmodus' : 'Vollansicht'}</strong>
+                <small>{privacyMode === 'protected' ? 'Lebensdaten potenziell lebender Personen werden ausgeblendet.' : 'Alle erfassten Lebensdaten werden angezeigt.'}</small>
+              </span>
+              <b aria-hidden="true">›</b>
+            </button>
+            <p className="settings-public-note">
+              Der Schutzmodus verändert nur die Darstellung. Die über GitHub Pages veröffentlichten Quelldaten sind technisch öffentlich abrufbar.
+            </p>
+          </div>
+
+          <div className="settings-section">
+            <div className="settings-section-heading">
+              <strong>Daten & App</strong>
+              <small>Gerätelokal</small>
+            </div>
+            <button type="button" className="settings-data-button" onClick={openCorrections}>
+              <span>
+                <strong>Lokale Korrekturen</strong>
+                <small>{editedCount} {editedCount === 1 ? 'Änderung' : 'Änderungen'} · sichern oder importieren</small>
+              </span>
+              <b aria-hidden="true">›</b>
+            </button>
+            <div className="settings-install-wrap">
+              <InstallAppCard />
+            </div>
+          </div>
+        </section>
       </div>
 
       <CorrectionDataSheet open={correctionsOpen} onClose={() => setCorrectionsOpen(false)} />
