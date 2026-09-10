@@ -1,6 +1,7 @@
 import type { Partner, Person } from './types'
 
 export type PrivacyMode = 'private' | 'protected'
+export type LifeStatus = 'living' | 'deceased' | 'unknown'
 
 const MAX_PLAUSIBLE_AGE = 120
 
@@ -10,7 +11,12 @@ function extractYear(value?: string) {
   return match ? Number(match[1]) : undefined
 }
 
-export function isPotentiallyLivingRecord(record: Pick<Person | Partner, 'birth' | 'death'>) {
+export function isPotentiallyLivingRecord(
+  record: Pick<Person | Partner, 'birth' | 'death'>,
+  explicitStatus: LifeStatus = 'unknown',
+) {
+  if (explicitStatus === 'living') return true
+  if (explicitStatus === 'deceased') return false
   if (record.death) return false
 
   const birthYear = extractYear(record.birth)
@@ -22,20 +28,32 @@ export function isPotentiallyLivingRecord(record: Pick<Person | Partner, 'birth'
   return true
 }
 
-export function isProtectedPerson(person: Person, mode: PrivacyMode) {
-  return mode === 'protected' && isPotentiallyLivingRecord(person)
+export function isProtectedPerson(
+  person: Person,
+  mode: PrivacyMode,
+  explicitStatus: LifeStatus = 'unknown',
+) {
+  return mode === 'protected' && isPotentiallyLivingRecord(person, explicitStatus)
 }
 
 export function isProtectedPartner(partner: Partner, mode: PrivacyMode) {
   return mode === 'protected' && isPotentiallyLivingRecord(partner)
 }
 
-export function protectedLifeLabel(person: Person, mode: PrivacyMode) {
-  return isProtectedPerson(person, mode) ? 'Lebensdaten geschützt' : undefined
+export function protectedLifeLabel(
+  person: Person,
+  mode: PrivacyMode,
+  explicitStatus: LifeStatus = 'unknown',
+) {
+  return isProtectedPerson(person, mode, explicitStatus) ? 'Lebensdaten geschützt' : undefined
 }
 
-export function protectedSearchParts(person: Person, mode: PrivacyMode) {
-  if (!isProtectedPerson(person, mode)) {
+export function protectedSearchParts(
+  person: Person,
+  mode: PrivacyMode,
+  explicitStatus: LifeStatus = 'unknown',
+) {
+  if (!isProtectedPerson(person, mode, explicitStatus)) {
     return [person.birth, person.birthPlace, person.death, person.deathPlace]
   }
 
@@ -44,4 +62,10 @@ export function protectedSearchParts(person: Person, mode: PrivacyMode) {
 
 export function privacyModeLabel(mode: PrivacyMode) {
   return mode === 'protected' ? 'Schutzmodus aktiv' : 'Private Vollansicht'
+}
+
+export function lifeStatusLabel(status: LifeStatus) {
+  if (status === 'living') return 'lebend'
+  if (status === 'deceased') return 'verstorben'
+  return 'nicht fachlich festgelegt'
 }
