@@ -1,0 +1,154 @@
+# Automatisches privates Deployment analog zur Essens-Check-App:
+# PRs werden separat durch ci.yml geprüft; ein Push auf main veröffentlicht
+# die geprüfte Version auf dem privaten Stammbaum-Server.
+name: Privat veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stammbaum-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Privates Deployment
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.STAMMBAUM_DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.STAMMBAUM_DEPLOY_USER }}
+      APP_DOMAIN: ${{ secrets.STAMMBAUM_DOMAIN }}
+      APP_USER: ${{ secrets.STAMMBAUM_USER }}
+      APP_PASSWORD: ${{ secrets.STAMMBAUM_PASSWORD }}
+      SSH_KEY: ${{ secrets.STAMMBAUM_DEPLOY_SSH_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.STAMMBAUM_DEPLOY_KNOWN_HOSTS }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deployment-Konfiguration prüfen
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in DEPLOY_HOST DEPLOY_USER APP_DOMAIN APP_USER APP_PASSWORD SSH_KEY SSH_KNOWN_HOSTS; do
+            if [ -z "${!name:-}" ]; then
+              echo "Fehlendes Production-Secret: $name"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Deployment abgebrochen. Siehe docs/DEPLOYMENT.md für die einmalige Einrichtung."
+            exit 1
+          fi
+          if [[ "$APP_DOMAIN" == *"://"* || "$APP_DOMAIN" == */* ]]; then
+            echo "STAMMBAUM_DOMAIN nur als Hostname setzen, z. B. familie.example.ch"
+            exit 1
+          fi
+
+      - name: Produktionscontainer bauen
+        run: docker build -t "stammbaum-villiger:${GITHUB_SHA}" .
+
+      - name: SSH sicher vorbereiten
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/stammbaum_deploy"
+          chmod 600 "$HOME/.ssh/stammbaum_deploy"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - name: Container und Passwortdatei übertragen
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_file="/tmp/stammbaum-${GITHUB_SHA}.tar.gz"
+          password_file="/tmp/stammbaum-password-${GITHUB_SHA}"
+          docker save "stammbaum-villiger:${GITHUB_SHA}" | gzip -9 > "$image_file"
+          printf '%s' "$APP_PASSWORD" > "$password_file"
+          chmod 600 "$password_file"
+          scp -i "$HOME/.ssh/stammbaum_deploy" \
+            "$image_file" "$password_file" \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
+          rm -f "$image_file" "$password_file"
+
+      - name: Neue Version auf dem privaten Server aktivieren
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i "$HOME/.ssh/stammbaum_deploy" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "APP_SHA='${GITHUB_SHA}' APP_DOMAIN='${APP_DOMAIN}' APP_USER='${APP_USER}' sh -s" <<'REMOTE'
+          set -eu
+
+          app_dir="${HOME}/stammbaum-production"
+          secret_dir="${app_dir}/secrets"
+          image_file="/tmp/stammbaum-${APP_SHA}.tar.gz"
+          incoming_password="/tmp/stammbaum-password-${APP_SHA}"
+
+          mkdir -p "$secret_dir"
+          chmod 700 "$app_dir" "$secret_dir"
+          mv "$incoming_password" "$secret_dir/password"
+          chmod 600 "$secret_dir/password"
+
+          gzip -dc "$image_file" | docker load
+          rm -f "$image_file"
+
+          docker rm -f stammbaum-villiger >/dev/null 2>&1 || true
+          docker run -d \
+            --name stammbaum-villiger \
+            --restart unless-stopped \
+            -p 80:80 \
+            -p 443:443 \
+            -e "STAMMBAUM_SITE_ADDRESS=${APP_DOMAIN}" \
+            -e "STAMMBAUM_USER=${APP_USER}" \
+            -e "STAMMBAUM_PASSWORD_FILE=/run/secrets/stammbaum-password" \
+            -v "${secret_dir}/password:/run/secrets/stammbaum-password:ro" \
+            -v stammbaum-caddy-data:/data \
+            -v stammbaum-caddy-config:/config \
+            "stammbaum-villiger:${APP_SHA}"
+
+          sleep 3
+          docker inspect -f '{{.State.Running}}' stammbaum-villiger | grep -qx true
+          REMOTE
+
+      - name: HTTPS und Zugriffsschutz prüfen
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://${APP_DOMAIN}/"
+          anonymous_code=""
+
+          for attempt in $(seq 1 30); do
+            anonymous_code="$(curl --connect-timeout 5 --max-time 10 -sS -o /dev/null -w '%{http_code}' "$url" || true)"
+            if [ "$anonymous_code" = "401" ]; then
+              break
+            fi
+            echo "HTTPS noch nicht bereit (Versuch ${attempt}/30, Status ${anonymous_code:-keiner})."
+            sleep 5
+          done
+
+          if [ "$anonymous_code" != "401" ]; then
+            echo "Fehler: anonymer Zugriff liefert nicht 401."
+            exit 1
+          fi
+
+          auth_code="$(curl --connect-timeout 5 --max-time 15 -sS -u "${APP_USER}:${APP_PASSWORD}" -o /dev/null -w '%{http_code}' "$url")"
+          if [ "$auth_code" != "200" ]; then
+            echo "Fehler: authentifizierter Zugriff liefert $auth_code statt 200."
+            exit 1
+          fi
+
+          sw_code="$(curl --connect-timeout 5 --max-time 15 -sS -u "${APP_USER}:${APP_PASSWORD}" -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/sw.js")"
+          if [ "$sw_code" != "200" ]; then
+            echo "Fehler: Service Worker liefert $sw_code statt 200."
+            exit 1
+          fi
+
+          echo "Privates HTTPS-Deployment und Zugriffsschutz erfolgreich geprüft."
