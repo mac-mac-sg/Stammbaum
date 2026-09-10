@@ -4,11 +4,13 @@ Die App wird smartphone-first weiterentwickelt. Die Desktop-Ansicht bleibt erhal
 
 ## Leitprinzip
 
-Die App-Führung ist auf drei Kernaufgaben reduziert:
+Die App-Führung ist auf drei klare Ziele reduziert:
 
-1. **Start** – schnell wieder einsteigen.
+1. **Start** – den Stammbaum als Ganzes entdecken und persönliche Schnellzugriffe nutzen.
 2. **Suche** – jede erfasste Person direkt finden.
-3. **Familie** – im Familienkontext navigieren und bei Bedarf den Gesamtbaum öffnen.
+3. **Stammbaum** – den neutralen Gesamtbaum ohne vorausgewählte Person öffnen.
+
+Der Primärpfad lautet damit: **erst Stammbaum entdecken, dann bei Interesse eine Person vertiefen**. Der Familienfokus ist kein eigener Haupttab mehr, sondern entsteht erst aus einer konkreten Personenauswahl.
 
 Administrative Funktionen wie Darstellung, Schutzmodus, Installation sowie Export/Import lokaler Korrekturen liegen im Zahnrad-Menü und konkurrieren nicht mit der täglichen Navigation.
 
@@ -18,24 +20,22 @@ Die Bottom Navigation besitzt auf Smartphones drei feste Ziele:
 
 - **Start**
 - **Suche**
-- **Familie**
+- **Stammbaum**
 
-Der frühere separate Punkt **Person** wurde entfernt, weil die aktuell fokussierte Person bereits direkt über ihre Karte geöffnet werden kann. Damit gibt es nur noch einen klaren Weg zu den Personendetails.
+Der frühere separate Punkt **Person** wurde entfernt. Auch **Familie** ist kein Hauptziel mehr: Ein Tipp auf **Stammbaum** öffnet immer die neutrale Gesamtansicht mit fünf Generationen. Erst ein Tipp auf eine Person erzeugt Personenfokus, Details oder den Familienkontext.
 
-Die zusätzliche Suchleiste oberhalb des Familienbereichs wird auf Smartphones ausgeblendet. Die Suche hat mobil genau einen festen Einstieg über **Suche**. Auf Desktop bleibt die kompakte Suchleiste erhalten.
+Die zusätzliche Suchleiste oberhalb des Baumbereichs wird auf Smartphones ausgeblendet. Die Suche hat mobil genau einen festen Einstieg über **Suche**. Auf Desktop bleibt die kompakte Suchleiste erhalten.
 
 ## Startseite
 
-Die Startseite ist bewusst kurz. Sie zeigt in dieser Reihenfolge:
+Die Startseite beginnt bewusst nicht mit einer Person. Sie zeigt in dieser Reihenfolge:
 
-1. einen grossen Sucheinstieg,
-2. **Weiter bei** mit dem zuletzt verwendeten Familienfokus,
+1. **Stammbaum entdecken** mit direktem Einstieg in den neutralen Gesamtbaum,
+2. gezielte Personensuche,
 3. Favoriten,
 4. zuletzt angesehene Personen.
 
-Der zuletzt verwendete Familienfokus wird lokal als stabile Personen-ID gespeichert. Beim allerersten Start dient `p095` weiterhin als Fallback.
-
-Favoriten und Verlauf werden ebenfalls lokal im Browser gespeichert. Persistiert werden nur stabile interne IDs; Lebensdaten werden für diese Navigationsfunktionen nicht zusätzlich dupliziert. Der Verlauf ist auf zwölf Einträge begrenzt und kann auf der Startseite geleert werden.
+Favoriten und Verlauf bleiben damit nützliche persönliche Schnellzugriffe, bestimmen aber nicht mehr den Ausgangspunkt der App. Der Verlauf ist auf zwölf Einträge begrenzt und kann auf der Startseite geleert werden.
 
 ## Suche
 
@@ -45,43 +45,42 @@ Ein Treffer auf eine nummerierte Person öffnet deren Familienkontext. Ein Treff
 
 Im Schutzmodus wird bei potenziell lebenden Personen nur der Name durchsucht; Lebensdaten und Orte werden nicht als Suchkriterien verwendet.
 
+Die mobile Suche ist ein Haupttab und wechselt deshalb praktisch sofort. Sie verwendet nur einen kurzen Fade und keine ausgeprägte räumliche Einfahrbewegung.
+
 ## Familienfokus
 
-Der Fokusmodus löst das zentrale Darstellungsproblem eines grossen Stammbaums auf kleinen Screens: Statt alle Äste gleichzeitig zu verkleinern, wird die Navigation personenorientiert.
+Der Fokusmodus löst das Darstellungsproblem eines grossen Stammbaums auf kleinen Screens: Statt alle Äste gleichzeitig zu verkleinern, wird nach Auswahl einer Person deren unmittelbarer Familienkontext gezeigt.
 
-Der Familienfokus zeigt:
-
-- Elternlinie,
-- ausgewählte Person,
-- Partnerpersonen,
-- Geschwister,
-- Kinder.
-
-Ein Tipp auf die ausgewählte Personenkarte öffnet direkt die Personendetails. Der separate, redundante Button **Personendetails** wurde entfernt. Der Verwandtschafts-Finder bleibt als eigenständige Aktion erhalten.
-
-Partnerkarten öffnen die jeweilige Partnerdetailansicht. Beziehungskarten innerhalb der Personendetails sind ebenfalls direkt antippbar und führen zur gleichen Partnerdetailansicht.
+Der Familienfokus zeigt Elternlinie, ausgewählte Person, Partnerpersonen, Geschwister und Kinder. Ein Tipp auf die ausgewählte Personenkarte öffnet direkt die Personendetails. Partnerkarten öffnen die jeweilige Partnerdetailansicht. Der Verwandtschafts-Finder bleibt als eigenständige Aktion erhalten.
 
 ## Gesamtbaum
 
-Innerhalb des Familienbereichs kann zwischen **Familie** und **Gesamtbaum** gewechselt werden. Der Gesamtbaum bleibt für Orientierung und Überblick verfügbar, ist aber kein eigener Hauptnavigationspunkt.
+Der Gesamtbaum ist jetzt selbst ein Hauptziel. Beim Einstieg über Start oder den Tab **Stammbaum** wird er neutral geöffnet:
 
-In der Gesamtansicht werden Partnerinnen und Partner als eigene Karten direkt neben der nummerierten Person dargestellt. Eine Paarlinie verbindet die Karten; der Kinderast setzt unter der gemeinsamen Familienachse an. Verschieben erfolgt per Drag, Zoomen per Pinch-Geste oder über die Zoom-Schaltflächen.
+- alle fünf Generationen,
+- keine vorausgewählte Person,
+- keine hervorgehobene Abstammungslinie,
+- kein ausgewählter Personen-Chip.
 
-## Verwandtschafts-Finder
-
-Vom Familienfokus aus kann für die aktuell gewählte Person eine zweite erfasste Person gesucht werden. Die Suche umfasst auch Partnerpersonen und verwendet dieselbe Suchlogik wie die übrige App.
-
-Der Finder unterscheidet Blutsverwandtschaft, direkte Paarbeziehungen und gemischte Verbindungen. Falls keine Verbindung berechnet werden kann, steht unmittelbar **Andere Person vergleichen** zur Verfügung; die Nutzerführung endet nicht mehr in einer Sackgasse.
+Erst nach einer Personenauswahl wird ein Kontext hervorgehoben. Verschieben erfolgt per Drag, Zoomen per Pinch-Geste oder über die Zoom-Schaltflächen.
 
 ## Einstellungen
 
-Das Zahnrad-Menü bündelt Funktionen, die nicht zur täglichen Familiennavigation gehören:
+Das Zahnrad-Menü ist als echte Aktion in die App-Kopfzeile integriert. Das Symbol wird als kontrollierbares SVG gerendert und nicht als plattformabhängiges Unicode-Zeichen.
 
-- Hell-/Dunkelmodus,
-- Schutzmodus/Vollansicht,
-- transparente Erklärung, dass der Schutzmodus nur die Darstellung verändert und keine Zugriffskontrolle für die öffentliche GitHub-Pages-App ist,
-- Export/Import lokaler Korrekturen,
-- PWA-/Homescreen-Installation, sofern vom Browser unterstützt.
+Das Popover öffnet räumlich vom Zahnrad aus mit einer kurzen Ease-out-Bewegung. Es bündelt Hell-/Dunkelmodus, Schutzmodus/Vollansicht, die Erklärung zur öffentlichen GitHub-Pages-Bereitstellung, Export/Import lokaler Korrekturen und die PWA-/Homescreen-Installation.
+
+## Design Engineering
+
+Die Interaktionen orientieren sich an den geprüften Design-Engineering-Prinzipien:
+
+- unmittelbares Press-Feedback auf antippbaren Elementen,
+- kurze UI-Übergänge mit gemeinsamer starker Ease-out-Kurve,
+- häufig genutzte Hauptnavigation ohne unnötige Animation,
+- origin-aware Popover für Einstellungen,
+- transparente Materialien nur dort, wo sie Hierarchie schaffen,
+- `prefers-reduced-motion`, `prefers-reduced-transparency` und `prefers-contrast` als Accessibility-Fallbacks,
+- besser lesbare Sekundärtexte statt 9-Pixel-Mikrotypografie.
 
 ## Quellen und Herkunft
 
