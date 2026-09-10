@@ -19,6 +19,7 @@ import './corrections.css'
 import './partner-person.css'
 import './tree-couples.css'
 import './home.css'
+import './install.css'
 
 assertValidGenealogy(people, peopleById, rootId)
 
