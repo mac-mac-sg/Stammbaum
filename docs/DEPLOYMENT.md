@@ -22,7 +22,7 @@ Die genealogischen Daten liegen im JavaScript-Bundle. Ein rein clientseitiger Lo
 
 Benötigt wird ein kleiner Linux-Server/VPS mit:
 
-- öffentlicher IPv4- oder IPv6-Adresse,
+- öffentlicher IPv4-Adresse oder DNS-Hostname für SSH,
 - installiertem Docker,
 - SSH-Zugang,
 - freien Ports 80 und 443,
@@ -36,7 +36,7 @@ Im Repository unter **Settings → Secrets and variables → Actions** werden fo
 
 | Secret | Inhalt |
 | --- | --- |
-| `STAMMBAUM_DEPLOY_HOST` | IP-Adresse oder SSH-Hostname des Servers |
+| `STAMMBAUM_DEPLOY_HOST` | IPv4-Adresse oder SSH-Hostname des Servers, ohne Protokoll |
 | `STAMMBAUM_DEPLOY_USER` | SSH-Benutzer auf dem Server |
 | `STAMMBAUM_DEPLOY_SSH_KEY` | privater SSH-Key für diesen Deployment-Benutzer |
 | `STAMMBAUM_DEPLOY_KNOWN_HOSTS` | vertrauenswürdiger `known_hosts`-Eintrag des Servers |
