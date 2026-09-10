@@ -1,5 +1,8 @@
+import { useState } from 'react'
+import EditPartnerSheet from './EditPartnerSheet'
+import { useEdits } from './EditContext'
 import { usePrivacy } from './PrivacyContext'
-import { isPotentiallyLivingRecord } from './privacy'
+import { isPotentiallyLivingRecord, lifeStatusLabel } from './privacy'
 import { relationLabel } from './familyGraph'
 import type { FamilyMember } from './familyGraph'
 import type { Person } from './types'
@@ -31,9 +34,24 @@ export default function PartnerPersonSheet({
   onNavigateLinked: (id: string) => void
 }) {
   const { mode } = usePrivacy()
+  const {
+    getPartnerLifeStatus,
+    getPartnerMember,
+    hasPartnerEdit,
+  } = useEdits()
+  const [editOpen, setEditOpen] = useState(false)
+
   if (!member || member.kind !== 'partner') return null
 
-  const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(member)
+  const effectiveMember = getPartnerMember(member.id) ?? member
+  const lifeStatus = getPartnerLifeStatus(effectiveMember.id)
+  const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(effectiveMember, lifeStatus)
+  const locallyEdited = hasPartnerEdit(effectiveMember.id)
+
+  const close = () => {
+    setEditOpen(false)
+    onClose()
+  }
 
   return (
     <>
@@ -41,22 +59,28 @@ export default function PartnerPersonSheet({
         type="button"
         className={`partner-person-backdrop${open ? ' is-open' : ''}`}
         aria-label="Partnerdetails schliessen"
-        onClick={onClose}
+        onClick={close}
       />
       <aside
         className={`partner-person-sheet${open ? ' is-open' : ''}`}
-        aria-label={`Details zu ${member.name}`}
+        aria-label={`Details zu ${effectiveMember.name}`}
         aria-hidden={!open}
       >
         <div className="sheet-handle" aria-hidden="true" />
         <div className="partner-person-header">
           <div>
-            <span className="eyebrow">Eigenständiger Partnerdatensatz</span>
-            <h2>{member.name}</h2>
-            <span className="partner-type-badge">{relationLabel(member)}</span>
+            <span className="eyebrow">Partnerperson</span>
+            <h2>{effectiveMember.name}</h2>
+            <span className="partner-type-badge">{relationLabel(effectiveMember)}</span>
             {protectedMember && <span className="privacy-badge">Lebensdaten geschützt</span>}
+            {locallyEdited && <span className="local-edit-badge">Lokal korrigiert</span>}
           </div>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Schliessen">×</button>
+          <div className="partner-person-actions">
+            {mode === 'private' && (
+              <button type="button" className="edit-button" onClick={() => setEditOpen(true)}>Bearbeiten</button>
+            )}
+            <button type="button" className="icon-button" onClick={close} aria-label="Schliessen">×</button>
+          </div>
         </div>
 
         <section className="partner-person-section">
@@ -66,11 +90,14 @@ export default function PartnerPersonSheet({
               type="button"
               className="partner-linked-person"
               onClick={() => {
-                onClose()
+                close()
                 onNavigateLinked(linkedPerson.id)
               }}
             >
-              <span>{member.relationship ?? 'Partnerschaft'}{member.relationshipStatus ? ` · ${member.relationshipStatus}` : ''}</span>
+              <span>
+                {effectiveMember.relationship ?? 'Partnerschaft'}
+                {effectiveMember.relationshipStatus ? ` · ${effectiveMember.relationshipStatus}` : ''}
+              </span>
               <strong>{linkedPerson.name}</strong>
               <b aria-hidden="true">→</b>
             </button>
@@ -87,29 +114,38 @@ export default function PartnerPersonSheet({
             </div>
           ) : (
             <dl className="facts">
-              <div><dt>Geburt</dt><dd>{formatDate(member.birth)}</dd></div>
-              <div><dt>Geburtsort</dt><dd>{member.birthPlace ?? 'nicht angegeben'}</dd></div>
-              <div><dt>Tod</dt><dd>{formatDate(member.death)}</dd></div>
-              <div><dt>Sterbeort</dt><dd>{member.deathPlace ?? 'nicht angegeben'}</dd></div>
+              <div><dt>Geburt</dt><dd>{formatDate(effectiveMember.birth)}</dd></div>
+              <div><dt>Geburtsort</dt><dd>{effectiveMember.birthPlace ?? 'nicht angegeben'}</dd></div>
+              <div><dt>Tod</dt><dd>{formatDate(effectiveMember.death)}</dd></div>
+              <div><dt>Sterbeort</dt><dd>{effectiveMember.deathPlace ?? 'nicht angegeben'}</dd></div>
             </dl>
           )}
+          <p className="source-hint partner-life-status">
+            Lebensstatus: {lifeStatusLabel(lifeStatus)}{lifeStatus === 'unknown' ? ' · Schutz über Heuristik' : ' · lokal festgelegt'}
+          </p>
         </section>
 
-        {!protectedMember && member.notes && (
+        {!protectedMember && effectiveMember.notes && (
           <section className="partner-person-section">
             <h3>Hinweis</h3>
-            <p className="uncertain-note">{member.notes}</p>
+            <p className="uncertain-note">{effectiveMember.notes}</p>
           </section>
         )}
 
         <section className="partner-person-section source-section">
           <h3>Quelle & Modellierung</h3>
-          <p>Nachkommen von Sebastian Villiger, Seite {member.source} von 9.</p>
+          <p>Nachkommen von Sebastian Villiger, Seite {effectiveMember.source} von 9.</p>
           <p className="source-hint">
-            Dieser Partner wurde aus dem bisherigen Beziehungsfeld als eigenständige Person mit stabiler ID in den Familiengraph überführt. Eltern oder weitere Vorfahren werden nicht ergänzt, solange sie nicht in einer Quelle belegt sind.
+            Dieser Partner wurde aus dem dokumentierten Beziehungsfeld als eigenständiger Knoten in den Familiengraph überführt. Lokale Korrekturen verändern die Scanquelle nicht; Eltern oder weitere Vorfahren werden nur ergänzt, wenn sie durch eine Quelle belegt sind.
           </p>
         </section>
       </aside>
+
+      <EditPartnerSheet
+        member={effectiveMember}
+        open={editOpen && mode === 'private'}
+        onClose={() => setEditOpen(false)}
+      />
     </>
   )
 }
