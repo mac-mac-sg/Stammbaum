@@ -15,6 +15,15 @@ function getInitialTheme(): ThemeMode {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+function SettingsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+      <path d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M19.1 13.7a7.8 7.8 0 0 0 .05-1.7 7.8 7.8 0 0 0-.05-1.7l2-1.55-2-3.45-2.48 1a7.93 7.93 0 0 0-2.94-1.7L13.3 2h-4l-.38 2.6a7.93 7.93 0 0 0-2.94 1.7l-2.48-1-2 3.45 2 1.55a7.8 7.8 0 0 0-.05 1.7c0 .58.02 1.14.05 1.7l-2 1.55 2 3.45 2.48-1a7.93 7.93 0 0 0 2.94 1.7L9.3 22h4l.38-2.6a7.93 7.93 0 0 0 2.94-1.7l2.48 1 2-3.45-2-1.55Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function SettingsMenu() {
   const { mode: privacyMode, setMode: setPrivacyMode } = usePrivacy()
   const { editedCount } = useEdits()
@@ -38,14 +47,14 @@ export default function SettingsMenu() {
 
   return (
     <>
-      {open && (
-        <button
-          type="button"
-          className="settings-backdrop"
-          aria-label="Einstellungen schliessen"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      <button
+        type="button"
+        className={`settings-backdrop${open ? ' is-open' : ''}`}
+        aria-label="Einstellungen schliessen"
+        aria-hidden={!open}
+        tabIndex={open ? 0 : -1}
+        onClick={() => setOpen(false)}
+      />
 
       <div className="settings-menu-host">
         <button
@@ -56,15 +65,14 @@ export default function SettingsMenu() {
           aria-controls="app-settings-panel"
           onClick={() => setOpen((current) => !current)}
         >
-          <span aria-hidden="true">⚙</span>
+          <SettingsIcon />
         </button>
 
         <section
           id="app-settings-panel"
-          className="settings-panel"
+          className={`settings-panel${open ? ' is-open' : ''}`}
           aria-label="Einstellungen"
           aria-hidden={!open}
-          hidden={!open}
         >
           <div className="settings-panel-header">
             <div>
