@@ -21,6 +21,12 @@ function formatDate(value?: string) {
   return `${day}. ${monthNames[month - 1]} ${year}`
 }
 
+function sourceDateLabel(value?: string) {
+  if (!value) return ''
+  const formatted = formatDate(value)
+  return formatted === 'nicht angegeben' ? '' : ` · ergänzt ${formatted}`
+}
+
 export default function PartnerPersonSheet({
   member,
   linkedPerson,
@@ -55,6 +61,7 @@ export default function PartnerPersonSheet({
   const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(effectiveMember, lifeStatus)
   const locallyEdited = hasPartnerEdit(effectiveMember.id)
   const favorite = isFavorite(effectiveMember.id)
+  const familySupplied = effectiveMember.sourceType === 'family'
 
   const close = () => {
     setEditOpen(false)
@@ -148,10 +155,24 @@ export default function PartnerPersonSheet({
         )}
 
         <section className="partner-person-section source-section">
-          <h3>Quelle & Modellierung</h3>
-          <p>Nachkommen von Sebastian Villiger, Seite {effectiveMember.source} von 9.</p>
+          <h3>Quelle & Herkunft</h3>
+          {familySupplied ? (
+            <>
+              <p>{effectiveMember.sourceLabel ?? 'Familienangabe'}{sourceDateLabel(effectiveMember.sourceDate)}.</p>
+              <p className="source-hint">
+                Diese Partnerangabe wurde nachträglich aus Familienwissen ergänzt und stammt nicht aus der ursprünglichen Scanseite.
+              </p>
+            </>
+          ) : (
+            <>
+              <p>Nachkommen von Sebastian Villiger, Seite {effectiveMember.source} von 9.</p>
+              <p className="source-hint">
+                Diese Partnerperson wurde aus dem dokumentierten Beziehungsfeld der Familienunterlagen als eigener Knoten in den Familiengraph überführt.
+              </p>
+            </>
+          )}
           <p className="source-hint">
-            Dieser Partner wurde aus dem dokumentierten Beziehungsfeld als eigenständiger Knoten in den Familiengraph überführt. Lokale Korrekturen verändern die Scanquelle nicht; Eltern oder weitere Vorfahren werden nur ergänzt, wenn sie durch eine Quelle belegt sind.
+            Lokale Korrekturen verändern die zugrunde liegende Angabe nicht; Eltern oder weitere Vorfahren werden nur ergänzt, wenn sie durch eine Quelle oder Familienangabe belegt sind.
           </p>
         </section>
       </aside>
