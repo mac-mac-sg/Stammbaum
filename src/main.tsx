@@ -15,6 +15,7 @@ import './privacy.css'
 import './mobile-search.css'
 import './edit.css'
 import './corrections.css'
+import './partner-person.css'
 
 assertValidGenealogy(people, peopleById, rootId)
 
