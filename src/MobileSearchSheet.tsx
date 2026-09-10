@@ -1,5 +1,6 @@
-import { useMemo, useRef, useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { people } from './data'
+import { useEdits } from './EditContext'
 import { usePrivacy } from './PrivacyContext'
 import { isProtectedPartner, isProtectedPerson, protectedSearchParts } from './privacy'
 import type { Person } from './types'
@@ -17,19 +18,6 @@ function formatDate(value?: string) {
   return `${day}. ${monthNames[month - 1]} ${year}`
 }
 
-function searchable(person: Person, protectedMode: boolean) {
-  const mode = protectedMode ? 'protected' : 'private'
-  const partnerParts = person.partners.flatMap((partner) => {
-    if (isProtectedPartner(partner, mode)) return [partner.name]
-    return [partner.name, partner.birth, partner.birthPlace, partner.death, partner.deathPlace]
-  })
-
-  return [person.name, ...protectedSearchParts(person, mode), ...partnerParts]
-    .filter(Boolean)
-    .join(' ')
-    .toLocaleLowerCase('de-CH')
-}
-
 export default function MobileSearchSheet({
   open,
   onClose,
@@ -40,6 +28,7 @@ export default function MobileSearchSheet({
   onSelect: (id: string) => void
 }) {
   const { mode } = usePrivacy()
+  const { getLifeStatus, getPerson, hasEdit } = useEdits()
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -48,13 +37,30 @@ export default function MobileSearchSheet({
     window.setTimeout(() => inputRef.current?.focus(), 80)
   }, [open])
 
+  const effectivePeople = useMemo(
+    () => people.map((person) => getPerson(person.id) ?? person),
+    [getPerson],
+  )
+
   const results = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('de-CH')
     if (!normalized) return []
-    return people
-      .filter((person) => searchable(person, mode === 'protected').includes(normalized))
+
+    return effectivePeople
+      .filter((person) => {
+        const partnerParts = person.partners.flatMap((partner) => {
+          if (isProtectedPartner(partner, mode)) return [partner.name]
+          return [partner.name, partner.birth, partner.birthPlace, partner.death, partner.deathPlace]
+        })
+        const searchText = [
+          person.name,
+          ...protectedSearchParts(person, mode, getLifeStatus(person.id)),
+          ...partnerParts,
+        ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
+        return searchText.includes(normalized)
+      })
       .slice(0, 24)
-  }, [mode, query])
+  }, [effectivePeople, getLifeStatus, mode, query])
 
   const close = () => {
     setQuery('')
@@ -79,7 +85,7 @@ export default function MobileSearchSheet({
       {mode === 'protected' && (
         <div className="mobile-search-privacy">
           <strong>Schutzmodus aktiv</strong>
-          <span>Bei potenziell lebenden Personen wird nur nach Namen gesucht.</span>
+          <span>Bei geschützten Personen wird nur nach Namen gesucht.</span>
         </div>
       )}
 
@@ -99,7 +105,7 @@ export default function MobileSearchSheet({
       <div className="mobile-search-body">
         {!query && (
           <div className="mobile-search-empty">
-            <strong>{people.length} Personen</strong>
+            <strong>{effectivePeople.length} Personen</strong>
             <span>Suche nach einer Person und springe direkt in ihren Familienfokus.</span>
           </div>
         )}
@@ -111,14 +117,14 @@ export default function MobileSearchSheet({
           </div>
         )}
 
-        {results.map((person) => {
-          const protectedPerson = isProtectedPerson(person, mode)
+        {results.map((person: Person) => {
+          const protectedPerson = isProtectedPerson(person, mode, getLifeStatus(person.id))
           return (
             <button type="button" className="mobile-search-result" key={person.id} onClick={() => choose(person.id)}>
               <span className="mobile-search-result-number">#{person.number}</span>
               <span className="mobile-search-result-copy">
                 <strong>{person.name}</strong>
-                <small>Generation {person.generation}</small>
+                <small>Generation {person.generation}{hasEdit(person.id) ? ' · lokal korrigiert' : ''}</small>
                 <span className={protectedPerson ? 'protected-value' : undefined}>
                   {protectedPerson ? 'Lebensdaten geschützt' : person.birth ? formatDate(person.birth) : 'Geburtsdatum offen'}
                   {!protectedPerson && person.birthPlace ? ` · ${person.birthPlace}` : ''}
