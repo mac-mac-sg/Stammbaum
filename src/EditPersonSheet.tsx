@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import { useEdits } from './EditContext'
 import { lifeStatusLabel } from './privacy'
 import type { LifeStatus } from './privacy'
@@ -58,7 +59,7 @@ export default function EditPersonSheet({
     setForm((current) => ({ ...current, [field]: value }))
   }
 
-  const submit = (event: React.FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault()
     const birth = form.birth.trim()
     const death = form.death.trim()
