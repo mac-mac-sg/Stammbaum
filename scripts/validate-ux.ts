@@ -21,6 +21,7 @@ assert(publicSearch('Thomas Korsch').length === 0, 'Thomas Korsch darf nicht meh
 
 const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
 const mobileSearch = readFileSync(new URL('../src/MobileSearchSheet.tsx', import.meta.url), 'utf8')
+const mobileSearchCss = readFileSync(new URL('../src/mobile-search.css', import.meta.url), 'utf8')
 const settings = readFileSync(new URL('../src/SettingsMenu.tsx', import.meta.url), 'utf8')
 const relationship = readFileSync(new URL('../src/RelationshipFinder.tsx', import.meta.url), 'utf8')
 const uxCss = readFileSync(new URL('../src/ux-simplification.css', import.meta.url), 'utf8')
@@ -34,6 +35,10 @@ assert(mobileSearch.includes('onSelectMember(member)'), 'Partner-Suchergebnisse 
 assert(uxCss.includes('.toolbar .search-wrap') && uxCss.includes('display: none'), 'Die doppelte mobile Suche muss in der Familienansicht verborgen bleiben.')
 assert(uxCss.includes('backdrop-filter: blur(20px) saturate(160%)'), 'Die mobile Navigation muss den Glass-Effekt behalten.')
 assert(uxCss.includes('--mobile-nav-glass') && uxCss.includes('--mobile-nav-glass-shadow'), 'Die Glass-Navigation braucht themefähige Flächen- und Schattenvariablen.')
+assert(mobileSearchCss.includes('top: var(--mobile-header)'), 'Die mobile Suche muss unterhalb der App-Kopfzeile beginnen.')
+assert(mobileSearchCss.includes('bottom: calc(var(--mobile-nav) + env(safe-area-inset-bottom))'), 'Die mobile Suche muss oberhalb der Bottom Navigation enden.')
+assert(mobileSearchCss.includes('z-index: 70'), 'Die mobile Suche muss unter der Bottom Navigation liegen.')
+assert(mobileSearchCss.includes('.mobile-search-header > .icon-button') && mobileSearchCss.includes('display: none'), 'Die mobile Suche darf keinen Schliessen-Knopf mit dem Einstellungsmenü überlagern.')
 assert((relationship.match(/Andere Person vergleichen/g) ?? []).length >= 2, 'Der Verwandtschafts-Finder braucht auch nach einem Fehlschlag einen Rückweg.')
 assert(settings.includes('technisch öffentlich abrufbar'), 'Die Datenschutzeinstellung muss den öffentlichen Bereitstellungscharakter erklären.')
 assert(!manifest.includes('Privates Familienarchiv'), 'Das Manifest darf die öffentliche App nicht als privat bezeichnen.')
