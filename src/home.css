@@ -62,16 +62,11 @@
   text-align: left;
   cursor: pointer;
   box-shadow: 0 10px 26px rgba(52, 75, 56, .16);
-  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms ease, background-color 160ms ease;
 }
 
 .home-tree-action:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 30px rgba(52, 75, 56, .21);
-}
-
-.home-tree-action:active {
-  transform: scale(.985);
 }
 
 .home-tree-action > span {
@@ -85,9 +80,9 @@
 }
 
 .home-tree-action small {
-  color: rgba(255, 255, 255, .72);
-  font-size: 10px;
-  line-height: 1.35;
+  color: rgba(255, 255, 255, .76);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .home-tree-action b {
@@ -186,20 +181,9 @@
 
 .home-discovery-stats small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: .06em;
-}
-
-.home-primary-action {
-  border: 1px solid var(--accent-strong);
-  background: var(--accent-strong);
-  color: white;
-}
-
-.home-secondary-action {
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, .7);
+  letter-spacing: .055em;
 }
 
 .home-search {
@@ -216,16 +200,11 @@
   align-items: center;
   text-align: left;
   cursor: pointer;
-  transition: transform 150ms cubic-bezier(.2, .8, .2, 1), border-color 150ms ease, background-color 150ms ease;
 }
 
 .home-search:hover {
   border-color: rgba(82, 106, 85, .35);
   background: var(--accent-soft);
-}
-
-.home-search:active {
-  transform: scale(.992);
 }
 
 .home-search > span:first-child {
@@ -245,65 +224,8 @@
 }
 
 .home-search strong { font-size: 14px; }
-.home-search small { color: var(--muted); font-size: 10px; }
+.home-search small { color: var(--muted); font-size: 11px; line-height: 1.4; }
 .home-search b { color: var(--accent-strong); }
-
-.home-utilities {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-}
-
-.home-utilities > button {
-  min-width: 0;
-  min-height: 72px;
-  padding: 12px 13px;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  background: var(--surface-strong);
-  color: var(--text);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  text-align: left;
-  cursor: pointer;
-}
-
-.home-utilities > button > span:first-child {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-}
-
-.home-utilities > button > span:nth-child(2) {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.home-utilities strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.home-utilities small {
-  color: var(--muted);
-  font-size: 9px;
-  line-height: 1.35;
-}
-
-.home-utilities b {
-  color: var(--accent-strong);
-  font-size: 12px;
-}
 
 .home-section {
   display: grid;
@@ -335,7 +257,7 @@
   border-radius: 9px;
   background: transparent;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -369,15 +291,15 @@
 }
 
 .home-person-main:hover { background: var(--accent-soft); }
-.home-person-meta { color: var(--muted); font-size: 9px; font-weight: 750; }
+.home-person-meta { color: var(--muted); font-size: 11px; font-weight: 750; }
 .home-person-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-.home-person-main > span:last-child { color: var(--muted); font-size: 10px; }
+.home-person-main > span:last-child { color: var(--muted); font-size: 11px; }
 
 .home-favorite {
   width: 48px;
   min-height: 100%;
   border: 0;
-  border-left: 1px solid #ebe9e2;
+  border-left: 1px solid var(--line);
   background: transparent;
   color: var(--muted);
   font-size: 22px;
@@ -416,7 +338,7 @@
 }
 
 .home-empty-card strong { color: var(--text); font-size: 12px; }
-.home-empty-card span { font-size: 10px; line-height: 1.45; }
+.home-empty-card span { font-size: 11px; line-height: 1.45; }
 .home-empty-card.compact { min-height: 60px; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -498,24 +420,11 @@
   }
 
   .home-search { min-height: 76px; }
-  .home-utilities { grid-template-columns: 1fr; }
-  .home-utilities > button { min-height: 68px; }
   .home-card-list { grid-template-columns: 1fr; }
 
   .home-person-main,
   .home-favorite {
     min-height: 76px;
-  }
-
-  .mobile-nav {
-    grid-template-columns: repeat(4, 1fr);
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .mobile-nav button.active:not(.primary) {
-    color: var(--accent-strong);
-    background: rgba(232, 238, 231, .72);
   }
 
   .favorite-button {
