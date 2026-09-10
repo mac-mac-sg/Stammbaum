@@ -3,6 +3,7 @@ import { people } from './data'
 import { useEdits } from './EditContext'
 import { buildFamilyMembers, descendantMember, relationLabel } from './familyGraph'
 import type { FamilyMember } from './familyGraph'
+import { searchFamilyMembers } from './memberSearch'
 import { usePrivacy } from './PrivacyContext'
 import { isPotentiallyLivingRecord, isProtectedPerson } from './privacy'
 import { getMemberRelationship } from './relationship'
@@ -20,13 +21,6 @@ function isMemberProtected(
   if (member.kind === 'partner') return isPotentiallyLivingRecord(member, getPartnerLifeStatus(member.id))
   const descendant = getPerson(member.id)
   return descendant ? isProtectedPerson(descendant, mode, getLifeStatus(member.id)) : true
-}
-
-function searchable(member: FamilyMember, protectedMember: boolean) {
-  return [
-    member.name,
-    ...(protectedMember ? [] : [member.birth, member.birthPlace, member.death, member.deathPlace]),
-  ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
 }
 
 export default function RelationshipFinder({
@@ -64,26 +58,31 @@ export default function RelationshipFinder({
   const target = targetId ? members.find((candidate) => candidate.id === targetId) : undefined
   const result = target ? getMemberRelationship(origin, target) : null
 
-  const matches = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase('de-CH')
-    if (!normalized) return []
-    return members
-      .filter((candidate) => candidate.id !== origin.id)
-      .filter((candidate) => searchable(
-        candidate,
-        isMemberProtected(candidate, mode, getLifeStatus, getPartnerLifeStatus, getPerson),
-      ).includes(normalized))
-      .slice(0, 10)
-  }, [getLifeStatus, getPartnerLifeStatus, getPerson, members, mode, origin.id, query])
+  const memberProtected = (member: FamilyMember) => isMemberProtected(
+    member,
+    mode,
+    getLifeStatus,
+    getPartnerLifeStatus,
+    getPerson,
+  )
+
+  const matches = useMemo(
+    () => searchFamilyMembers(members, query, memberProtected, 10, origin.id),
+    [getLifeStatus, getPartnerLifeStatus, getPerson, members, mode, origin.id, query],
+  )
 
   const chooseTarget = (candidate: FamilyMember) => {
     setTargetId(candidate.id)
     setQuery('')
   }
 
-  const close = () => {
-    setQuery('')
+  const resetTarget = () => {
     setTargetId(null)
+    setQuery('')
+  }
+
+  const close = () => {
+    resetTarget()
     onClose()
   }
 
@@ -141,7 +140,7 @@ export default function RelationshipFinder({
                         {candidate.kind === 'descendant'
                           ? `#${candidate.number} · Generation ${candidate.generation}`
                           : `${relationLabel(candidate)}${linked ? ` von ${linked.name}` : ''}`}
-                        {isMemberProtected(candidate, mode, getLifeStatus, getPartnerLifeStatus, getPerson) ? ' · geschützt' : ''}
+                        {memberProtected(candidate) ? ' · geschützt' : ''}
                       </span>
                     </button>
                   )
@@ -186,7 +185,7 @@ export default function RelationshipFinder({
               </div>
             </div>
 
-            <button type="button" className="relationship-reset" onClick={() => setTargetId(null)}>
+            <button type="button" className="relationship-reset" onClick={resetTarget}>
               Andere Person vergleichen
             </button>
           </div>
@@ -194,7 +193,10 @@ export default function RelationshipFinder({
 
         {target && !result && (
           <div className="relationship-empty">
-            Für diese beiden Personen konnte auf Basis der erfassten Abstammungs- und Partnerschaftsverknüpfungen keine Verbindung berechnet werden.
+            <p>Für diese beiden Personen konnte auf Basis der erfassten Abstammungs- und Partnerschaftsverknüpfungen keine Verbindung berechnet werden.</p>
+            <button type="button" className="relationship-reset" onClick={resetTarget}>
+              Andere Person vergleichen
+            </button>
           </div>
         )}
 

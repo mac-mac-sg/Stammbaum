@@ -1,7 +1,7 @@
 {
   "name": "Stammbaum Villiger",
   "short_name": "Stammbaum",
-  "description": "Privates Familienarchiv mit interaktivem Stammbaum der Nachkommen von Sebastian Villiger.",
+  "description": "Familienarchiv mit interaktivem Stammbaum der Nachkommen von Sebastian Villiger.",
   "lang": "de-CH",
   "start_url": ".",
   "scope": ".",

@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import CorrectionDataSheet from './CorrectionDataSheet'
+import InstallAppCard from './InstallAppCard'
+import { useEdits } from './EditContext'
 import { usePrivacy } from './PrivacyContext'
 
 type ThemeMode = 'light' | 'dark'
@@ -14,8 +17,10 @@ function getInitialTheme(): ThemeMode {
 
 export default function SettingsMenu() {
   const { mode: privacyMode, setMode: setPrivacyMode } = usePrivacy()
+  const { editedCount } = useEdits()
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme)
   const [open, setOpen] = useState(false)
+  const [correctionsOpen, setCorrectionsOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -25,6 +30,11 @@ export default function SettingsMenu() {
     const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     if (themeColor) themeColor.content = theme === 'dark' ? '#141714' : '#f4f2ec'
   }, [theme])
+
+  const openCorrections = () => {
+    setOpen(false)
+    setCorrectionsOpen(true)
+  }
 
   return (
     <>
@@ -88,7 +98,7 @@ export default function SettingsMenu() {
 
             <div className="settings-section">
               <div className="settings-section-heading">
-                <strong>Privacy</strong>
+                <strong>Datenschutz</strong>
                 <small>{privacyMode === 'protected' ? 'Schutz aktiv' : 'Vollansicht aktiv'}</small>
               </div>
               <button
@@ -100,14 +110,36 @@ export default function SettingsMenu() {
                 <span className="settings-privacy-icon" aria-hidden="true">{privacyMode === 'protected' ? '◈' : '○'}</span>
                 <span>
                   <strong>{privacyMode === 'protected' ? 'Schutzmodus' : 'Vollansicht'}</strong>
-                  <small>{privacyMode === 'protected' ? 'Lebensdaten potenziell lebender Personen sind verborgen.' : 'Alle erfassten Lebensdaten werden angezeigt.'}</small>
+                  <small>{privacyMode === 'protected' ? 'Lebensdaten potenziell lebender Personen werden ausgeblendet.' : 'Alle erfassten Lebensdaten werden angezeigt.'}</small>
                 </span>
                 <b aria-hidden="true">›</b>
               </button>
+              <p className="settings-public-note">
+                Der Schutzmodus verändert nur die Darstellung. Die über GitHub Pages veröffentlichten Quelldaten sind technisch öffentlich abrufbar.
+              </p>
+            </div>
+
+            <div className="settings-section">
+              <div className="settings-section-heading">
+                <strong>Daten & App</strong>
+                <small>Gerätelokal</small>
+              </div>
+              <button type="button" className="settings-data-button" onClick={openCorrections}>
+                <span>
+                  <strong>Lokale Korrekturen</strong>
+                  <small>{editedCount} {editedCount === 1 ? 'Änderung' : 'Änderungen'} · sichern oder importieren</small>
+                </span>
+                <b aria-hidden="true">›</b>
+              </button>
+              <div className="settings-install-wrap">
+                <InstallAppCard />
+              </div>
             </div>
           </section>
         )}
       </div>
+
+      <CorrectionDataSheet open={correctionsOpen} onClose={() => setCorrectionsOpen(false)} />
     </>
   )
 }

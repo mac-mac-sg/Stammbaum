@@ -8,7 +8,8 @@ Die App ist für die Installation auf Smartphones als Progressive Web App vorber
 - eigenes App-Icon
 - Service Worker unter `public/sw.js`
 - Registrierung nur bei HTTPS und nicht auf `localhost`
-- versionsbezogener Cache mit automatischem Entfernen älterer App-Caches
+- automatische Cache-Versionierung anhand des jeweils gebauten JavaScript-Bundles
+- automatisches Entfernen älterer App-Caches beim Aktivieren eines neuen Builds
 - Network-first für Navigationen mit Offline-Fallback
 - Cache-first mit Hintergrundaktualisierung für bereits geladene statische Ressourcen
 - ausschliesslich Same-Origin-Caching
@@ -32,4 +33,6 @@ GitHub Pages liefert die Anwendung automatisch per HTTPS aus. Dadurch stehen Ser
 
 ## Cache-Strategie
 
-Der Cache heisst aktuell `stammbaum-villiger-v1`. Bei einer Änderung der Offline-Strategie oder einer bewusst erzwungenen Neuverteilung kann `CACHE_VERSION` in `public/sw.js` erhöht werden. Beim Aktivieren des neuen Workers werden ältere Caches mit dem Präfix `stammbaum-villiger-` entfernt.
+Die Service-Worker-Registrierung leitet aus dem Dateinamen des gebauten, gehashten JavaScript-Einstiegspunkts einen Build-Schlüssel ab und hängt ihn an die Service-Worker-URL. Dadurch erkennt der Browser nach jedem neuen Produktions-Build einen aktualisierten Worker. Der Worker verwendet denselben Build-Schlüssel für seinen Cache und entfernt beim Aktivieren ältere Caches mit dem Präfix `stammbaum-villiger-`.
+
+Damit ist kein manuelles Hochzählen einer `CACHE_VERSION` mehr nötig und alte Build-Ressourcen werden bei regulären App-Updates automatisch abgelöst.

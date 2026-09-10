@@ -1,5 +1,5 @@
 import { people, peopleById } from './data'
-import type { Partner, Person } from './types'
+import type { Partner, PartnerSourceType, Person } from './types'
 
 export type FamilyMemberKind = 'descendant' | 'partner'
 
@@ -20,6 +20,9 @@ export interface FamilyMember {
   partnerIndex?: number
   relationship?: Partner['relationship']
   relationshipStatus?: Partner['status']
+  sourceType?: PartnerSourceType
+  sourceLabel?: string
+  sourceDate?: string
 }
 
 export interface CoupleRelation {
@@ -68,6 +71,9 @@ export function partnerMembersForPerson(person: Person): FamilyMember[] {
     partnerIndex,
     relationship: partner.relationship,
     relationshipStatus: partner.status,
+    sourceType: partner.sourceType ?? 'scan',
+    sourceLabel: partner.sourceLabel,
+    sourceDate: partner.sourceDate,
   }))
 }
 

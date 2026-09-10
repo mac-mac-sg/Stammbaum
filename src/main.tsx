@@ -23,6 +23,7 @@ import './home.css'
 import './install.css'
 import './theme.css'
 import './theme-fixes.css'
+import './ux-simplification.css'
 
 assertValidGenealogy(people, peopleById, rootId)
 
@@ -30,8 +31,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <EditProvider>
       <PrivacyProvider>
-        <SettingsMenu />
         <FamilyNavigationProvider>
+          <SettingsMenu />
           <App />
         </FamilyNavigationProvider>
       </PrivacyProvider>

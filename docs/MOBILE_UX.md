@@ -2,109 +2,93 @@
 
 Die App wird smartphone-first weiterentwickelt. Die Desktop-Ansicht bleibt erhalten, ist aber nicht das primäre Interaktionsmodell.
 
-## Bedienkonzept auf Smartphones
+## Leitprinzip
 
-- Standardansicht auf kleinen Displays ist eine **eigene Startseite** statt des vollständigen Stammbaums.
-- Die Startseite bietet direkten Zugriff auf aktuellen Familienfokus, Suche, Gesamtbaum, Datenschutzmodus und lokale Korrekturdaten.
-- **Favoriten** und **zuletzt angesehene Personen** erlauben einen schnellen Wiedereinstieg ohne erneute Suche.
-- Die Bottom Navigation besitzt vier feste Ziele: **Start**, **Familie**, **Suchen** und **Person**.
-- Der Familienfokus zeigt zur gewählten Person die Elternlinie, **Partnerpersonen**, Geschwister und Kinder in touch-freundlichen Karten.
-- Partnerinnen und Partner sind keine reine Textzeile mehr, sondern eigenständige Personenknoten mit eigener Detailansicht.
-- Die Abstammungslinie zu Sebastian Villiger bleibt als horizontal scrollbarer Pfad erreichbar.
-- Ein Umschalter erlaubt den Wechsel zwischen **Fokus** und **Gesamt**; der Gesamtbaum ist ausserdem direkt von der Startseite erreichbar.
-- In der Gesamtansicht belegt der Stammbaum den verfügbaren Bildschirm zwischen Kopfzeile und unterer Navigation.
-- In der Gesamtansicht werden Partnerinnen und Partner als **eigene Karten direkt neben der nummerierten Person** dargestellt. Eine Paarlinie verbindet die Karten; der Kinderast setzt unter der gemeinsamen Familienachse an.
-- Verschieben erfolgt per Drag, Zoomen per Pinch-Geste oder über die drei Zoom-Schaltflächen. Weil Paar-Karten mehr Breite benötigen, startet die Gesamtansicht etwas weiter herausgezoomt und erlaubt einen kleineren Minimalzoom.
-- Auf sehr kleinen Displays wird die kompakte Suchleiste ausgeblendet; «Suchen» in der Bottom Navigation öffnet stattdessen eine Vollbildsuche.
-- Die mobile Vollbildsuche durchsucht nummerierte Personen und Partnerpersonen. Ein Partner-Treffer führt in den zugehörigen Familienkontext.
-- Personendetails öffnen auf kleinen Displays als Bottom Sheet und blockieren nicht dauerhaft die Baumansicht.
-- Partnerdetails öffnen ebenfalls als mobile Vollbild-/Sheet-Ansicht und zeigen nur tatsächlich belegte Angaben. Auch Partnerkarten in der Gesamtansicht sind direkt antippbar.
-- Nummerierte Personen und Partnerpersonen können direkt aus ihrer Detailansicht als Favorit markiert werden.
-- Die Editiermodi öffnen auf Smartphones als eigene Vollbildansichten mit grossen Eingabefeldern und fixierter Speicheraktion.
-- Interaktive Elemente haben für Touch-Bedienung vergrösserte Trefferflächen.
-- `env(safe-area-inset-*)` berücksichtigt Geräte mit Notch, Dynamic Island oder Gestenleiste.
-- `100dvh` statt statischem `100vh` vermeidet Höhenprobleme mit ein- und ausgeblendeter Browser-Chrome.
+Die App-Führung ist auf drei Kernaufgaben reduziert:
+
+1. **Start** – schnell wieder einsteigen.
+2. **Suche** – jede erfasste Person direkt finden.
+3. **Familie** – im Familienkontext navigieren und bei Bedarf den Gesamtbaum öffnen.
+
+Administrative Funktionen wie Darstellung, Schutzmodus, Installation sowie Export/Import lokaler Korrekturen liegen im Zahnrad-Menü und konkurrieren nicht mit der täglichen Navigation.
+
+## Bottom Navigation
+
+Die Bottom Navigation besitzt auf Smartphones drei feste Ziele:
+
+- **Start**
+- **Suche**
+- **Familie**
+
+Der frühere separate Punkt **Person** wurde entfernt, weil die aktuell fokussierte Person bereits direkt über ihre Karte geöffnet werden kann. Damit gibt es nur noch einen klaren Weg zu den Personendetails.
+
+Die zusätzliche Suchleiste oberhalb des Familienbereichs wird auf Smartphones ausgeblendet. Die Suche hat mobil genau einen festen Einstieg über **Suche**. Auf Desktop bleibt die kompakte Suchleiste erhalten.
 
 ## Startseite
 
-Die mobile Startseite ist als produktorientierter Einstieg aufgebaut und ersetzt den früheren direkten Sprung in den Stammbaum. Sie zeigt:
+Die Startseite ist bewusst kurz. Sie zeigt in dieser Reihenfolge:
 
-1. den aktuell gewählten Familienfokus,
-2. einen grossen Sucheinstieg,
-3. Datenschutzmodus und Zugriff auf lokale Korrekturdaten,
-4. gespeicherte Favoriten,
-5. die zuletzt angesehenen Personen.
+1. einen grossen Sucheinstieg,
+2. **Weiter bei** mit dem zuletzt verwendeten Familienfokus,
+3. Favoriten,
+4. zuletzt angesehene Personen.
 
-Favoriten und Verlauf werden lokal im Browser gespeichert. Persistiert werden nur die stabilen internen IDs der nummerierten Personen bzw. Partnerknoten. Lebensdaten werden für diese Navigationsfunktionen nicht zusätzlich dupliziert. Der Verlauf ist auf zwölf Einträge begrenzt und kann auf der Startseite geleert werden.
+Der zuletzt verwendete Familienfokus wird lokal als stabile Personen-ID gespeichert. Beim allerersten Start dient `p095` weiterhin als Fallback.
+
+Favoriten und Verlauf werden ebenfalls lokal im Browser gespeichert. Persistiert werden nur stabile interne IDs; Lebensdaten werden für diese Navigationsfunktionen nicht zusätzlich dupliziert. Der Verlauf ist auf zwölf Einträge begrenzt und kann auf der Startseite geleert werden.
+
+## Suche
+
+Die Suchlogik ist für Desktop, Smartphone und Verwandtschafts-Finder vereinheitlicht. Sie durchsucht nummerierte Personen und eigenständige Partnerpersonen.
+
+Ein Treffer auf eine nummerierte Person öffnet deren Familienkontext. Ein Treffer auf eine Partnerperson öffnet **direkt die Partnerdetailansicht** und zeigt im Hintergrund den zugehörigen Familienkontext. Damit entspricht das Ziel der Suche immer dem angezeigten Treffer.
+
+Im Schutzmodus wird bei potenziell lebenden Personen nur der Name durchsucht; Lebensdaten und Orte werden nicht als Suchkriterien verwendet.
 
 ## Familienfokus
 
-Der Fokusmodus löst das zentrale Darstellungsproblem eines grossen Stammbaums auf kleinen Screens: Statt alle Äste gleichzeitig zu verkleinern, wird die Navigation personenorientiert. Ein Tipp auf Elternlinie, Partnerperson, Geschwister oder Kind verschiebt bzw. vertieft den Familienkontext. Die vollständigen Lebens- und Quellenangaben bleiben über die Detailansichten erreichbar.
+Der Fokusmodus löst das zentrale Darstellungsproblem eines grossen Stammbaums auf kleinen Screens: Statt alle Äste gleichzeitig zu verkleinern, wird die Navigation personenorientiert.
 
-Die nummerierten Personen basieren auf den erfassten Eltern-Kind-Beziehungen. Dokumentierte Ehe-, Lebens- und Verlobungspartner werden zusätzlich als eigenständige Knoten modelliert. Für Partnerpersonen werden keine Eltern oder Vorfahren ergänzt, wenn diese in den Unterlagen nicht belegt sind.
+Der Familienfokus zeigt:
 
-## Gesamtbaum und Paar-Karten
+- Elternlinie,
+- ausgewählte Person,
+- Partnerpersonen,
+- Geschwister,
+- Kinder.
 
-Der vollständige Stammbaum bleibt für Orientierung, Überblick und grössere Displays verfügbar. Ein Familienknoten besteht nun nicht mehr nur aus einer Personenkarte mit Partnertext, sondern aus einer horizontalen Familieneinheit:
+Ein Tipp auf die ausgewählte Personenkarte öffnet direkt die Personendetails. Der separate, redundante Button **Personendetails** wurde entfernt. Der Verwandtschafts-Finder bleibt als eigenständige Aktion erhalten.
 
-- links bzw. zuerst die nummerierte Person,
-- daneben eine oder mehrere dokumentierte Partnerpersonen als eigene Karten,
-- dazwischen eine sichtbare Paarverbindung,
-- darunter der gemeinsame Kinderast des erfassten Nachkommenzweigs.
+Partnerkarten öffnen die jeweilige Partnerdetailansicht. Beziehungskarten innerhalb der Personendetails sind ebenfalls direkt antippbar und führen zur gleichen Partnerdetailansicht.
 
-Die Partnerkarten sind interaktiv und öffnen ihre eigene Detailansicht. Bei mehreren dokumentierten Beziehungen werden die Partnerkarten nebeneinander angeordnet. Damit bleibt die Quelle vollständig sichtbar, ohne mehrere unbelegte Eltern-Kind-Kanten zu erzeugen.
+## Gesamtbaum
+
+Innerhalb des Familienbereichs kann zwischen **Familie** und **Gesamtbaum** gewechselt werden. Der Gesamtbaum bleibt für Orientierung und Überblick verfügbar, ist aber kein eigener Hauptnavigationspunkt.
+
+In der Gesamtansicht werden Partnerinnen und Partner als eigene Karten direkt neben der nummerierten Person dargestellt. Eine Paarlinie verbindet die Karten; der Kinderast setzt unter der gemeinsamen Familienachse an. Verschieben erfolgt per Drag, Zoomen per Pinch-Geste oder über die Zoom-Schaltflächen.
 
 ## Verwandtschafts-Finder
 
-Vom Familienfokus aus kann für die aktuell gewählte Person eine zweite erfasste Person gesucht werden. Die Suche umfasst auch Partnerpersonen.
+Vom Familienfokus aus kann für die aktuell gewählte Person eine zweite erfasste Person gesucht werden. Die Suche umfasst auch Partnerpersonen und verwendet dieselbe Suchlogik wie die übrige App.
 
-Der Finder unterscheidet:
+Der Finder unterscheidet Blutsverwandtschaft, direkte Paarbeziehungen und gemischte Verbindungen. Falls keine Verbindung berechnet werden kann, steht unmittelbar **Andere Person vergleichen** zur Verfügung; die Nutzerführung endet nicht mehr in einer Sackgasse.
 
-- **Blutsverwandtschaft** über die strukturierten Eltern-Kind-Kanten,
-- **direkte Paarbeziehungen** wie Ehe, Partnerschaft oder Verlobung,
-- **gemischte Verbindungen** über eine Partnerperson und den bekannten Nachkommenbaum.
+## Einstellungen
 
-Bei einer gemischten Verbindung wird transparent erklärt, über welche Paarbeziehung und welche Blutsverwandtschaft der Pfad zustande kommt. Unbekannte Abstammung auf der Partnerseite wird nicht konstruiert. Lokale Änderungen am Beziehungstyp wirken unmittelbar im Finder.
+Das Zahnrad-Menü bündelt Funktionen, die nicht zur täglichen Familiennavigation gehören:
 
-## Datenschutzmodus
+- Hell-/Dunkelmodus,
+- Schutzmodus/Vollansicht,
+- transparente Erklärung, dass der Schutzmodus nur die Darstellung verändert und keine Zugriffskontrolle für die öffentliche GitHub-Pages-App ist,
+- Export/Import lokaler Korrekturen,
+- PWA-/Homescreen-Installation, sofern vom Browser unterstützt.
 
-Der **Schutzmodus** ist beim ersten Öffnen standardmässig aktiv und bleibt danach lokal im Browser gespeichert. Er kann über die Schaltfläche in der Kopfzeile oder direkt auf der Startseite in die private Vollansicht umgeschaltet werden.
+## Quellen und Herkunft
 
-Für nummerierte Personen und Partnerpersonen kann in der privaten Vollansicht ein expliziter Lebensstatus gesetzt werden: `living`, `deceased` oder `unknown`. Dieser Status hat Vorrang vor der Heuristik. Bei `unknown` gilt weiterhin die konservative 120-Jahre-Regel.
-
-Im Schutzmodus werden für geschützte Personen Geburts- und Sterbedaten, Orte sowie Zusatznotizen ausgeblendet. Datum und Ort werden dort auch nicht als Suchkriterien verwendet. Namen und genealogische Beziehungen bleiben sichtbar, damit Stammbaum und Verwandtschafts-Finder weiterhin funktionieren.
-
-## Lokaler Editiermodus
-
-Der Editiermodus ist bewusst nicht-destruktiv und nur in der privaten Vollansicht verfügbar.
-
-Für nummerierte Personen können gepflegt werden:
-
-- Lebensstatus
-- Geburtsdatum und Geburtsort
-- Sterbedatum und Sterbeort
-- Zusatznotiz bzw. Korrekturhinweis
-
-Für Partnerpersonen kommen hinzu:
-
-- Beziehungstyp: Ehe, Partnerschaft oder Verlobung
-- Beziehungsstatus: keiner, geschieden oder annulliert
-
-Änderungen werden lokal auf dem Gerät gespeichert und sofort in Gesamtbaum, Familienfokus, Suche, Partnerdetail, Verwandtschafts-Finder und Datenschutzlogik verwendet. Die Ausgangsdaten aus den Scans bleiben unverändert. Eine lokale Korrektur ist visuell markiert und kann pro Person oder Partnerperson wieder vollständig verworfen werden.
-
-Lokale Personen- und Partnerkorrekturen können gemeinsam als private JSON-Sicherung exportiert und auf einem anderen Gerät wieder importiert werden. Das Exportformat Version 2 bleibt beim Import kompatibel mit älteren Version-1-Sicherungen. Die Sicherungsfunktion ist direkt von der Startseite erreichbar.
+Scanbasierte Partnerangaben und nachträglich ergänztes Familienwissen werden unterschieden. Eine Familienangabe kann ein Quellenlabel und ein Ergänzungsdatum tragen. Die Partnerdetailansicht behauptet dadurch nicht mehr pauschal, jede Partnerangabe stamme aus der ursprünglichen Scanseite.
 
 ## Web-App-Verhalten
 
-`manifest.webmanifest`, Theme-Color, Standalone-Metadaten und ein kontrollierter Service Worker sind vorbereitet. Damit kann die App nach einem HTTPS-Deployment app-ähnlich vom Homescreen genutzt werden. Die genealogischen Ausgangsdaten bleiben versioniert im Repository; lokale Korrekturen, Favoriten und Verlauf werden separat im Browser gehalten.
+`manifest.webmanifest`, Theme-Color, Standalone-Metadaten und Service Worker sind für GitHub Pages vorbereitet. Der Service Worker erhält bei jedem neuen Produktions-Build automatisch einen Build-Schlüssel aus dem gehashten JavaScript-Einstiegspunkt. Dadurch werden veraltete App-Caches ohne manuelles Versionshochzählen abgelöst.
 
-## Nächste mobile Ausbaustufen
-
-1. privates/authentifiziertes Deployment
-2. optionaler Freigabeprozess für bestätigte Korrekturen
-3. zusätzliche Quellen und Partnerlinien
-4. später optional Fotos und Dokumente pro Person
-
-## Umgesetzt am 10. September 2026
-
-Smartphone-Startseite, Favoriten, Verlauf, vierteilige Bottom Navigation, Familienfokus, eigenständige Partnerpersonen, Paar-Karten in der Gesamtansicht, Verwandtschafts-Finder über Bluts- und Paarbeziehungen, Schutzmodus, mobile Vollbildsuche, Editiermodus für nummerierte Personen und Partnerpersonen sowie Export/Import sind im Branch `initial-app` umgesetzt.
+`env(safe-area-inset-*)` berücksichtigt Geräte mit Notch oder Gestenleiste. `100dvh` vermeidet Höhenprobleme mit ein- und ausgeblendeter Browser-Chrome.

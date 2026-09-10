@@ -1,5 +1,7 @@
 export type Gender = 'm' | 'f'
 
+export type PartnerSourceType = 'scan' | 'family'
+
 export interface Partner {
   name: string
   birth?: string
@@ -9,6 +11,10 @@ export interface Partner {
   relationship: 'Ehe' | 'Partnerschaft' | 'Verlobung'
   status?: 'annulliert' | 'geschieden'
   notes?: string
+  /** Herkunft der Partnerangabe. Ohne Angabe gilt die Scanquelle der verknüpften Person. */
+  sourceType?: PartnerSourceType
+  sourceLabel?: string
+  sourceDate?: string
   /** Nur für lokal abgeleitete Arbeitsstände; Quelldaten müssen dieses Feld nicht setzen. */
   lifeStatus?: 'living' | 'deceased' | 'unknown'
 }
