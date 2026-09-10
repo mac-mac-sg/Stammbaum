@@ -12,6 +12,7 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 - Elternlinie, Partnerpersonen, Geschwister und Kinder als touch-freundliche Karten
 - Partnerpersonen mit eigener Detailansicht und eigener Datenschutzbehandlung
 - vollständiger, zoombarer Stammbaum als alternative Gesamtansicht
+- im Gesamtbaum werden Nachkomme und Partnerperson als **verbundene Paar-Karten nebeneinander** dargestellt; Kinder liegen darunter auf der gemeinsamen Familienachse
 - kompakte Suche sowie **Vollbildsuche auf kleinen Smartphones**; Partnerpersonen sind dort ebenfalls auffindbar
 - **Verwandtschafts-Finder** über Abstammungs- und Partnerschaftsverbindungen inklusive Verbindungspfad
 - Personendetails mit Lebensdaten, Beziehungen, Kindern, Abstammungslinie und Quellenhinweisen
@@ -35,7 +36,7 @@ Die ursprünglichen Scans nummerieren nur die Nachkommen von Sebastian Villiger.
 - Paarverbindungen werden als eigene Relationen modelliert,
 - unbekannte Eltern oder Vorfahren von Partnerpersonen werden **nicht** ergänzt.
 
-Damit können Partnerpersonen in Suche, Familienfokus und Verwandtschafts-Finder als eigene Personen behandelt werden, ohne unbelegte Abstammungsinformationen zu erfinden.
+Damit können Partnerpersonen in Suche, Familienfokus, Gesamtbaum und Verwandtschafts-Finder als eigene Personen behandelt werden, ohne unbelegte Abstammungsinformationen zu erfinden.
 
 ## Entwicklung
 
@@ -70,11 +71,11 @@ Der Verwandtschafts-Finder unterscheidet zwischen Blutsverwandtschaft und Verbin
 
 ## Nächste Schritte
 
-1. Partnerpersonen auch im vollständigen Baum als eigene nebeneinanderliegende Karten visualisieren
+1. strukturierte Bearbeitung von Partnerdaten und zusätzlichen Beziehungen
 2. fachliche Verifikation schwer lesbarer Scanstellen
-3. strukturierte Bearbeitung von Partnerdaten und zusätzlichen Beziehungen
-4. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
-5. Festlegung eines privaten/authentifizierten Deployment-Ziels
+3. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
+4. privates/authentifiziertes Deployment mit installierbarer PWA
+5. später optional Fotos und Dokumente pro Person
 
 ## Branch
 
