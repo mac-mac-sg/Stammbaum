@@ -13,10 +13,11 @@ function isMemberProtected(
   member: FamilyMember,
   mode: PrivacyMode,
   getLifeStatus: (id: string) => LifeStatus,
+  getPartnerLifeStatus: (id: string) => LifeStatus,
   getPerson: (id: string) => Person | undefined,
 ) {
   if (mode !== 'protected') return false
-  if (member.kind === 'partner') return isPotentiallyLivingRecord(member)
+  if (member.kind === 'partner') return isPotentiallyLivingRecord(member, getPartnerLifeStatus(member.id))
   const descendant = getPerson(member.id)
   return descendant ? isProtectedPerson(descendant, mode, getLifeStatus(member.id)) : true
 }
@@ -40,7 +41,12 @@ export default function RelationshipFinder({
   onNavigate: (id: string) => void
 }) {
   const { mode } = usePrivacy()
-  const { getLifeStatus, getPerson } = useEdits()
+  const {
+    getLifeStatus,
+    getPartnerLifeStatus,
+    getPartnerMember,
+    getPerson,
+  } = useEdits()
   const [query, setQuery] = useState('')
   const [targetId, setTargetId] = useState<string | null>(null)
 
@@ -48,7 +54,12 @@ export default function RelationshipFinder({
     () => people.map((candidate) => getPerson(candidate.id) ?? candidate),
     [getPerson],
   )
-  const members = useMemo(() => buildFamilyMembers(effectivePeople), [effectivePeople])
+  const members = useMemo(
+    () => buildFamilyMembers(effectivePeople).map((member) => (
+      member.kind === 'partner' ? getPartnerMember(member.id) ?? member : member
+    )),
+    [effectivePeople, getPartnerMember],
+  )
   const origin = useMemo(() => descendantMember(person), [person])
   const target = targetId ? members.find((candidate) => candidate.id === targetId) : undefined
   const result = target ? getMemberRelationship(origin, target) : null
@@ -60,10 +71,10 @@ export default function RelationshipFinder({
       .filter((candidate) => candidate.id !== origin.id)
       .filter((candidate) => searchable(
         candidate,
-        isMemberProtected(candidate, mode, getLifeStatus, getPerson),
+        isMemberProtected(candidate, mode, getLifeStatus, getPartnerLifeStatus, getPerson),
       ).includes(normalized))
       .slice(0, 10)
-  }, [getLifeStatus, getPerson, members, mode, origin.id, query])
+  }, [getLifeStatus, getPartnerLifeStatus, getPerson, members, mode, origin.id, query])
 
   const chooseTarget = (candidate: FamilyMember) => {
     setTargetId(candidate.id)
@@ -130,7 +141,7 @@ export default function RelationshipFinder({
                         {candidate.kind === 'descendant'
                           ? `#${candidate.number} · Generation ${candidate.generation}`
                           : `${relationLabel(candidate)}${linked ? ` von ${linked.name}` : ''}`}
-                        {isMemberProtected(candidate, mode, getLifeStatus, getPerson) ? ' · geschützt' : ''}
+                        {isMemberProtected(candidate, mode, getLifeStatus, getPartnerLifeStatus, getPerson) ? ' · geschützt' : ''}
                       </span>
                     </button>
                   )
@@ -188,7 +199,7 @@ export default function RelationshipFinder({
         )}
 
         <p className="relationship-note">
-          Partnerinnen und Partner sind jetzt eigenständige Knoten im Familiengraph. Eine Partnerschaft wird als Verbindung berücksichtigt; Eltern oder Vorfahren einer Partnerperson werden jedoch nicht erfunden, solange sie nicht aus einer Quelle belegt sind. Im Schutzmodus werden Lebensdaten potenziell lebender Personen nicht für die Suche verwendet.
+          Partnerinnen und Partner sind eigenständige Knoten im Familiengraph. Lokale Korrekturen an Beziehungstyp und Lebensdaten fliessen sofort in Suche und Darstellung ein. Eltern oder Vorfahren einer Partnerperson werden nicht erfunden, solange sie nicht aus einer Quelle belegt sind.
         </p>
       </aside>
     </>
