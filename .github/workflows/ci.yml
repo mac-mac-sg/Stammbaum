@@ -25,14 +25,22 @@ jobs:
         run: |
           set -euo pipefail
           container=stammbaum-ci
-          cleanup() { docker rm -f "$container" >/dev/null 2>&1 || true; }
+          password_file="$(mktemp)"
+          cleanup() {
+            docker rm -f "$container" >/dev/null 2>&1 || true
+            rm -f "$password_file"
+          }
           trap cleanup EXIT
+
+          printf '%s' 'ci-only-test-password' > "$password_file"
+          chmod 600 "$password_file"
 
           docker run -d \
             --name "$container" \
             -p 18080:8080 \
             -e STAMMBAUM_USER=ci-test \
-            -e STAMMBAUM_PASSWORD='ci-only-test-password' \
+            -e STAMMBAUM_PASSWORD_FILE=/run/secrets/stammbaum-password \
+            -v "$password_file:/run/secrets/stammbaum-password:ro" \
             stammbaum-villiger:ci
 
           for attempt in $(seq 1 20); do
