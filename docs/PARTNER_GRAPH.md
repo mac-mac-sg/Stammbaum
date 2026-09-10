@@ -28,11 +28,13 @@ Ein Partnerknoten übernimmt ausschliesslich Angaben, die bereits in der Quelle 
 
 Unbekannte Eltern, Geschwister, Kinder oder Vorfahren werden nicht ergänzt.
 
-## Paarrelation
+## Paarrelation und Gesamtbaum
 
 Jede bisherige Partnerangabe erzeugt eine eigene Relation zwischen dem nummerierten Nachkommen und dem Partnerknoten. Dadurch können beide Datensätze im Familiengraph separat adressiert werden.
 
 Im vollständigen Stammbaum wird diese Relation nun auch visuell abgebildet: Der nummerierte Nachkomme und seine dokumentierten Partnerpersonen erscheinen als nebeneinanderliegende Karten. Eine horizontale Paarlinie verbindet die Karten. Der Kinderast setzt unter der gemeinsamen Familieneinheit an, ohne zusätzliche oder unbelegte Eltern-Kind-Kanten zu erzeugen.
+
+Bei mehreren dokumentierten Beziehungen werden mehrere Partnerkarten nebeneinander dargestellt. Die Darstellung sagt damit nur aus, dass diese Beziehungen zur nummerierten Person dokumentiert sind; sie behauptet keine gemeinsame Elternschaft für alle Partnerpersonen.
 
 ## Suche und Navigation
 
