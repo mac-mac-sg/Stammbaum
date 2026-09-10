@@ -1,0 +1,665 @@
+:root[data-theme="light"] {
+  color-scheme: light;
+  color: #20231f;
+  background: #f4f2ec;
+  --bg: #f4f2ec;
+  --surface: #f8f7f2;
+  --surface-strong: #ffffff;
+  --surface-tint: #f0f1ec;
+  --text: #20231f;
+  --muted: #5d625a;
+  --line: #c9cdc6;
+  --line-strong: #959e94;
+  --accent: #45614b;
+  --accent-soft: #e3ebe2;
+  --accent-strong: #2d4a34;
+  --accent-ink: #2d4a34;
+  --warm-soft: #f4eee0;
+  --warm-ink: #665327;
+  --danger-soft: #f3e7e1;
+  --danger-bg: #f7ebe6;
+  --danger-ink: #6b3d2f;
+  --shadow: 0 14px 40px rgba(38, 43, 37, .11);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #f2f4ef;
+  background: #141714;
+  --bg: #141714;
+  --surface: #1b1f1b;
+  --surface-strong: #222722;
+  --surface-tint: #2b312b;
+  --text: #f2f4ef;
+  --muted: #b7beb5;
+  --line: #3d463f;
+  --line-strong: #69756a;
+  --accent: #91b29a;
+  --accent-soft: #29382d;
+  --accent-strong: #315c3a;
+  --accent-ink: #b6d5bb;
+  --warm-soft: #3b3424;
+  --warm-ink: #e6d28f;
+  --danger-soft: #382b27;
+  --danger-bg: #402d28;
+  --danger-ink: #f0b9a5;
+  --shadow: 0 16px 44px rgba(0, 0, 0, .34);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+html[data-theme] body {
+  color: var(--text);
+  background: var(--bg);
+}
+
+html[data-theme] button,
+html[data-theme] input,
+html[data-theme] textarea,
+html[data-theme] select {
+  color: var(--text);
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #70756d;
+  opacity: 1;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #9ca59b;
+  opacity: 1;
+}
+
+.app-shell,
+.main-layout,
+.tree-area,
+.toolbar,
+.toolbar-controls,
+.search-wrap,
+.canvas-frame,
+.focus-view,
+.focus-stage,
+.home-view,
+.detail-panel,
+.detail-topbar,
+.detail-topbar > div:first-child,
+.edit-sheet,
+.edit-header,
+.edit-header > div:first-child,
+.correction-sheet,
+.correction-header,
+.correction-header > div:first-child,
+.partner-person-sheet,
+.partner-person-header,
+.partner-person-header > div:first-child,
+.relationship-sheet,
+.relationship-header,
+.relationship-header > div:first-child,
+.mobile-search-sheet,
+.mobile-search-header,
+.mobile-search-header > div:first-child {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.detail-topbar h2,
+.edit-header h2,
+.correction-header h2,
+.partner-person-header h2,
+.relationship-header h2,
+.relationship-card,
+.family-links button,
+.partner-linked-person,
+.settings-panel {
+  overflow-wrap: anywhere;
+}
+
+.detail-topbar-actions,
+.partner-person-actions {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.edit-sheet,
+.correction-sheet,
+.partner-person-sheet,
+.relationship-sheet {
+  max-width: 100vw;
+}
+
+/* The former privacy control is replaced by the settings menu. */
+.header-actions > .privacy-toggle {
+  display: none !important;
+}
+
+.app-header {
+  padding-right: 92px;
+}
+
+/* Explicit light mode also wins when the device itself is in dark mode. */
+html[data-theme="light"] body {
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, .85), transparent 34rem), var(--bg);
+}
+
+html[data-theme="light"] .app-header {
+  background: rgba(244, 242, 236, .92);
+}
+
+html[data-theme="light"] .search-box,
+html[data-theme="light"] .search-results,
+html[data-theme="light"] .segmented,
+html[data-theme="light"] .zoom-controls,
+html[data-theme="light"] .detail-panel,
+html[data-theme="light"] .person-card {
+  background: var(--surface-strong);
+}
+
+html[data-theme="light"] .search-results > button,
+html[data-theme="light"] .detail-section,
+html[data-theme="light"] .edit-form fieldset,
+html[data-theme="light"] .correction-section,
+html[data-theme="light"] .partner-person-section,
+html[data-theme="light"] .mobile-search-result,
+html[data-theme="light"] .relationship-search-results button,
+html[data-theme="light"] .relationship-note {
+  border-color: var(--line);
+}
+
+html[data-theme="light"] .canvas-frame {
+  background: linear-gradient(rgba(69, 97, 75, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(69, 97, 75, .05) 1px, transparent 1px), var(--surface);
+  background-size: 28px 28px;
+}
+
+html[data-theme="light"] .person-card,
+html[data-theme="light"] .focus-person-card,
+html[data-theme="light"] .tree-partner-card {
+  border-color: var(--line);
+}
+
+html[data-theme="light"] .source-number {
+  background: var(--surface-tint);
+}
+
+html[data-theme="light"] .partner-line,
+html[data-theme="light"] .focus-card-partner {
+  border-color: var(--line);
+  color: var(--text);
+}
+
+html[data-theme="light"] .canvas-help,
+html[data-theme="light"] .selected-chip,
+html[data-theme="light"] .home-current,
+html[data-theme="light"] .home-secondary-action,
+html[data-theme="light"] .ancestor-strip,
+html[data-theme="light"] .focus-family-section,
+html[data-theme="light"] .focus-relationship-button,
+html[data-theme="light"] .relationship-search-wrap input,
+html[data-theme="light"] .relationship-search-results,
+html[data-theme="light"] .relationship-reset,
+html[data-theme="light"] .relationship-pair,
+html[data-theme="light"] .tree-partner-card {
+  background: var(--surface-strong);
+}
+
+html[data-theme="light"] .relationship-card,
+html[data-theme="light"] .relationship-pair {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+html[data-theme="light"] .lineage button {
+  background: var(--accent-soft);
+}
+
+html[data-theme="light"] .focus-family-section.selected-section,
+html[data-theme="light"] .relationship-answer {
+  background: linear-gradient(135deg, var(--accent-soft), var(--surface-strong));
+}
+
+/* Dark mode: replace remaining fixed light surfaces and use a lighter accent for text/icons. */
+html[data-theme="dark"] body {
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, .035), transparent 32rem), var(--bg);
+}
+
+html[data-theme="dark"] .app-header {
+  background: rgba(20, 23, 20, .94);
+}
+
+html[data-theme="dark"] .canvas-frame {
+  background: linear-gradient(rgba(145, 178, 154, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(145, 178, 154, .055) 1px, transparent 1px), var(--surface);
+  background-size: 28px 28px;
+}
+
+html[data-theme="dark"] .canvas-frame.is-focus {
+  background: radial-gradient(circle at 50% 7%, rgba(145, 178, 154, .10), transparent 24rem), var(--surface);
+}
+
+html[data-theme="dark"] .home-current,
+html[data-theme="dark"] .home-secondary-action,
+html[data-theme="dark"] .ancestor-strip,
+html[data-theme="dark"] .focus-family-section,
+html[data-theme="dark"] .focus-person-card,
+html[data-theme="dark"] .focus-relationship-button,
+html[data-theme="dark"] .relationship-search-wrap input,
+html[data-theme="dark"] .relationship-search-results,
+html[data-theme="dark"] .relationship-reset,
+html[data-theme="dark"] .relationship-pair,
+html[data-theme="dark"] .tree-partner-card,
+html[data-theme="dark"] .selected-chip,
+html[data-theme="dark"] .zoom-controls,
+html[data-theme="dark"] .canvas-help {
+  background: var(--surface-strong);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .focus-family-section.selected-section,
+html[data-theme="dark"] .relationship-answer,
+html[data-theme="dark"] .home-hero {
+  background: linear-gradient(135deg, var(--accent-soft), var(--surface-strong));
+}
+
+html[data-theme="dark"] .relationship-card,
+html[data-theme="dark"] .relationship-pair {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .search-results > button,
+html[data-theme="dark"] .detail-section,
+html[data-theme="dark"] .edit-form fieldset,
+html[data-theme="dark"] .correction-section,
+html[data-theme="dark"] .partner-person-section,
+html[data-theme="dark"] .mobile-search-result,
+html[data-theme="dark"] .relationship-search-results button,
+html[data-theme="dark"] .relationship-note,
+html[data-theme="dark"] .home-favorite {
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .source-number,
+html[data-theme="dark"] .correction-message {
+  background: var(--surface-tint);
+}
+
+html[data-theme="dark"] .partner-line,
+html[data-theme="dark"] .focus-card-partner,
+html[data-theme="dark"] .relationship-answer p {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .mobile-nav,
+html[data-theme="dark"] .edit-actions {
+  background: rgba(34, 39, 34, .96);
+}
+
+html[data-theme="dark"] .privacy-badge,
+html[data-theme="dark"] .tree-partner-type,
+html[data-theme="dark"] .home-search > span:first-child,
+html[data-theme="dark"] .home-search b,
+html[data-theme="dark"] .home-utilities > button > span:first-child,
+html[data-theme="dark"] .home-utilities b,
+html[data-theme="dark"] .install-icon,
+html[data-theme="dark"] .mobile-search-privacy,
+html[data-theme="dark"] .mobile-search-result-number,
+html[data-theme="dark"] .partner-focus-arrow,
+html[data-theme="dark"] .partner-linked-person b,
+html[data-theme="dark"] .edit-data-tools,
+html[data-theme="dark"] .focus-relationship-button,
+html[data-theme="dark"] .relationship-reset,
+html[data-theme="dark"] .relationship-path button,
+html[data-theme="dark"] .mobile-nav button.primary,
+html[data-theme="dark"] .mobile-nav button.active:not(.primary) {
+  color: var(--accent-ink);
+}
+
+html[data-theme="dark"] .home-favorite.is-active,
+html[data-theme="dark"] .favorite-button.is-active,
+html[data-theme="dark"] .local-edit-badge,
+html[data-theme="dark"] .partner-type-badge,
+html[data-theme="dark"] .member-kind-tag {
+  background: var(--warm-soft);
+  color: var(--warm-ink);
+  border-color: #675d39;
+}
+
+html[data-theme="dark"] .edit-error,
+html[data-theme="dark"] .correction-reset,
+html[data-theme="dark"] .correction-reset.is-confirming {
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  border-color: #745044;
+}
+
+html[data-theme="dark"] .tree-partner-card::after {
+  border-color: var(--surface-strong);
+}
+
+html[data-theme="dark"] .tree-node-has-partners > ul::after {
+  border-color: var(--surface);
+}
+
+html[data-theme] .segmented button.active,
+html[data-theme] .focus-details-button,
+html[data-theme] .home-primary-action,
+html[data-theme] .install-card > button,
+html[data-theme] .edit-save,
+html[data-theme] .correction-primary {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #ffffff;
+}
+
+html[data-theme] :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Settings */
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 188;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.settings-menu-host {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(24px, env(safe-area-inset-right));
+  z-index: 200;
+}
+
+.settings-trigger,
+.settings-close {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.settings-trigger {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(30, 35, 30, .12);
+}
+
+.settings-trigger > span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.settings-trigger:hover,
+.settings-trigger.is-open,
+.settings-close:hover {
+  background: var(--accent-soft);
+}
+
+.settings-panel {
+  position: absolute;
+  top: 54px;
+  right: 0;
+  width: min(328px, calc(100vw - 24px));
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  color: var(--text);
+  box-shadow: 0 22px 60px rgba(20, 24, 20, .22);
+}
+
+.settings-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-panel-header h2 {
+  margin: 4px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  line-height: 1.05;
+}
+
+.settings-close {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 20px;
+}
+
+.settings-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.settings-section-heading {
+  margin-bottom: 9px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-section-heading strong {
+  font-size: 12px;
+}
+
+.settings-section-heading small {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+}
+
+.settings-theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.settings-theme-options button {
+  min-width: 0;
+  min-height: 54px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.settings-theme-options button > span {
+  color: var(--muted);
+  font-size: 17px;
+}
+
+.settings-theme-options button > strong {
+  font-size: 11px;
+}
+
+.settings-theme-options button.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.settings-theme-options button.is-active > span,
+.settings-theme-options button.is-active > strong {
+  color: var(--accent-ink);
+}
+
+.settings-privacy-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 68px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-privacy-button.is-protected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.settings-privacy-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--surface-strong);
+  color: var(--accent-ink);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+}
+
+.settings-privacy-button > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.settings-privacy-button strong {
+  font-size: 11px;
+}
+
+.settings-privacy-button small {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.settings-privacy-button b {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+@media (max-width: 820px) {
+  .app-header {
+    padding-right: 70px !important;
+  }
+
+  .app-header h1 {
+    max-width: calc(100vw - 138px);
+  }
+
+  .settings-menu-host {
+    top: max(11px, env(safe-area-inset-top));
+    right: max(11px, env(safe-area-inset-right));
+  }
+
+  .settings-trigger {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    box-shadow: none;
+  }
+
+  .settings-panel {
+    position: fixed;
+    top: calc(max(11px, env(safe-area-inset-top)) + 52px);
+    right: max(10px, env(safe-area-inset-right));
+    width: min(340px, calc(100vw - 20px));
+    max-height: calc(100dvh - 82px - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .mobile-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 100vw;
+  }
+
+  .tree-area,
+  .home-view,
+  .focus-view,
+  .mobile-search-sheet,
+  .edit-sheet,
+  .correction-sheet,
+  .partner-person-sheet,
+  .relationship-sheet,
+  .detail-panel {
+    max-width: 100vw;
+  }
+
+  .home-search,
+  .home-utilities > button,
+  .home-person-card,
+  .install-card,
+  .partner-focus-card,
+  .partner-linked-person,
+  .relationship-pair,
+  .relationship-answer,
+  .relationship-path,
+  .mobile-search-result {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .home-search,
+  .home-utilities > button,
+  .install-card,
+  .relationship-pair,
+  .partner-focus-card,
+  .partner-linked-person {
+    overflow: hidden;
+  }
+
+  .toolbar-controls {
+    max-width: 100%;
+  }
+
+  .focus-horizontal-list {
+    max-width: calc(100vw - 20px);
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-panel {
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+
+  .settings-theme-options button {
+    min-height: 58px;
+  }
+
+  .detail-topbar,
+  .partner-person-header,
+  .edit-header,
+  .correction-header,
+  .relationship-header,
+  .mobile-search-header {
+    max-width: 100%;
+  }
+}
