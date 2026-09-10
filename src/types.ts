@@ -9,6 +9,8 @@ export interface Partner {
   relationship: 'Ehe' | 'Partnerschaft' | 'Verlobung'
   status?: 'annulliert' | 'geschieden'
   notes?: string
+  /** Nur für lokal abgeleitete Arbeitsstände; Quelldaten müssen dieses Feld nicht setzen. */
+  lifeStatus?: 'living' | 'deceased' | 'unknown'
 }
 
 export interface Person {
