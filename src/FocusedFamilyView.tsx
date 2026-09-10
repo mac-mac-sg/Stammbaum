@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import PartnerPersonSheet from './PartnerPersonSheet'
 import RelationshipFinder from './RelationshipFinder'
 import { useEdits } from './EditContext'
+import { partnerMembersForPerson, relationLabel } from './familyGraph'
+import type { FamilyMember } from './familyGraph'
 import { usePrivacy } from './PrivacyContext'
-import { isProtectedPerson } from './privacy'
+import { isPotentiallyLivingRecord, isProtectedPerson } from './privacy'
 import type { Person } from './types'
 
 const monthNames = [
@@ -31,7 +34,6 @@ function CompactPerson({
 }) {
   const { mode } = usePrivacy()
   const { getLifeStatus, hasEdit } = useEdits()
-  const partner = person.partners[0]
   const protectedPerson = isProtectedPerson(person, mode, getLifeStatus(person.id))
 
   return (
@@ -55,7 +57,32 @@ function CompactPerson({
       </span>
       {protectedPerson && <span className="privacy-badge">Geschützt</span>}
       {hasEdit(person.id) && <span className="local-edit-badge">Lokal korrigiert</span>}
-      {partner && <span className="focus-card-partner">∞ {partner.name}</span>}
+    </button>
+  )
+}
+
+function PartnerFocusCard({
+  member,
+  onOpen,
+}: {
+  member: FamilyMember
+  onOpen: (member: FamilyMember) => void
+}) {
+  const { mode } = usePrivacy()
+  const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(member)
+
+  return (
+    <button type="button" className="partner-focus-card" onClick={() => onOpen(member)}>
+      <span className="partner-focus-type">{relationLabel(member)}</span>
+      <strong>{member.name}</strong>
+      <span className={`partner-focus-life${protectedMember ? ' protected-value' : ''}`}>
+        {protectedMember
+          ? 'Lebensdaten geschützt'
+          : member.birth
+            ? `* ${formatDate(member.birth)}${member.birthPlace ? ` · ${member.birthPlace}` : ''}`
+            : member.birthPlace ?? 'Keine weiteren Lebensdaten erfasst'}
+      </span>
+      <span className="partner-focus-arrow" aria-hidden="true">→</span>
     </button>
   )
 }
@@ -70,6 +97,7 @@ export default function FocusedFamilyView({
   onOpenDetails: () => void
 }) {
   const [relationshipOpen, setRelationshipOpen] = useState(false)
+  const [selectedPartner, setSelectedPartner] = useState<FamilyMember | undefined>()
   const { getPerson } = useEdits()
   const parent = person.parentId ? getPerson(person.parentId) : undefined
   const siblings = parent
@@ -81,6 +109,7 @@ export default function FocusedFamilyView({
   const children = person.childIds
     .map((id) => getPerson(id))
     .filter((value): value is Person => Boolean(value))
+  const partners = partnerMembersForPerson(person)
 
   const ancestors: Person[] = []
   let current = person.parentId ? getPerson(person.parentId) : undefined
@@ -132,6 +161,20 @@ export default function FocusedFamilyView({
           </div>
         </section>
 
+        {partners.length > 0 && (
+          <section className="focus-family-section">
+            <div className="focus-section-heading">
+              <span>Partnerinnen & Partner</span>
+              <small>{partners.length}</small>
+            </div>
+            <div className="partner-focus-list">
+              {partners.map((partner) => (
+                <PartnerFocusCard key={partner.id} member={partner} onOpen={setSelectedPartner} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {siblings.length > 0 && (
           <section className="focus-family-section">
             <div className="focus-section-heading">
@@ -168,6 +211,14 @@ export default function FocusedFamilyView({
         open={relationshipOpen}
         onClose={() => setRelationshipOpen(false)}
         onNavigate={onSelect}
+      />
+
+      <PartnerPersonSheet
+        member={selectedPartner}
+        linkedPerson={selectedPartner?.linkedPersonId ? getPerson(selectedPartner.linkedPersonId) : undefined}
+        open={Boolean(selectedPartner)}
+        onClose={() => setSelectedPartner(undefined)}
+        onNavigateLinked={onSelect}
       />
     </div>
   )
