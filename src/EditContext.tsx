@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { peopleById } from './data'
-import { familyMembersById } from './familyGraph'
+import { familyMembersById, partnerMemberId } from './familyGraph'
 import type { FamilyMember } from './familyGraph'
 import type { LifeStatus } from './privacy'
 import type { Partner, Person } from './types'
@@ -173,11 +173,31 @@ export function EditProvider({ children }: { children: ReactNode }) {
     const base = peopleById[id]
     if (!base) return undefined
     const edit = edits[id]
-    if (!edit) return base
+    const hasPartnerCorrections = base.partners.some((_, index) => Boolean(partnerEdits[partnerMemberId(id, index)]))
 
-    const { lifeStatus: _lifeStatus, updatedAt: _updatedAt, ...personFields } = edit
-    return { ...base, ...personFields }
-  }, [edits])
+    if (!edit && !hasPartnerCorrections) return base
+
+    const personFields = edit
+      ? (() => {
+          const { lifeStatus: _lifeStatus, updatedAt: _updatedAt, ...fields } = edit
+          return fields
+        })()
+      : {}
+
+    const partners = base.partners.map((partner, index) => {
+      const partnerEdit = partnerEdits[partnerMemberId(id, index)]
+      if (!partnerEdit) return partner
+
+      const { updatedAt: _updatedAt, relationshipStatus, ...partnerFields } = partnerEdit
+      return {
+        ...partner,
+        ...partnerFields,
+        status: relationshipStatus === null ? undefined : relationshipStatus ?? partner.status,
+      }
+    })
+
+    return { ...base, ...personFields, partners }
+  }, [edits, partnerEdits])
 
   const getLifeStatus = useCallback((id: string): LifeStatus => {
     return edits[id]?.lifeStatus ?? 'unknown'
@@ -214,7 +234,6 @@ export function EditProvider({ children }: { children: ReactNode }) {
     if (!edit) return base
 
     const {
-      lifeStatus: _lifeStatus,
       updatedAt: _updatedAt,
       relationshipStatus,
       ...memberFields
