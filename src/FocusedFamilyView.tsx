@@ -69,19 +69,29 @@ function PartnerFocusCard({
   onOpen: (member: FamilyMember) => void
 }) {
   const { mode } = usePrivacy()
-  const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(member)
+  const {
+    getPartnerLifeStatus,
+    getPartnerMember,
+    hasPartnerEdit,
+  } = useEdits()
+  const effectiveMember = getPartnerMember(member.id) ?? member
+  const protectedMember = mode === 'protected' && isPotentiallyLivingRecord(
+    effectiveMember,
+    getPartnerLifeStatus(effectiveMember.id),
+  )
 
   return (
-    <button type="button" className="partner-focus-card" onClick={() => onOpen(member)}>
-      <span className="partner-focus-type">{relationLabel(member)}</span>
-      <strong>{member.name}</strong>
+    <button type="button" className="partner-focus-card" onClick={() => onOpen(effectiveMember)}>
+      <span className="partner-focus-type">{relationLabel(effectiveMember)}</span>
+      <strong>{effectiveMember.name}</strong>
       <span className={`partner-focus-life${protectedMember ? ' protected-value' : ''}`}>
         {protectedMember
           ? 'Lebensdaten geschützt'
-          : member.birth
-            ? `* ${formatDate(member.birth)}${member.birthPlace ? ` · ${member.birthPlace}` : ''}`
-            : member.birthPlace ?? 'Keine weiteren Lebensdaten erfasst'}
+          : effectiveMember.birth
+            ? `* ${formatDate(effectiveMember.birth)}${effectiveMember.birthPlace ? ` · ${effectiveMember.birthPlace}` : ''}`
+            : effectiveMember.birthPlace ?? 'Keine weiteren Lebensdaten erfasst'}
       </span>
+      {hasPartnerEdit(effectiveMember.id) && <span className="local-edit-badge">Lokal korrigiert</span>}
       <span className="partner-focus-arrow" aria-hidden="true">→</span>
     </button>
   )
