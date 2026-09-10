@@ -1,0 +1,250 @@
+/*
+ * Design-Engineering-Polish nach emil-design-eng + Apple-Design-Prinzipien.
+ * Diese Datei liegt bewusst am Ende der CSS-Kaskade und bündelt Interaktions-
+ * und Materialregeln, statt weitere komponentenspezifische Sonderfälle zu erzeugen.
+ */
+
+:root {
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+  --press-duration: 120ms;
+}
+
+/* Header: Einstellungen sind eine echte Header-Aktion, nicht mehr ein frei schwebender Fremdkörper. */
+.app-header {
+  padding-right: 28px !important;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.settings-menu-host {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  z-index: 200;
+  flex: 0 0 auto;
+}
+
+.settings-trigger {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  transition:
+    transform var(--press-duration) var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.settings-trigger svg {
+  display: block;
+}
+
+.settings-trigger:active,
+.settings-close:active,
+.settings-theme-options button:active,
+.settings-privacy-button:active,
+.settings-data-button:active {
+  transform: scale(.97);
+}
+
+.settings-backdrop {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 120ms ease, visibility 120ms ease;
+}
+
+.settings-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.settings-panel {
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  transform-origin: top right;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px) scale(.98);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out),
+    visibility 150ms ease;
+}
+
+.settings-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.settings-section-heading small,
+.settings-privacy-button small,
+.settings-data-button small,
+.settings-public-note {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Bottom Navigation: leichte Materialschicht, durchgehend sichtbar und direkt responsiv. */
+.mobile-nav button {
+  transition:
+    transform var(--press-duration) var(--ease-out),
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.mobile-nav button:active {
+  transform: scale(.97);
+}
+
+.mobile-nav button > small {
+  font-size: 11px;
+}
+
+/* Primäre Startaktionen: unmittelbares Press-Feedback statt kaum sichtbarer Skalierung. */
+.home-tree-action,
+.home-search,
+.home-person-main,
+.home-favorite,
+.favorite-button,
+.relationship-card-button,
+.focus-person-card,
+.focus-details-button,
+.focus-relationship-button,
+.mobile-search-result,
+.family-links button,
+.zoom-controls button,
+.segmented button {
+  transition-property: transform, background-color, border-color, color, box-shadow;
+  transition-duration: var(--press-duration), 150ms, 150ms, 150ms, 150ms;
+  transition-timing-function: var(--ease-out), ease, ease, ease, ease;
+}
+
+.home-tree-action:active,
+.home-search:active,
+.home-person-main:active,
+.home-favorite:active,
+.favorite-button:active,
+.relationship-card-button:active,
+.focus-person-card:active,
+.focus-details-button:active,
+.focus-relationship-button:active,
+.mobile-search-result:active,
+.family-links button:active,
+.zoom-controls button:active,
+.segmented button:active {
+  transform: scale(.98);
+}
+
+.home-search small,
+.home-tree-action small,
+.home-person-meta,
+.home-person-main > span:last-child,
+.home-empty-card span,
+.home-discovery-stats small {
+  font-size: 11px;
+}
+
+/* Suche ist ein Haupttab: praktisch sofortiger Zustandswechsel, keine unnötige räumliche Fahrt. */
+@media (max-width: 820px) {
+  .app-header {
+    padding-right: 14px !important;
+  }
+
+  .app-header h1 {
+    max-width: calc(100vw - 132px);
+  }
+
+  .settings-panel {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: min(340px, calc(100vw - 20px));
+    max-height: calc(100dvh - var(--mobile-header) - var(--mobile-nav) - 20px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .mobile-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .mobile-search-sheet {
+    transform: none !important;
+    transition: opacity 110ms var(--ease-out), visibility 110ms ease !important;
+  }
+
+  .mobile-search-result-copy small,
+  .mobile-search-result-copy > span,
+  .mobile-search-privacy span {
+    font-size: 11px;
+  }
+}
+
+/* Glasmaterial mit systemnahen Accessibility-Fallbacks. */
+@media (prefers-reduced-transparency: reduce) {
+  .mobile-nav,
+  .app-header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .mobile-nav {
+    background: var(--surface-strong) !important;
+  }
+
+  .app-header {
+    background: var(--bg) !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .mobile-nav,
+  .settings-panel,
+  .settings-trigger {
+    border-color: var(--line-strong) !important;
+  }
+
+  .mobile-nav {
+    background: var(--surface-strong) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-panel,
+  .settings-backdrop,
+  .mobile-search-sheet,
+  .mobile-nav button,
+  .home-tree-action,
+  .home-search,
+  .home-person-main,
+  .home-favorite,
+  .favorite-button,
+  .relationship-card-button,
+  .focus-person-card,
+  .focus-details-button,
+  .focus-relationship-button,
+  .mobile-search-result,
+  .family-links button,
+  .zoom-controls button,
+  .segmented button {
+    transition-duration: 0ms !important;
+    animation: none !important;
+  }
+
+  .settings-panel,
+  .mobile-search-sheet {
+    transform: none !important;
+  }
+}
