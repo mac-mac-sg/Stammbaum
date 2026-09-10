@@ -11,7 +11,7 @@ Die Wahl wird nur lokal im Browser unter `stammbaum-privacy-mode` gespeichert.
 
 ## Lebensstatus und Heuristik
 
-Der Schutzmodus berücksichtigt nun einen expliziten Lebensstatus pro Person:
+Der Schutzmodus berücksichtigt einen expliziten Lebensstatus pro Person:
 
 - `living`: Die Person wird im Schutzmodus immer geschützt.
 - `deceased`: Die vorhandenen Lebensdaten dürfen im Schutzmodus angezeigt werden.
@@ -34,6 +34,12 @@ In der privaten Vollansicht können Lebensstatus, Geburts- und Sterbedaten, Orte
 - können pro Person vollständig verworfen werden.
 
 Die lokalen Änderungen werden unter `stammbaum-person-edits-v1` gespeichert. Sie sind bewusst als nicht-destruktive Arbeitsebene ausgelegt, bis ein späteres fachliches Freigabe- und Persistenzmodell definiert ist.
+
+## Export und Import
+
+Lokale Korrekturen können als versionierte JSON-Datei exportiert und auf einem anderen Gerät wieder importiert werden. Beim Import werden nur bekannte Personen-IDs und formal gültige Korrektureinträge übernommen; andere Einträge werden übersprungen. Importierte Korrekturen werden mit bereits vorhandenen lokalen Korrekturen zusammengeführt.
+
+Die Exportdatei kann vollständige personenbezogene Angaben enthalten. Sie ist deshalb wie eine private Familiendatei zu behandeln und sollte nicht öffentlich geteilt oder ungeschützt abgelegt werden.
 
 ## Im Schutzmodus verborgen
 
