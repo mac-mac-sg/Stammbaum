@@ -17,6 +17,7 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 - **expliziter Lebensstatus** (`living`, `deceased`, `unknown`) als lokale fachliche Korrektur
 - **nicht-destruktiver Editiermodus** für Lebensdaten, Orte und Zusatznotizen
 - lokale Korrekturen wirken sofort in Baum, Fokus, Suche und Datenschutzlogik
+- **Export und Import lokaler Korrekturen als JSON**, inklusive Validierung bekannter Personen-IDs
 - Bottom-Sheet- und Vollbild-Interaktionen auf kleinen Displays
 - responsive Gestaltung inklusive Dark Mode
 - Web-App-Manifest, Homescreen-Metadaten und kontrollierter Service Worker
@@ -45,7 +46,7 @@ npm run build
 
 Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Oberfläche standardmässig im Schutzmodus. Für Personen kann in der privaten Vollansicht ein expliziter Lebensstatus gesetzt werden. Solange dieser auf `unknown` steht, greift weiterhin die konservative 120-Jahre-Heuristik.
 
-Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie überschreiben weder die Scanquelle noch die im Repository erfassten Ausgangsdaten. Details stehen in `docs/PRIVACY.md`.
+Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie überschreiben weder die Scanquelle noch die im Repository erfassten Ausgangsdaten. Für Sicherung oder Gerätewechsel können sie als JSON exportiert und wieder importiert werden. Exportdateien können personenbezogene Daten enthalten und sind entsprechend privat zu behandeln. Details stehen in `docs/PRIVACY.md`.
 
 ## Datenqualität
 
@@ -55,9 +56,9 @@ Der Verwandtschafts-Finder berechnet Beziehungen nur über die strukturierten El
 
 ## Nächste Schritte
 
-1. Export/Import und fachliche Freigabe lokaler Korrekturen
-2. weitere fachliche Verifikation schwer lesbarer Scanstellen
-3. strukturierte Pflege von Partnern und zusätzlichen Beziehungen
+1. fachliche Verifikation schwer lesbarer Scanstellen
+2. strukturierte Pflege von Partnern und zusätzlichen Beziehungen
+3. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
 4. Festlegung eines privaten/authentifizierten Deployment-Ziels
 
 ## Branch
