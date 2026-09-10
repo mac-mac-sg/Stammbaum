@@ -32,7 +32,8 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 - Web-App-Manifest, Homescreen-Metadaten und kontrollierter Service Worker
 - Installationshinweis auf unterstützten Smartphones nach einem sicheren HTTPS-Deployment
 - fail-closed **Docker/Caddy-Deployment** mit serverseitiger Basic Authentication und Sicherheitsheadern
-- automatische Datenvalidierung, Produktions-Build und Container-Build in GitHub Actions CI
+- **automatisches privates Deployment nach jedem Push auf `main`**, analog zum Veröffentlichungsprinzip der Essens-Check-App
+- automatische Datenvalidierung, Produktions-Build, Container-Build und Authentifizierungs-Smoke-Test in GitHub Actions CI
 
 ## Datenmodell
 
@@ -71,7 +72,17 @@ Privaten Container bauen:
 docker build -t stammbaum-villiger .
 ```
 
-Details zu Authentifizierung, HTTPS und Betriebsregeln stehen in `docs/DEPLOYMENT.md`.
+## Privates Deployment
+
+Der normale Ablauf entspricht jetzt funktional der Essens-Check-App:
+
+```text
+Pull Request → CI → Merge nach main → automatisches Deployment
+```
+
+Statt GitHub Pages wird der geprüfte Container per SSH auf einen privaten Linux-Server übertragen. Caddy übernimmt dort HTTPS und schützt sämtliche App-Dateien mit serverseitiger Authentifizierung. Der Deployment-Workflow prüft nach der Veröffentlichung automatisch, dass anonymer Zugriff abgewiesen und authentifizierter Zugriff akzeptiert wird.
+
+Für die einmalige Inbetriebnahme werden ein kleiner Docker-fähiger Server, ein Domainname sowie sieben GitHub-Secrets benötigt. Danach genügt ein Merge auf `main`, um eine neue Version automatisch bereitzustellen. Die genaue Einrichtung steht in `docs/DEPLOYMENT.md`.
 
 ## Datenschutz
 
@@ -91,11 +102,11 @@ Der Verwandtschafts-Finder unterscheidet zwischen Blutsverwandtschaft und Verbin
 
 ## Nächste Schritte
 
-1. konkretes privates Hosting-Ziel festlegen und HTTPS-Endpunkt anbinden
-2. fachliche Verifikation schwer lesbarer Scanstellen
-3. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
-4. zusätzliche Familienquellen für bisher unbekannte Partnerlinien
-5. später optional Fotos und Dokumente pro Person
+1. einmalig privaten Server, Domain/DNS und GitHub-Production-Secrets einrichten
+2. erstes automatisches HTTPS-Deployment ausführen und auf Smartphone testen
+3. fachliche Verifikation schwer lesbarer Scanstellen
+4. Freigabeprozess für bestätigte lokale Korrekturen in den zentralen Datensatz
+5. zusätzliche Familienquellen sowie später optional Fotos und Dokumente
 
 ## Branch
 
