@@ -47,8 +47,21 @@ jobs:
             echo "Deployment abgebrochen. Siehe docs/DEPLOYMENT.md für die einmalige Einrichtung."
             exit 1
           fi
-          if [[ "$APP_DOMAIN" == *"://"* || "$APP_DOMAIN" == */* ]]; then
-            echo "STAMMBAUM_DOMAIN nur als Hostname setzen, z. B. familie.example.ch"
+
+          if [[ ! "$DEPLOY_HOST" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "STAMMBAUM_DEPLOY_HOST muss ein Hostname oder eine IPv4-Adresse ohne Protokoll sein."
+            exit 1
+          fi
+          if [[ ! "$DEPLOY_USER" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "STAMMBAUM_DEPLOY_USER enthält nicht unterstützte Zeichen."
+            exit 1
+          fi
+          if [[ ! "$APP_DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]]; then
+            echo "STAMMBAUM_DOMAIN nur als DNS-Hostname setzen, z. B. familie.example.ch"
+            exit 1
+          fi
+          if [[ ! "$APP_USER" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "STAMMBAUM_USER darf nur Buchstaben, Zahlen, Punkt, Unterstrich und Bindestrich enthalten."
             exit 1
           fi
 
