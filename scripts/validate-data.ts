@@ -1,7 +1,10 @@
 import { people, peopleById, rootId } from '../src/data'
+import { buildFamilyMembers } from '../src/familyGraph'
 import { validateGenealogy } from '../src/dataValidation'
 
 const result = validateGenealogy(people, peopleById, rootId)
+const familyMembers = buildFamilyMembers(people)
+const partnerCount = familyMembers.filter((member) => member.kind === 'partner').length
 
 if (result.warnings.length > 0) {
   console.log(`Datenprüfung: ${result.warnings.length} Hinweis(e).`)
@@ -14,4 +17,6 @@ if (result.errors.length > 0) {
   process.exit(1)
 }
 
-console.log(`Datenprüfung erfolgreich: ${people.length} Personen, ${new Set(people.map((person) => person.number)).size} eindeutige Quellennummern.`)
+console.log(
+  `Datenprüfung erfolgreich: ${people.length} nummerierte Nachkommen, ${partnerCount} Partnerpersonen, ${familyMembers.length} Personenknoten, ${new Set(people.map((person) => person.number)).size} eindeutige Quellennummern.`,
+)
