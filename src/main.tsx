@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import { EditProvider } from './EditContext'
 import { PrivacyProvider } from './PrivacyContext'
 import { registerServiceWorker } from './registerServiceWorker'
 import { assertValidGenealogy } from './dataValidation'
@@ -12,14 +13,17 @@ import './focus-mobile.css'
 import './relationship.css'
 import './privacy.css'
 import './mobile-search.css'
+import './edit.css'
 
 assertValidGenealogy(people, peopleById, rootId)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <PrivacyProvider>
-      <App />
-    </PrivacyProvider>
+    <EditProvider>
+      <PrivacyProvider>
+        <App />
+      </PrivacyProvider>
+    </EditProvider>
   </React.StrictMode>,
 )
 
