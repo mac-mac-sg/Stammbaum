@@ -1,15 +1,18 @@
 import { useMemo, useRef, useState } from 'react'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+import EditPersonSheet from './EditPersonSheet'
 import FocusedFamilyView from './FocusedFamilyView'
 import MobileSearchSheet from './MobileSearchSheet'
+import { useEdits } from './EditContext'
 import { usePrivacy } from './PrivacyContext'
 import {
   isProtectedPartner,
   isProtectedPerson,
+  lifeStatusLabel,
   protectedSearchParts,
   privacyModeLabel,
 } from './privacy'
-import type { PrivacyMode } from './privacy'
+import type { LifeStatus, PrivacyMode } from './privacy'
 import { people, peopleById, rootId } from './data'
 import type { Person } from './types'
 
@@ -28,14 +31,14 @@ function formatDate(value?: string) {
   return `${day}. ${monthNames[month - 1]} ${year}`
 }
 
-function lifeLabel(person: Person, privacyMode: PrivacyMode) {
-  if (isProtectedPerson(person, privacyMode)) return 'Lebensdaten geschützt'
+function lifeLabel(person: Person, privacyMode: PrivacyMode, lifeStatus: LifeStatus) {
+  if (isProtectedPerson(person, privacyMode, lifeStatus)) return 'Lebensdaten geschützt'
   const birth = person.birth ? formatDate(person.birth) : '?'
   const death = person.death ? formatDate(person.death) : ''
   return death ? `${birth} – ${death}` : `* ${birth}`
 }
 
-function searchText(person: Person, privacyMode: PrivacyMode) {
+function searchText(person: Person, privacyMode: PrivacyMode, lifeStatus: LifeStatus) {
   const partnerParts = person.partners.flatMap((partner) => {
     if (isProtectedPartner(partner, privacyMode)) return [partner.name]
     return [partner.name, partner.birth, partner.birthPlace, partner.death, partner.deathPlace]
@@ -43,7 +46,7 @@ function searchText(person: Person, privacyMode: PrivacyMode) {
 
   return [
     person.name,
-    ...protectedSearchParts(person, privacyMode),
+    ...protectedSearchParts(person, privacyMode, lifeStatus),
     ...partnerParts,
   ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
 }
@@ -70,8 +73,10 @@ function PersonCard({
   inPath: boolean
 }) {
   const { mode } = usePrivacy()
+  const { getLifeStatus, hasEdit } = useEdits()
   const partner = person.partners[0]
-  const protectedPerson = isProtectedPerson(person, mode)
+  const lifeStatus = getLifeStatus(person.id)
+  const protectedPerson = isProtectedPerson(person, mode, lifeStatus)
 
   return (
     <button
@@ -82,8 +87,9 @@ function PersonCard({
     >
       <span className="source-number">{person.number}</span>
       <span className="person-name">{person.name}</span>
-      <span className={`person-life${protectedPerson ? ' protected-value' : ''}`}>{lifeLabel(person, mode)}</span>
+      <span className={`person-life${protectedPerson ? ' protected-value' : ''}`}>{lifeLabel(person, mode, lifeStatus)}</span>
       {protectedPerson && <span className="privacy-badge">Geschützt</span>}
+      {hasEdit(person.id) && <span className="local-edit-badge">Lokal korrigiert</span>}
       {partner && (
         <span className="partner-line">
           <span aria-hidden="true">∞</span>
@@ -110,7 +116,8 @@ function TreeNode({
   pathIds: Set<string>
   onSelect: (id: string) => void
 }) {
-  const person = peopleById[personId]
+  const { getPerson } = useEdits()
+  const person = getPerson(personId)
   if (!person) return null
 
   const visibleChildren =
@@ -149,17 +156,25 @@ function DetailPanel({
   open,
   onClose,
   onSelect,
+  onEdit,
 }: {
   person: Person
   open: boolean
   onClose: () => void
   onSelect: (id: string) => void
+  onEdit: () => void
 }) {
   const { mode } = usePrivacy()
-  const parent = person.parentId ? peopleById[person.parentId] : undefined
-  const children = person.childIds.map((id) => peopleById[id]).filter(Boolean)
-  const path = getPathToRoot(person.id).map((id) => peopleById[id])
-  const protectedPerson = isProtectedPerson(person, mode)
+  const { getLifeStatus, getPerson, hasEdit } = useEdits()
+  const parent = person.parentId ? getPerson(person.parentId) : undefined
+  const children = person.childIds
+    .map((id) => getPerson(id))
+    .filter((value): value is Person => Boolean(value))
+  const path = getPathToRoot(person.id)
+    .map((id) => getPerson(id))
+    .filter((value): value is Person => Boolean(value))
+  const lifeStatus = getLifeStatus(person.id)
+  const protectedPerson = isProtectedPerson(person, mode, lifeStatus)
 
   return (
     <aside className={`detail-panel${open ? ' is-open' : ''}`} aria-label={`Details zu ${person.name}`}>
@@ -169,10 +184,14 @@ function DetailPanel({
           <span className="eyebrow">Person #{person.number} · Generation {person.generation}</span>
           <h2>{person.name}</h2>
           {protectedPerson && <span className="privacy-badge">Lebensdaten geschützt</span>}
+          {hasEdit(person.id) && <span className="local-edit-badge">Lokale Korrektur aktiv</span>}
         </div>
-        <button className="icon-button" type="button" onClick={onClose} aria-label="Details schliessen">
-          ×
-        </button>
+        <div className="detail-topbar-actions">
+          {mode === 'private' && (
+            <button className="edit-button" type="button" onClick={onEdit}>Bearbeiten</button>
+          )}
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Details schliessen">×</button>
+        </div>
       </div>
 
       <section className="detail-section">
@@ -187,7 +206,7 @@ function DetailPanel({
           <div>
             <dt>Geburtsort</dt>
             <dd className={protectedPerson ? 'protected-value' : undefined}>
-              {protectedPerson ? 'im Schutzmodus verborgen' : person.birthPlace ?? 'nicht angegeben'}
+              {protectedPerson ? 'im Schutzmodus verborgen' : person.birthPlace || 'nicht angegeben'}
             </dd>
           </div>
           <div>
@@ -199,10 +218,13 @@ function DetailPanel({
           <div>
             <dt>Sterbeort</dt>
             <dd className={protectedPerson ? 'protected-value' : undefined}>
-              {protectedPerson ? 'im Schutzmodus verborgen' : person.deathPlace ?? 'nicht angegeben'}
+              {protectedPerson ? 'im Schutzmodus verborgen' : person.deathPlace || 'nicht angegeben'}
             </dd>
           </div>
         </dl>
+        <p className="source-hint">
+          Lebensstatus: {lifeStatusLabel(lifeStatus)}{lifeStatus === 'unknown' ? ' · Schutz über Heuristik' : ' · lokal festgelegt'}
+        </p>
       </section>
 
       {person.partners.length > 0 && (
@@ -266,9 +288,7 @@ function DetailPanel({
           {path.map((pathPerson, index) => (
             <span key={pathPerson.id}>
               {index > 0 && <b>→</b>}
-              <button type="button" onClick={() => onSelect(pathPerson.id)}>
-                {pathPerson.name}
-              </button>
+              <button type="button" onClick={() => onSelect(pathPerson.id)}>{pathPerson.name}</button>
             </span>
           ))}
         </div>
@@ -283,8 +303,7 @@ function DetailPanel({
             <p className="protected-value">Zusatznotizen werden für potenziell lebende Personen im Schutzmodus ebenfalls verborgen.</p>
           )}
           <p className="source-hint">
-            Angaben wurden aus den bereitgestellten Scans übertragen. Unklare oder unvollständige
-            Stellen werden ausdrücklich nicht ergänzt.
+            Angaben wurden aus den bereitgestellten Scans übertragen. Lokale Korrekturen überschreiben die Quelle nicht.
           </p>
         </section>
       )}
@@ -294,10 +313,12 @@ function DetailPanel({
 
 export default function App() {
   const { mode: privacyMode, toggleMode } = usePrivacy()
+  const { editedCount, getLifeStatus, getPerson } = useEdits()
   const [selectedId, setSelectedId] = useState('p095')
   const [query, setQuery] = useState('')
   const [depthLimit, setDepthLimit] = useState(5)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches ? 'focus' : 'tree',
@@ -305,16 +326,20 @@ export default function App() {
   const zoomRef = useRef<any>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const selectedPerson = peopleById[selectedId] ?? peopleById[rootId]
+  const selectedPerson = getPerson(selectedId) ?? getPerson(rootId) ?? peopleById[rootId]
   const pathIds = useMemo(() => new Set(getPathToRoot(selectedPerson.id)), [selectedPerson.id])
+  const effectivePeople = useMemo(
+    () => people.map((person) => getPerson(person.id) ?? person),
+    [getPerson],
+  )
 
   const results = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('de-CH')
     if (!normalized) return []
-    return people
-      .filter((person) => searchText(person, privacyMode).includes(normalized))
+    return effectivePeople
+      .filter((person) => searchText(person, privacyMode, getLifeStatus(person.id)).includes(normalized))
       .slice(0, 10)
-  }, [privacyMode, query])
+  }, [effectivePeople, getLifeStatus, privacyMode, query])
 
   const focusPerson = (id: string, scale = 0.86) => {
     window.setTimeout(() => {
@@ -326,10 +351,11 @@ export default function App() {
     id: string,
     options: { focusTree?: boolean; details?: boolean } = {},
   ) => {
-    const person = peopleById[id]
+    const person = getPerson(id)
     if (!person) return
     setSelectedId(id)
     setDetailOpen(Boolean(options.details))
+    setEditOpen(false)
     setMobileSearchOpen(false)
     if (person.generation > depthLimit) setDepthLimit(person.generation)
     setQuery('')
@@ -338,6 +364,7 @@ export default function App() {
 
   const switchView = (mode: ViewMode) => {
     setDetailOpen(false)
+    setEditOpen(false)
     setMobileSearchOpen(false)
     setViewMode(mode)
     if (mode === 'tree') focusPerson(selectedPerson.id, 0.72)
@@ -345,6 +372,7 @@ export default function App() {
 
   const openSearch = () => {
     setDetailOpen(false)
+    setEditOpen(false)
     if (typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches) {
       setMobileSearchOpen(true)
       return
@@ -355,15 +383,16 @@ export default function App() {
     }, 40)
   }
 
+  const togglePrivacy = () => {
+    setEditOpen(false)
+    toggleMode()
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="brand">
-          <div className="brand-mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
+          <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
           <div>
             <span className="eyebrow">Familienarchiv</span>
             <h1>Stammbaum Villiger</h1>
@@ -374,7 +403,7 @@ export default function App() {
           <button
             type="button"
             className={`privacy-toggle${privacyMode === 'protected' ? ' is-protected' : ''}`}
-            onClick={toggleMode}
+            onClick={togglePrivacy}
             aria-pressed={privacyMode === 'protected'}
             aria-label={`${privacyModeLabel(privacyMode)}. Ansicht wechseln.`}
             title={`${privacyModeLabel(privacyMode)} – antippen zum Wechseln`}
@@ -382,23 +411,14 @@ export default function App() {
             <span className="privacy-icon" aria-hidden="true">{privacyMode === 'protected' ? '◈' : '○'}</span>
             <span className="privacy-copy">
               <strong>{privacyMode === 'protected' ? 'Schutzmodus' : 'Vollansicht'}</strong>
-              <small>{privacyMode === 'protected' ? 'Lebensdaten verborgen' : 'Private Daten sichtbar'}</small>
+              <small>{privacyMode === 'protected' ? 'Lebensdaten verborgen' : `${editedCount} lokale Änderungen`}</small>
             </span>
           </button>
 
           <div className="header-stats" aria-label="Datenbestand">
-            <div>
-              <strong>{people.length}</strong>
-              <span>Personen</span>
-            </div>
-            <div>
-              <strong>5</strong>
-              <span>Generationen</span>
-            </div>
-            <div>
-              <strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong>
-              <span>Beziehungen</span>
-            </div>
+            <div><strong>{people.length}</strong><span>Personen</span></div>
+            <div><strong>5</strong><span>Generationen</span></div>
+            <div><strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong><span>Beziehungen</span></div>
           </div>
         </div>
       </header>
@@ -419,20 +439,14 @@ export default function App() {
                   autoComplete="off"
                   enterKeyHint="search"
                 />
-                {query && (
-                  <button type="button" onClick={() => setQuery('')} aria-label="Suche leeren">×</button>
-                )}
+                {query && <button type="button" onClick={() => setQuery('')} aria-label="Suche leeren">×</button>}
               </div>
               {results.length > 0 && (
                 <div className="search-results">
                   {results.map((person) => {
-                    const protectedResult = isProtectedPerson(person, privacyMode)
+                    const protectedResult = isProtectedPerson(person, privacyMode, getLifeStatus(person.id))
                     return (
-                      <button
-                        type="button"
-                        key={person.id}
-                        onClick={() => navigatePerson(person.id, { focusTree: true })}
-                      >
+                      <button type="button" key={person.id} onClick={() => navigatePerson(person.id, { focusTree: true })}>
                         <span>
                           <strong>{person.name}</strong>
                           <small>#{person.number} · Generation {person.generation}</small>
@@ -445,29 +459,15 @@ export default function App() {
                   })}
                 </div>
               )}
-              {query && results.length === 0 && (
-                <div className="search-results empty">Keine passende Person gefunden.</div>
-              )}
+              {query && results.length === 0 && <div className="search-results empty">Keine passende Person gefunden.</div>}
             </div>
 
             <div className="toolbar-controls">
               <div className="view-control">
                 <span>Ansicht</span>
                 <div className="segmented view-segmented">
-                  <button
-                    type="button"
-                    className={viewMode === 'focus' ? 'active' : ''}
-                    onClick={() => switchView('focus')}
-                  >
-                    Fokus
-                  </button>
-                  <button
-                    type="button"
-                    className={viewMode === 'tree' ? 'active' : ''}
-                    onClick={() => switchView('tree')}
-                  >
-                    Gesamt
-                  </button>
+                  <button type="button" className={viewMode === 'focus' ? 'active' : ''} onClick={() => switchView('focus')}>Fokus</button>
+                  <button type="button" className={viewMode === 'tree' ? 'active' : ''} onClick={() => switchView('tree')}>Gesamt</button>
                 </div>
               </div>
 
@@ -482,9 +482,7 @@ export default function App() {
                         className={depthLimit === depth ? 'active' : ''}
                         onClick={() => setDepthLimit(depth)}
                         aria-label={`Bis Generation ${depth} anzeigen`}
-                      >
-                        {depth}
-                      </button>
+                      >{depth}</button>
                     ))}
                   </div>
                 </div>
@@ -560,6 +558,10 @@ export default function App() {
           open={detailOpen}
           onClose={() => setDetailOpen(false)}
           onSelect={(id) => navigatePerson(id, { focusTree: true, details: true })}
+          onEdit={() => {
+            setDetailOpen(false)
+            setEditOpen(true)
+          }}
         />
       </main>
 
@@ -568,6 +570,15 @@ export default function App() {
         className={`sheet-backdrop${detailOpen ? ' is-open' : ''}`}
         aria-label="Personendetails schliessen"
         onClick={() => setDetailOpen(false)}
+      />
+
+      <EditPersonSheet
+        person={selectedPerson}
+        open={editOpen && privacyMode === 'private'}
+        onClose={() => {
+          setEditOpen(false)
+          setDetailOpen(true)
+        }}
       />
 
       <MobileSearchSheet
@@ -592,7 +603,11 @@ export default function App() {
       </nav>
 
       <footer>
-        <span>{privacyMode === 'protected' ? 'Schutzmodus aktiv · Lebensdaten potenziell lebender Personen verborgen' : 'Private Vollansicht · personenbezogene Daten sichtbar'}</span>
+        <span>
+          {privacyMode === 'protected'
+            ? 'Schutzmodus aktiv · Lebensdaten potenziell lebender Personen verborgen'
+            : `Private Vollansicht · ${editedCount} lokale ${editedCount === 1 ? 'Änderung' : 'Änderungen'}`}
+        </span>
         <span>Quelle: Familienunterlagen «Nachkommen von Sebastian Villiger»</span>
       </footer>
     </div>
