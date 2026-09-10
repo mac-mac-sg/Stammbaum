@@ -14,16 +14,25 @@ Private, smartphone-first Stammbaum-App auf Basis der bereitgestellten Familienu
 - **Verwandtschafts-Finder** zwischen zwei erfassten Personen inklusive Verbindungspfad und gemeinsamer Bezugsperson
 - Personendetails mit Lebensdaten, Beziehungen, Kindern, Abstammungslinie und Quellenhinweisen
 - **Schutzmodus für potenziell lebende Personen**, standardmässig aktiv und lokal gespeichert
-- Bottom-Sheet-Details auf kleinen Displays
+- **expliziter Lebensstatus** (`living`, `deceased`, `unknown`) als lokale fachliche Korrektur
+- **nicht-destruktiver Editiermodus** für Lebensdaten, Orte und Zusatznotizen
+- lokale Korrekturen wirken sofort in Baum, Fokus, Suche und Datenschutzlogik
+- Bottom-Sheet- und Vollbild-Interaktionen auf kleinen Displays
 - responsive Gestaltung inklusive Dark Mode
-- Web-App-Manifest und Homescreen-Metadaten
-- GitHub Actions CI für den Produktions-Build
+- Web-App-Manifest, Homescreen-Metadaten und kontrollierter Service Worker
+- automatische Datenvalidierung plus Produktions-Build in GitHub Actions CI
 
 ## Entwicklung
 
 ```bash
 npm install
 npm run dev
+```
+
+Datenprüfung:
+
+```bash
+npm run validate:data
 ```
 
 Produktions-Build:
@@ -34,22 +43,22 @@ npm run build
 
 ## Datenschutz
 
-Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Oberfläche standardmässig im Schutzmodus. Für Datensätze ohne erfasstes Sterbedatum werden Lebensdaten verborgen, wenn das Geburtsjahr höchstens 120 Jahre zurückliegt; bei vollständig fehlendem Geburtsdatum wird vorsichtshalber ebenfalls geschützt. Die private Vollansicht kann bewusst zugeschaltet werden.
+Das Repository und der Prototyp sind bewusst privat. Zusätzlich startet die Oberfläche standardmässig im Schutzmodus. Für Personen kann in der privaten Vollansicht ein expliziter Lebensstatus gesetzt werden. Solange dieser auf `unknown` steht, greift weiterhin die konservative 120-Jahre-Heuristik.
 
-Diese Heuristik ist eine Schutzmassnahme, aber kein Ersatz für einen fachlich gepflegten Lebensstatus pro Person. Namen und genealogische Beziehungen bleiben im Schutzmodus sichtbar.
+Lokale Korrekturen werden nur im Browser des jeweiligen Geräts gespeichert. Sie überschreiben weder die Scanquelle noch die im Repository erfassten Ausgangsdaten. Details stehen in `docs/PRIVACY.md`.
 
 ## Datenqualität
 
-Unklare oder unvollständige Angaben aus den Scans werden nicht geraten. Sie sind in `docs/DATA_QUALITY.md` dokumentiert. Das Smartphone-Bedienkonzept inklusive Datenschutzlogik ist in `docs/MOBILE_UX.md` beschrieben.
+Unklare oder unvollständige Angaben aus den Scans werden nicht geraten. Sie sind in `docs/DATA_QUALITY.md` dokumentiert. Das Smartphone-Bedienkonzept ist in `docs/MOBILE_UX.md` beschrieben.
 
 Der Verwandtschafts-Finder berechnet Beziehungen nur über die strukturierten Eltern-Kind-Verknüpfungen des erfassten Nachkommenbaums. Ehe- und Lebenspartner sind derzeit Zusatzdaten und nicht als eigene Knoten im Beziehungsgraphen verknüpft.
 
 ## Nächste Schritte
 
-1. fachliche Kennzeichnung des Lebensstatus statt ausschliesslicher Heuristik
+1. Export/Import und fachliche Freigabe lokaler Korrekturen
 2. weitere fachliche Verifikation schwer lesbarer Scanstellen
-3. optionaler Editiermodus für Ergänzungen und Korrekturen
-4. optionaler Deployment-/Installationspfad als PWA mit kontrolliertem Service Worker
+3. strukturierte Pflege von Partnern und zusätzlichen Beziehungen
+4. Festlegung eines privaten/authentifizierten Deployment-Ziels
 
 ## Branch
 
