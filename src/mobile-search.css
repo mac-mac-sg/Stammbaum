@@ -1,18 +1,26 @@
 .mobile-search-sheet { display: none; }
 
 @media (max-width: 820px) {
+  /*
+   * Die Suche ist auf Smartphones ein eigener Hauptbereich und kein Vollbild-Modal.
+   * Kopfzeile/Einstellungen sowie die Bottom Navigation bleiben dadurch an ihrem
+   * gewohnten Ort sichtbar und die Navigation verhält sich in allen drei Tabs gleich.
+   */
   .mobile-search-sheet {
     display: flex;
     position: fixed;
-    inset: 0;
-    z-index: 140;
+    top: var(--mobile-header);
+    right: 0;
+    bottom: calc(var(--mobile-nav) + env(safe-area-inset-bottom));
+    left: 0;
+    z-index: 70;
     flex-direction: column;
-    padding: max(16px, env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+    padding: 14px 14px 16px;
     background: var(--surface-strong);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transform: translateY(14px);
+    transform: translateY(8px);
     transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
   }
 
@@ -37,6 +45,14 @@
     font-size: 28px;
     line-height: 1;
     letter-spacing: -.03em;
+  }
+
+  /*
+   * Schliessen erfolgt über Start/Familie in der permanent sichtbaren Bottom Nav.
+   * So kollidiert rechts oben kein zweites Bedienelement mit dem Einstellungsmenü.
+   */
+  .mobile-search-header > .icon-button {
+    display: none;
   }
 
   .mobile-search-privacy {
@@ -92,7 +108,7 @@
     margin-top: 12px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding-bottom: 10px;
+    padding-bottom: 18px;
   }
 
   .mobile-search-result {
