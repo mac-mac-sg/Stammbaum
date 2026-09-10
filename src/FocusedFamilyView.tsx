@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import RelationshipFinder from './RelationshipFinder'
+import { useEdits } from './EditContext'
 import { usePrivacy } from './PrivacyContext'
 import { isProtectedPerson } from './privacy'
-import { peopleById } from './data'
 import type { Person } from './types'
 
 const monthNames = [
@@ -18,16 +18,6 @@ function formatDate(value?: string) {
   return `${day}. ${monthNames[month - 1]} ${year}`
 }
 
-function getAncestors(person: Person) {
-  const ancestors: Person[] = []
-  let current = person.parentId ? peopleById[person.parentId] : undefined
-  while (current) {
-    ancestors.unshift(current)
-    current = current.parentId ? peopleById[current.parentId] : undefined
-  }
-  return ancestors
-}
-
 function CompactPerson({
   person,
   label,
@@ -40,8 +30,9 @@ function CompactPerson({
   onSelect: (id: string) => void
 }) {
   const { mode } = usePrivacy()
+  const { getLifeStatus, hasEdit } = useEdits()
   const partner = person.partners[0]
-  const protectedPerson = isProtectedPerson(person, mode)
+  const protectedPerson = isProtectedPerson(person, mode, getLifeStatus(person.id))
 
   return (
     <button
@@ -63,6 +54,7 @@ function CompactPerson({
             </>}
       </span>
       {protectedPerson && <span className="privacy-badge">Geschützt</span>}
+      {hasEdit(person.id) && <span className="local-edit-badge">Lokal korrigiert</span>}
       {partner && <span className="focus-card-partner">∞ {partner.name}</span>}
     </button>
   )
@@ -78,17 +70,24 @@ export default function FocusedFamilyView({
   onOpenDetails: () => void
 }) {
   const [relationshipOpen, setRelationshipOpen] = useState(false)
-  const parent = person.parentId ? peopleById[person.parentId] : undefined
+  const { getPerson } = useEdits()
+  const parent = person.parentId ? getPerson(person.parentId) : undefined
   const siblings = parent
     ? parent.childIds
         .filter((id) => id !== person.id)
-        .map((id) => peopleById[id])
+        .map((id) => getPerson(id))
         .filter((value): value is Person => Boolean(value))
     : []
   const children = person.childIds
-    .map((id) => peopleById[id])
+    .map((id) => getPerson(id))
     .filter((value): value is Person => Boolean(value))
-  const ancestors = getAncestors(person)
+
+  const ancestors: Person[] = []
+  let current = person.parentId ? getPerson(person.parentId) : undefined
+  while (current) {
+    ancestors.unshift(current)
+    current = current.parentId ? getPerson(current.parentId) : undefined
+  }
 
   return (
     <div className="focus-view" aria-label={`Familienfokus für ${person.name}`}>
@@ -120,12 +119,7 @@ export default function FocusedFamilyView({
             <span>Im Fokus</span>
             <small>Generation {person.generation}</small>
           </div>
-          <CompactPerson
-            person={person}
-            selected
-            label="Ausgewählte Person"
-            onSelect={() => onOpenDetails()}
-          />
+          <CompactPerson person={person} selected label="Ausgewählte Person" onSelect={() => onOpenDetails()} />
           <div className="focus-actions">
             <button type="button" className="focus-details-button" onClick={onOpenDetails}>
               Personendetails
