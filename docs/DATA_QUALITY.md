@@ -13,7 +13,6 @@ Die erste Datenerfassung basiert ausschliesslich auf den bereitgestellten Scans.
 | XY Hartmann-Mark (#73) | Platzhaltername aus der Vorlage übernommen. |
 | XXY Hartmann-Mark (#74) | Platzhaltername aus der Vorlage übernommen. |
 | Gion Lorenzo (#83) | Tag und Monat sind in der Vorlage unkenntlich/als `***` angegeben; nur Jahr 2003 und Ort Köniz übernommen. |
-| Thomas Korsch | Geburtsdatum bei der Partnerschaft mit Nadine Jerg (#93) ist nur als `10. 5. ??` lesbar. |
 | Larissa Gramm (#101) | Geburtsdatum ist nur als `10. 1. ??` lesbar. |
 | Alfred Mark (Partner von #2) | Geburtsort ist in der Vorlage mit `?` angegeben. |
 
