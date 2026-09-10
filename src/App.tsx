@@ -5,6 +5,7 @@ import FocusedFamilyView from './FocusedFamilyView'
 import HomeView from './HomeView'
 import MobileSearchSheet from './MobileSearchSheet'
 import PartnerPersonSheet from './PartnerPersonSheet'
+import SettingsMenu from './SettingsMenu'
 import { useEdits } from './EditContext'
 import { useFamilyNavigation } from './FamilyNavigationContext'
 import { buildFamilyMembers, partnerMemberId, partnerMembersForPerson, relationLabel } from './familyGraph'
@@ -444,8 +445,8 @@ export default function App() {
 
   const focusPerson = (id: string, scale = 0.86) => {
     window.setTimeout(() => {
-      zoomRef.current?.zoomToElement?.(`person-${id}`, scale, 450)
-    }, 100)
+      zoomRef.current?.zoomToElement?.(`person-${id}`, scale, 240)
+    }, 30)
   }
 
   const navigatePerson = (
@@ -547,6 +548,7 @@ export default function App() {
             <div><strong>5</strong><span>Generationen</span></div>
             <div><strong>{people.reduce((sum, p) => sum + p.partners.length, 0)}</strong><span>Partner</span></div>
           </div>
+          <SettingsMenu />
         </div>
       </header>
 
@@ -753,9 +755,9 @@ export default function App() {
           <span aria-hidden="true">⌕</span>
           <small>Suche</small>
         </button>
-        <button type="button" className={(viewMode === 'focus' || viewMode === 'tree') && !mobileSearchOpen ? 'active' : ''} onClick={() => switchView('focus')}>
+        <button type="button" className={(viewMode === 'focus' || viewMode === 'tree') && !mobileSearchOpen ? 'active' : ''} onClick={openWholeTree}>
           <span aria-hidden="true">◎</span>
-          <small>Familie</small>
+          <small>Stammbaum</small>
         </button>
       </nav>
 
