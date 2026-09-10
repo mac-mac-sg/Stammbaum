@@ -140,7 +140,11 @@ export default function SettingsMenu() {
             <button type="button" className="settings-data-button" onClick={openCorrections}>
               <span>
                 <strong>Lokale Korrekturen</strong>
-                <small>{editedCount} {editedCount === 1 ? 'Änderung' : 'Änderungen'} · sichern oder importieren</small>
+                <small>
+                  {editedCount === 0
+                    ? 'Keine lokalen Änderungen · öffnen'
+                    : `${editedCount} ${editedCount === 1 ? 'Änderung' : 'Änderungen'} · ansehen & verwalten`}
+                </small>
               </span>
               <b aria-hidden="true">›</b>
             </button>
