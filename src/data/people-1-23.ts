@@ -1,0 +1,40 @@
+import type { Person } from '../types'
+
+export const people1to23: Person[] = [
+  {
+    "id": "p001",
+    "number": 1,
+    "name": "Sebastian Villiger",
+    "birth": "1874-03-29",
+    "birthPlace": "Zug",
+    "death": "1949-01-14",
+    "deathPlace": "Zug",
+    "gender": "m",
+    "source": 1,
+    "generation": 1,
+    "childIds": ["p002", "p003", "p004", "p005", "p006"],
+    "partners": [{"name":"Anna Villiger [Schwerzmann]","birth":"1874-06-19","birthPlace":"Hünenberg","death":"1930-11-28","deathPlace":"Zug","relationship":"Ehe"}]
+  },
+  {"id":"p002","number":2,"name":"Marie Mark [Villiger]","birth":"1903-11-09","birthPlace":"Zug, Untere Altstadt 25","death":"1984-12-21","deathPlace":"Zug","gender":"f","source":1,"generation":2,"parentId":"p001","childIds":["p007","p008","p009","p010","p011"],"partners":[{"name":"Alfred Mark","birth":"1894-03-22","birthPlace":"Unbekannt","death":"1961-03-22","deathPlace":"Zug","relationship":"Ehe"}]},
+  {"id":"p003","number":3,"name":"Emilie Zehnder [Villiger]","birth":"1904-12-15","birthPlace":"Zug, Untere Altstadt 25","death":"1976-10-04","deathPlace":"Steckborn","gender":"f","source":1,"generation":2,"parentId":"p001","childIds":["p012","p013","p014","p015"],"partners":[{"name":"Franz Zehnder","birth":"1900-05-29","death":"1972-04-28","deathPlace":"Steckborn","relationship":"Ehe"}]},
+  {"id":"p004","number":4,"name":"Ida Jerg [Villiger]","birth":"1907-08-12","birthPlace":"Zug, Untere Altstadt 25","death":"1992-04-22","deathPlace":"Goldach / SG","gender":"f","source":2,"generation":2,"parentId":"p001","childIds":["p016","p017","p018"],"partners":[{"name":"Josef Jerg","birth":"1900-02-28","birthPlace":"Flawil","death":"1980-01-13","deathPlace":"Goldach / SG","relationship":"Ehe"}]},
+  {"id":"p005","number":5,"name":"Wilhelmine Bühlmann [Villiger]","birth":"1909-03-22","birthPlace":"Zug, Untere Altstadt 25","death":"1994-02-14","deathPlace":"St. Gallen","gender":"f","source":2,"generation":2,"parentId":"p001","childIds":["p019","p020"],"partners":[{"name":"Robert Bühlmann","birth":"1911-09-11","birthPlace":"St. Gallen","death":"1993-12-13","deathPlace":"St. Gallen","relationship":"Ehe"}]},
+  {"id":"p006","number":6,"name":"Käthi Sutter [Villiger]","birth":"1914-05-09","birthPlace":"Zug, Untere Altstadt 25","death":"1997-04-15","deathPlace":"Zug","gender":"f","source":2,"generation":2,"parentId":"p001","childIds":["p021","p022","p023"],"partners":[{"name":"Karl Sutter","birth":"1907-06-24","birthPlace":"Zug","death":"1973-03-17","deathPlace":"Zug","relationship":"Ehe"}]},
+  {"id":"p007","number":7,"name":"Alfred Mark","birth":"1925-02-23","death":"2008-04-29","deathPlace":"Zug / Münchenbuchsee","gender":"m","source":2,"generation":3,"parentId":"p002","childIds":["p024","p025"],"partners":[{"name":"Rosemarie 1. Frau Mark [Hinderer]","birth":"1924-01-21","birthPlace":"Münchenbuchsee","relationship":"Ehe","status":"annulliert"}]},
+  {"id":"p008","number":8,"name":"Margrit Mark","birth":"1926-07-14","birthPlace":"Zug / Walchwil","gender":"f","source":2,"generation":3,"parentId":"p002","childIds":["p026","p027","p028","p029","p030"],"partners":[{"name":"Hans Vetter","birth":"1924-03-23","birthPlace":"Walchwil","deathPlace":"Walchwil","relationship":"Ehe"}]},
+  {"id":"p009","number":9,"name":"Viktor Mark","birth":"1930-12-03","birthPlace":"Zug / Habkern","gender":"m","source":3,"generation":3,"parentId":"p002","childIds":["p031","p032","p033"],"partners":[{"name":"Ursula Ganser","birth":"1931-06-11","birthPlace":"Habkern / Rorschach","relationship":"Ehe"}]},
+  {"id":"p010","number":10,"name":"Trudi Mark","birth":"1934-03-22","birthPlace":"Zug / Flawil","gender":"f","source":3,"generation":3,"parentId":"p002","childIds":["p034","p035","p036"],"partners":[{"name":"Albert Lutz","birth":"1929-09-25","birthPlace":"Flawil / Lutzenberg","relationship":"Ehe"}]},
+  {"id":"p011","number":11,"name":"Walter Mark","birth":"1944-03-31","birthPlace":"Zug / Hünenberg","gender":"m","source":3,"generation":3,"parentId":"p002","childIds":["p037"],"partners":[{"name":"Denise Arbuckle","birth":"1948-01-09","birthPlace":"Hünenberg","relationship":"Ehe"}]},
+  {"id":"p012","number":12,"name":"Franz Zehnder","birth":"1927-10-29","birthPlace":"Steckborn","gender":"m","source":3,"generation":3,"parentId":"p003","childIds":["p038","p039","p040","p041"],"partners":[{"name":"Ilse Zehnder [Annen]","birth":"1923-08-16","deathPlace":"Steckborn","relationship":"Ehe"}]},
+  {"id":"p013","number":13,"name":"Paul Zehnder","birth":"1928-09-13","birthPlace":"Steckborn / Bütschwil","death":"2000-12-03","deathPlace":"Bütschwil","gender":"m","source":3,"generation":3,"parentId":"p003","childIds":["p042","p043","p044","p045","p046","p047"],"partners":[{"name":"Maria Schönenberger","birth":"1923-05-03","birthPlace":"Bütschwil","relationship":"Ehe"}]},
+  {"id":"p014","number":14,"name":"Emma Zehnder","birth":"1930-08-21","birthPlace":"Steckborn","gender":"f","source":3,"generation":3,"parentId":"p003","childIds":["p048","p049"],"partners":[{"name":"Thomas Egli","birth":"1929-05-04","birthPlace":"Steckborn","death":"2009-05-28","deathPlace":"Steckborn","relationship":"Ehe"}]},
+  {"id":"p015","number":15,"name":"Rosmarie Frey [Zehnder]","birth":"1932-03-29","birthPlace":"Steckborn","death":"2011-01-25","deathPlace":"Ebikon","gender":"f","source":3,"generation":3,"parentId":"p003","childIds":["p050","p051"],"partners":[{"name":"Karl Frey","birth":"1932-12-08","birthPlace":"Ebikon","death":"2011-01-25","deathPlace":"Ebikon","relationship":"Ehe"}]},
+  {"id":"p016","number":16,"name":"Josef Jerg","birth":"1935-07-20","birthPlace":"Goldach / SG","gender":"m","source":3,"generation":3,"parentId":"p004","childIds":["p052","p053","p054","p055","p056"],"partners":[{"name":"Gertrud Jerg [Hettich]","birth":"1939-12-28","birthPlace":"Goldach","relationship":"Ehe"}]},
+  {"id":"p017","number":17,"name":"Walter Jerg","birth":"1938-05-10","birthPlace":"Goldach / SG","gender":"m","source":4,"generation":3,"parentId":"p004","childIds":["p057","p058","p059"],"partners":[{"name":"Ludmilla Kuschej","birth":"1937-10-07","birthPlace":"Goldach / Bleiburg","relationship":"Ehe"}]},
+  {"id":"p018","number":18,"name":"Karl Jerg","birth":"1940-11-29","birthPlace":"Goldach / SG","gender":"m","source":4,"generation":3,"parentId":"p004","childIds":["p060","p061"],"partners":[{"name":"Agnes Baumgartner","birth":"1948-03-15","birthPlace":"Goldach / SG","relationship":"Ehe"}]},
+  {"id":"p019","number":19,"name":"Josy Mauderli / Kreis [Bühlmann]","birth":"1939-04-18","birthPlace":"St. Gallen / Waldkirch","gender":"f","source":4,"generation":3,"parentId":"p005","childIds":["p062","p063","p064","p065"],"partners":[{"name":"Anton Mauderli","birth":"1942-06-16","birthPlace":"Waldkirch","relationship":"Ehe","status":"geschieden"}]},
+  {"id":"p020","number":20,"name":"Robert Bühlmann","birth":"1941-08-24","birthPlace":"St. Gallen","death":"1964-11-03","gender":"m","source":4,"generation":3,"parentId":"p005","childIds":[],"partners":[]},
+  {"id":"p021","number":21,"name":"Alice Sutter","birth":"1941-04-14","birthPlace":"Zug / Braunschweig","gender":"f","source":4,"generation":3,"parentId":"p006","childIds":["p066","p067","p068"],"partners":[{"name":"Horst Schneider","birth":"1938-02-12","relationship":"Ehe"}]},
+  {"id":"p022","number":22,"name":"Karl Sutter","birth":"1943-05-18","birthPlace":"Zug / Schenkon","gender":"m","source":4,"generation":3,"parentId":"p006","childIds":["p069","p070"],"partners":[{"name":"Gisela Hofer","birth":"1947-06-27","birthPlace":"Schenkon","relationship":"Ehe"}]},
+  {"id":"p023","number":23,"name":"Paul Sutter","birth":"1953-01-26","birthPlace":"Zug / Mettmenstetten","gender":"m","source":4,"generation":3,"parentId":"p006","childIds":["p071","p072"],"partners":[{"name":"Ruth Lier","birth":"1955-12-24","birthPlace":"Mettmenstetten","relationship":"Partnerschaft"}]}
+] as Person[]

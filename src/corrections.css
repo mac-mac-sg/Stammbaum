@@ -1,0 +1,222 @@
+.correction-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 125;
+  border: 0;
+  background: rgba(25, 28, 24, .24);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+
+.correction-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.correction-sheet {
+  position: fixed;
+  z-index: 130;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100vw);
+  padding: 24px 22px 30px;
+  border-left: 1px solid var(--line);
+  background: var(--surface-strong);
+  box-shadow: -18px 0 50px rgba(30, 32, 28, .16);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(calc(100% + 24px));
+  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+  visibility: hidden;
+}
+
+.correction-sheet.is-open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.correction-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.correction-header h2 {
+  margin: 5px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.08;
+}
+
+.correction-summary {
+  margin: 20px 0 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.correction-summary strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  color: var(--accent-strong);
+}
+
+.correction-summary span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.correction-section {
+  padding: 20px 0;
+  border-bottom: 1px solid #ebe9e2;
+}
+
+.correction-section h3 {
+  margin: 0 0 7px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.correction-section p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.correction-primary,
+.correction-reset,
+.correction-file-input::file-selector-button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.correction-primary {
+  border: 1px solid var(--accent-strong);
+  background: var(--accent-strong);
+  color: white;
+}
+
+.correction-primary:disabled,
+.correction-reset:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.correction-file-input {
+  width: 100%;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.correction-file-input::file-selector-button {
+  margin-right: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.correction-reset {
+  border: 1px solid #d7b8ab;
+  background: #fbf5f2;
+  color: #7a4938;
+}
+
+.correction-reset.is-confirming {
+  border-color: #a85f43;
+  background: #f6e4dc;
+  color: #743b28;
+}
+
+.correction-message {
+  margin-top: 16px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  background: #f1f3ee;
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.correction-data-button,
+.edit-data-tools {
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.correction-data-button { min-width: 42px; }
+.correction-data-button:hover,
+.edit-data-tools:hover { background: var(--accent-soft); }
+.correction-data-button span { font-size: 16px; }
+.correction-data-button small { font-size: 9px; font-weight: 750; color: var(--muted); }
+
+.edit-data-tools {
+  margin-top: 10px;
+  min-height: 36px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+@media (max-width: 820px) {
+  .correction-sheet {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    padding: max(14px, env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+    border: 0;
+    transform: translateY(100%);
+  }
+
+  .correction-sheet.is-open { transform: translateY(0); }
+  .correction-sheet .sheet-handle { display: none; }
+  .correction-header h2 { font-size: 24px; }
+
+  .correction-primary,
+  .correction-reset,
+  .correction-file-input::file-selector-button {
+    min-height: 48px;
+  }
+
+  .correction-primary,
+  .correction-reset {
+    width: 100%;
+  }
+
+  .correction-data-button {
+    width: 42px;
+    padding: 0;
+    border-radius: 13px;
+  }
+
+  .correction-data-button small { display: none; }
+
+  .edit-data-tools {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 12px;
+  }
+}

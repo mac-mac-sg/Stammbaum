@@ -1,0 +1,458 @@
+.mobile-nav,
+.selected-chip,
+.sheet-handle,
+.sheet-backdrop {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  :root {
+    --mobile-header: 68px;
+    --mobile-nav: 70px;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    min-width: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  input {
+    touch-action: manipulation;
+  }
+
+  .app-shell {
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .app-header {
+    min-height: var(--mobile-header);
+    height: var(--mobile-header);
+    padding: max(10px, env(safe-area-inset-top)) 14px 10px;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+
+  .brand {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    flex: 0 0 auto;
+  }
+
+  .brand-mark span:nth-child(1) { top: 7px; left: 16px; }
+  .brand-mark span:nth-child(2) { left: 8px; bottom: 8px; }
+  .brand-mark span:nth-child(3) { right: 8px; bottom: 8px; }
+  .brand-mark::before,
+  .brand-mark::after {
+    height: 18px;
+    bottom: 12px;
+    left: 18px;
+  }
+
+  .app-header .eyebrow {
+    font-size: 9px;
+    margin-bottom: 1px;
+  }
+
+  .app-header h1 {
+    max-width: 68vw;
+    font-size: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-stats {
+    display: none;
+  }
+
+  .main-layout {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tree-area {
+    height: 100%;
+    min-height: 0;
+    padding: 10px 10px calc(var(--mobile-nav) + env(safe-area-inset-bottom) + 8px);
+    gap: 9px;
+  }
+
+  .toolbar {
+    align-items: stretch;
+    gap: 7px;
+    flex: 0 0 auto;
+  }
+
+  .search-wrap {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .search-wrap > label,
+  .depth-control > span {
+    display: none;
+  }
+
+  .search-box {
+    height: 46px;
+    border-radius: 14px;
+    padding: 0 10px;
+  }
+
+  .search-box input {
+    font-size: 16px;
+  }
+
+  .search-box button {
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  .search-results {
+    position: fixed;
+    top: calc(var(--mobile-header) + 63px);
+    left: 10px;
+    right: 10px;
+    max-height: min(56dvh, 430px);
+    overflow-y: auto;
+    border-radius: 16px;
+    z-index: 90;
+  }
+
+  .search-results > button {
+    min-height: 58px;
+    padding: 11px 12px;
+    align-items: center;
+  }
+
+  .search-results strong {
+    font-size: 14px;
+  }
+
+  .search-results small,
+  .search-results > button > span:last-child {
+    font-size: 10px;
+  }
+
+  .depth-control {
+    flex: 0 0 auto;
+  }
+
+  .segmented {
+    height: 46px;
+    border-radius: 14px;
+    padding: 3px;
+  }
+
+  .segmented button {
+    min-width: 34px;
+    min-height: 38px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .segmented button:nth-child(1) {
+    display: none;
+  }
+
+  .canvas-frame {
+    min-height: 0;
+    height: 100%;
+    border-radius: 18px;
+    flex: 1 1 auto;
+  }
+
+  .tree-viewport {
+    min-height: 0 !important;
+    height: 100% !important;
+    touch-action: none !important;
+  }
+
+  .tree-transform {
+    padding: 64px 72px 110px;
+  }
+
+  .person-card {
+    width: 210px;
+    min-height: 100px;
+    padding: 15px 14px 13px;
+    border-radius: 15px;
+  }
+
+  .person-card:hover {
+    transform: none;
+  }
+
+  .person-name {
+    font-size: 15px;
+  }
+
+  .person-life,
+  .partner-line {
+    font-size: 10px;
+  }
+
+  .zoom-controls {
+    top: 10px;
+    right: 10px;
+    gap: 1px;
+    padding: 3px;
+    border-radius: 11px;
+  }
+
+  .zoom-controls button {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .canvas-help {
+    display: none;
+  }
+
+  .selected-chip {
+    display: flex;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 18;
+    max-width: calc(100% - 20px);
+    padding: 8px 11px;
+    border: 1px solid rgba(217, 215, 207, 0.88);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 7px 22px rgba(46, 48, 41, 0.08);
+    backdrop-filter: blur(12px);
+    text-align: left;
+    flex-direction: column;
+  }
+
+  .selected-chip span {
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .selected-chip strong {
+    max-width: 70vw;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+
+  .sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    padding: 0;
+    border: 0;
+    background: rgba(25, 28, 24, .22);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+
+  .sheet-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .detail-panel {
+    display: block;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    max-height: min(78dvh, 720px);
+    padding: 10px 18px calc(24px + env(safe-area-inset-bottom));
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 24px 24px 0 0;
+    background: var(--surface-strong);
+    box-shadow: 0 -18px 50px rgba(30, 32, 28, .18);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateY(calc(100% + 24px));
+    transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+    visibility: hidden;
+  }
+
+  .detail-panel.is-open {
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  .sheet-handle {
+    display: block;
+    width: 42px;
+    height: 4px;
+    margin: 0 auto 12px;
+    border-radius: 99px;
+    background: var(--line-strong);
+  }
+
+  .detail-topbar {
+    position: sticky;
+    top: -10px;
+    z-index: 2;
+    padding: 5px 0 12px;
+    background: var(--surface-strong);
+  }
+
+  .detail-topbar h2 {
+    font-size: 26px;
+  }
+
+  .icon-button {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 12px;
+  }
+
+  .detail-section {
+    padding: 18px 0;
+  }
+
+  .facts {
+    gap: 14px 12px;
+  }
+
+  .facts dd {
+    font-size: 13px;
+  }
+
+  .relationship-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .family-links button {
+    min-height: 52px;
+    padding: 11px 12px;
+    border-radius: 12px;
+  }
+
+  .lineage button {
+    min-height: 38px;
+  }
+
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    position: fixed;
+    z-index: 80;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: calc(var(--mobile-nav) + env(safe-area-inset-bottom));
+    padding: 7px 12px calc(7px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: rgba(251, 250, 247, .94);
+    backdrop-filter: blur(18px);
+  }
+
+  .mobile-nav button {
+    min-width: 0;
+    min-height: 52px;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .mobile-nav button > span {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .mobile-nav button > small {
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .mobile-nav button.primary {
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+  }
+
+  footer {
+    display: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .app-header h1 {
+    font-size: 18px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tree-area {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .toolbar {
+    gap: 5px;
+  }
+
+  .segmented button {
+    min-width: 31px;
+  }
+
+  .search-results {
+    left: 7px;
+    right: 7px;
+  }
+
+  .facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (display-mode: standalone) and (max-width: 820px) {
+  .app-header {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+}
