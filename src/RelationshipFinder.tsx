@@ -1,16 +1,30 @@
 import { useMemo, useState } from 'react'
-import { useEdits } from './EditContext'
-import { usePrivacy } from './PrivacyContext'
-import { isProtectedPerson, protectedSearchParts } from './privacy'
 import { people } from './data'
-import { getRelationship } from './relationship'
-import type { Person } from './types'
+import { useEdits } from './EditContext'
+import { buildFamilyMembers, descendantMember, relationLabel } from './familyGraph'
+import type { FamilyMember } from './familyGraph'
+import { usePrivacy } from './PrivacyContext'
+import { isPotentiallyLivingRecord, isProtectedPerson } from './privacy'
+import { getMemberRelationship } from './relationship'
 import type { LifeStatus, PrivacyMode } from './privacy'
+import type { Person } from './types'
 
-function searchable(person: Person, privacyMode: PrivacyMode, lifeStatus: LifeStatus) {
+function isMemberProtected(
+  member: FamilyMember,
+  mode: PrivacyMode,
+  getLifeStatus: (id: string) => LifeStatus,
+  getPerson: (id: string) => Person | undefined,
+) {
+  if (mode !== 'protected') return false
+  if (member.kind === 'partner') return isPotentiallyLivingRecord(member)
+  const descendant = getPerson(member.id)
+  return descendant ? isProtectedPerson(descendant, mode, getLifeStatus(member.id)) : true
+}
+
+function searchable(member: FamilyMember, protectedMember: boolean) {
   return [
-    person.name,
-    ...protectedSearchParts(person, privacyMode, lifeStatus),
+    member.name,
+    ...(protectedMember ? [] : [member.birth, member.birthPlace, member.death, member.deathPlace]),
   ].filter(Boolean).join(' ').toLocaleLowerCase('de-CH')
 }
 
@@ -34,21 +48,24 @@ export default function RelationshipFinder({
     () => people.map((candidate) => getPerson(candidate.id) ?? candidate),
     [getPerson],
   )
-  const target = targetId ? getPerson(targetId) : undefined
-  const result = target ? getRelationship(person, target) : null
+  const members = useMemo(() => buildFamilyMembers(effectivePeople), [effectivePeople])
+  const origin = useMemo(() => descendantMember(person), [person])
+  const target = targetId ? members.find((candidate) => candidate.id === targetId) : undefined
+  const result = target ? getMemberRelationship(origin, target) : null
 
   const matches = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('de-CH')
     if (!normalized) return []
-    return effectivePeople
-      .filter((candidate) => (
-        candidate.id !== person.id &&
-        searchable(candidate, mode, getLifeStatus(candidate.id)).includes(normalized)
-      ))
-      .slice(0, 8)
-  }, [effectivePeople, getLifeStatus, mode, person.id, query])
+    return members
+      .filter((candidate) => candidate.id !== origin.id)
+      .filter((candidate) => searchable(
+        candidate,
+        isMemberProtected(candidate, mode, getLifeStatus, getPerson),
+      ).includes(normalized))
+      .slice(0, 10)
+  }, [getLifeStatus, getPerson, members, mode, origin.id, query])
 
-  const chooseTarget = (candidate: Person) => {
+  const chooseTarget = (candidate: FamilyMember) => {
     setTargetId(candidate.id)
     setQuery('')
   }
@@ -57,6 +74,13 @@ export default function RelationshipFinder({
     setQuery('')
     setTargetId(null)
     onClose()
+  }
+
+  const navigateMember = (member: FamilyMember) => {
+    const destination = member.kind === 'partner' ? member.linkedPersonId : member.id
+    if (!destination) return
+    close()
+    onNavigate(destination)
   }
 
   return (
@@ -95,15 +119,22 @@ export default function RelationshipFinder({
             />
             {query && (
               <div className="relationship-search-results">
-                {matches.length > 0 ? matches.map((candidate) => (
-                  <button type="button" key={candidate.id} onClick={() => chooseTarget(candidate)}>
-                    <strong>{candidate.name}</strong>
-                    <span>
-                      #{candidate.number} · Generation {candidate.generation}
-                      {isProtectedPerson(candidate, mode, getLifeStatus(candidate.id)) ? ' · geschützt' : ''}
-                    </span>
-                  </button>
-                )) : <p>Keine passende Person gefunden.</p>}
+                {matches.length > 0 ? matches.map((candidate) => {
+                  const linked = candidate.kind === 'partner' && candidate.linkedPersonId
+                    ? getPerson(candidate.linkedPersonId)
+                    : undefined
+                  return (
+                    <button type="button" key={candidate.id} onClick={() => chooseTarget(candidate)}>
+                      <strong>{candidate.name}</strong>
+                      <span>
+                        {candidate.kind === 'descendant'
+                          ? `#${candidate.number} · Generation ${candidate.generation}`
+                          : `${relationLabel(candidate)}${linked ? ` von ${linked.name}` : ''}`}
+                        {isMemberProtected(candidate, mode, getLifeStatus, getPerson) ? ' · geschützt' : ''}
+                      </span>
+                    </button>
+                  )
+                }) : <p>Keine passende Person gefunden.</p>}
               </div>
             )}
           </div>
@@ -120,6 +151,7 @@ export default function RelationshipFinder({
               <div>
                 <span>Person B</span>
                 <strong>{target.name}</strong>
+                {target.kind === 'partner' && <small className="member-kind-tag">Partnerperson</small>}
               </div>
             </div>
 
@@ -130,16 +162,13 @@ export default function RelationshipFinder({
             </div>
 
             <div className="relationship-path">
-              <span>Verbindung im erfassten Stammbaum</span>
+              <span>Verbindung im erfassten Familiengraph</span>
               <div>
-                {result.path.map((pathPerson, index) => (
-                  <span key={pathPerson.id}>
+                {result.path.map((pathMember, index) => (
+                  <span key={`${pathMember.id}-${index}`}>
                     {index > 0 && <i aria-hidden="true">→</i>}
-                    <button type="button" onClick={() => {
-                      close()
-                      onNavigate(pathPerson.id)
-                    }}>
-                      {pathPerson.name}
+                    <button type="button" onClick={() => navigateMember(pathMember)}>
+                      {pathMember.name}{pathMember.kind === 'partner' ? ' · Partner' : ''}
                     </button>
                   </span>
                 ))}
@@ -154,12 +183,12 @@ export default function RelationshipFinder({
 
         {target && !result && (
           <div className="relationship-empty">
-            Für diese beiden Personen konnte auf Basis der erfassten Eltern-Kind-Verknüpfungen keine Verbindung berechnet werden.
+            Für diese beiden Personen konnte auf Basis der erfassten Abstammungs- und Partnerschaftsverknüpfungen keine Verbindung berechnet werden.
           </div>
         )}
 
         <p className="relationship-note">
-          Berechnet werden nur die strukturierten Abstammungsverbindungen aus den vorhandenen Familienunterlagen. Ehe- und Lebenspartner sind aktuell nicht als eigenständige Personen im Beziehungsgraphen verknüpft. Im Schutzmodus werden Lebensdaten geschützter Personen nicht für die Suche verwendet.
+          Partnerinnen und Partner sind jetzt eigenständige Knoten im Familiengraph. Eine Partnerschaft wird als Verbindung berücksichtigt; Eltern oder Vorfahren einer Partnerperson werden jedoch nicht erfunden, solange sie nicht aus einer Quelle belegt sind. Im Schutzmodus werden Lebensdaten potenziell lebender Personen nicht für die Suche verwendet.
         </p>
       </aside>
     </>
