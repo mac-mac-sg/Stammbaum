@@ -612,7 +612,7 @@ export default function App() {
                   <div className="depth-control">
                     <span>Baumtiefe</span>
                     <div className="segmented">
-                      {[2, 3, 4, 5].map((depth) => (
+                      {[1, 2, 3, 4, 5].map((depth) => (
                         <button
                           type="button"
                           key={depth}

@@ -101,6 +101,17 @@ html[data-theme="dark"] {
     justify-content: space-between;
   }
 
+  /* Eine alte mobile Regel blendet pauschal den ersten Segmented-Button aus.
+     Hier neutralisieren wir sie und beschränken das Verstecken auf den
+     nicht mehr als Hauptnavigation benötigten Familien-Button. */
+  .segmented > button:first-child {
+    display: block;
+  }
+
+  .view-segmented > button:first-child {
+    display: none;
+  }
+
   .view-segmented button {
     min-width: 72px;
   }
