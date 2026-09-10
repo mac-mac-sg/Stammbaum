@@ -152,9 +152,9 @@
   line-height: 1.4;
 }
 
-.correction-data-button {
-  min-width: 42px;
-  height: 42px;
+.correction-data-button,
+.edit-data-tools {
+  min-height: 42px;
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -167,9 +167,19 @@
   cursor: pointer;
 }
 
-.correction-data-button:hover { background: var(--accent-soft); }
+.correction-data-button { min-width: 42px; }
+.correction-data-button:hover,
+.edit-data-tools:hover { background: var(--accent-soft); }
 .correction-data-button span { font-size: 16px; }
 .correction-data-button small { font-size: 9px; font-weight: 750; color: var(--muted); }
+
+.edit-data-tools {
+  margin-top: 10px;
+  min-height: 36px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-strong);
+}
 
 @media (max-width: 820px) {
   .correction-sheet {
@@ -203,4 +213,10 @@
   }
 
   .correction-data-button small { display: none; }
+
+  .edit-data-tools {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 12px;
+  }
 }
