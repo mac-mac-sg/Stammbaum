@@ -24,6 +24,7 @@ import './theme.css'
 import './theme-fixes.css'
 import './ux-simplification.css'
 import './design-polish.css'
+import './modern-colors.css'
 
 assertValidGenealogy(people, peopleById, rootId)
 
