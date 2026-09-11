@@ -31,6 +31,7 @@ const correctionsCss = readFileSync(new URL('../src/corrections.css', import.met
 const relationship = readFileSync(new URL('../src/RelationshipFinder.tsx', import.meta.url), 'utf8')
 const uxCss = readFileSync(new URL('../src/ux-simplification.css', import.meta.url), 'utf8')
 const designCss = readFileSync(new URL('../src/design-polish.css', import.meta.url), 'utf8')
+const modernColors = readFileSync(new URL('../src/modern-colors.css', import.meta.url), 'utf8')
 const manifest = readFileSync(new URL('../public/manifest.webmanifest', import.meta.url), 'utf8')
 
 for (const label of ['<small>Start</small>', '<small>Suche</small>', '<small>Stammbaum</small>']) {
@@ -51,6 +52,10 @@ assert(uxCss.includes('.view-segmented > button:first-child') && uxCss.includes(
 assert(app.includes('zoomToElement?.(`person-${id}`, scale, 240)'), 'Wiederholte Baumfokussierung muss kurz und responsiv bleiben.')
 assert(app.includes('<SettingsMenu />'), 'Die Einstellungen müssen als echte Header-Aktion innerhalb der App gerendert werden.')
 assert(!main.includes('<SettingsMenu />'), 'Das Einstellungsmenü darf nicht mehr als frei schwebendes Root-Geschwister gerendert werden.')
+assert(main.includes("import './modern-colors.css'"), 'Die moderne Farbpalette muss als letzter visueller Override geladen werden.')
+assert(modernColors.includes('--accent-strong: #155f6c'), 'Die moderne Light-Mode-Petrolfarbe fehlt.')
+assert(modernColors.includes('--accent-ink: #9dd7df'), 'Die moderne Dark-Mode-Akzentfarbe fehlt.')
+assert(modernColors.includes('--mobile-nav-glass'), 'Die moderne Palette muss auch die Glass-Navigation einfärben.')
 assert(homeCss.includes('.home-discovery') && homeCss.includes('.home-tree-action'), 'Die tree-first Startseite braucht ihre eigene visuelle Hierarchie.')
 assert(homeCss.includes('prefers-reduced-motion'), 'Bewegung auf der Startseite muss reduzierte Bewegung respektieren.')
 assert(mobileSearch.includes('onSelectMember(member)'), 'Partner-Suchergebnisse müssen direkt als FamilyMember geöffnet werden.')
@@ -78,5 +83,6 @@ assert(designCss.includes('prefers-reduced-motion'), 'Interaktionspolish muss re
 assert((relationship.match(/Andere Person vergleichen/g) ?? []).length >= 2, 'Der Verwandtschafts-Finder braucht auch nach einem Fehlschlag einen Rückweg.')
 assert(settings.includes('technisch öffentlich abrufbar'), 'Die Datenschutzeinstellung muss den öffentlichen Bereitstellungscharakter erklären.')
 assert(!manifest.includes('Privates Familienarchiv'), 'Das Manifest darf die öffentliche App nicht als privat bezeichnen.')
+assert(manifest.includes('"theme_color": "#155f6c"'), 'Die PWA-Themefarbe muss zur modernen Petrolpalette passen.')
 
 console.log(`UX-Prüfung erfolgreich: ${people.length} nummerierte Personen, ${members.length - people.length} Partnerpersonen.`)
